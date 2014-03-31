@@ -49,13 +49,9 @@ gulp.task "coffee", ->
 #     .pipe gulp.dest(destinationFolder)
 
 gulp.task "browser-sync", ->
-  browserSync.init ["#{destinationFolder}/styles/*.css", "#{destinationFolder}/index.html"],
+  browserSync.init "#{destinationFolder}/**/*.*",
     server:
       baseDir: "public"
-      index: "index.html"
-    proxy:
-        host: 'localhost'
-        port: '8000'
 
 gulp.task "jade", ->
   YOUR_LOCALS = {};

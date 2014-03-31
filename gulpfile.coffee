@@ -14,14 +14,15 @@ gulpif = require("gulp-if")
 ngmin  = require("gulp-ngmin")
 minifyCSS   = require("gulp-minify-css")
 runSequence = require("run-sequence")
-jade = require("gulp-jade")
-imagemin = require('gulp-imagemin');
+jade     = require("gulp-jade")
+imagemin = require('gulp-imagemin')
+browserSync = require('browser-sync')
 
 production = false
 destinationFolder = 'public'
 
 gulp.task "styles", ->
-  gulp.src("app/styles/*.styl")
+  gulp.src("app/styles/index.styl")
     .pipe(plumber())
     .pipe stylus({
             set:['compress']
@@ -31,13 +32,13 @@ gulp.task "styles", ->
 
 gulp.task "coffee", ->
   gulp.src("app/**/*.coffee")
-    .pipe(plumber())
-    .pipe(coffee(bare: true)
-    .pipe(coffeelint())
-    .pipe(coffeelint.reporter())
-    .pipe(concat("application.js"))
-    .pipe(gulpif(production, ngmin()))
-    .pipe(gulpif(production, uglify()))
+    .pipe plumber()
+    .pipe coffee(bare: true)
+    .pipe coffeelint()
+    .pipe coffeelint.reporter()
+    .pipe concat("application.js")
+    .pipe gulpif(production, ngmin())
+    .pipe gulpif(production, uglify())
     .pipe gulp.dest(destinationFolder)
 
 # gulp.task "scripts", ->
@@ -46,6 +47,15 @@ gulp.task "coffee", ->
 #     .pipe(gulpif(production, ngmin()))
 #     .pipe(gulpif(production, uglify()))
 #     .pipe gulp.dest(destinationFolder)
+
+gulp.task "browser-sync", ->
+  browserSync.init ["#{destinationFolder}/styles/*.css", "#{destinationFolder}/index.html"],
+    server:
+      baseDir: "public"
+      index: "index.html"
+    proxy:
+        host: 'localhost'
+        port: '8000'
 
 gulp.task "jade", ->
   YOUR_LOCALS = {};
@@ -57,8 +67,7 @@ gulp.task "jade", ->
       root: "app/views/"
       module: "templatesApp"
     ))
-    .pipe(gulp.dest('destinationFolder'))
-
+    .pipe(gulp.dest(destinationFolder))
 
 # gulp.task "templates", ->
 #   gulp.src("views/*.html")
@@ -74,14 +83,13 @@ gulp.task "images", ->
     .pipe imagemin()
     .pipe gulp.dest("#{destinationFolder}/images")
 
-
-gulp.task "watch", ->
+gulp.task "watch", ['browser-sync'], ->
   gulp.watch "app/styles/*.styl", ["styles"]
   gulp.watch "app/**/*.coffee", ["coffee"]
   gulp.watch "app/views/*.jade", ["jade"]
 
 gulp.task "uncss", ->
-  gulp.src("#{destinationFolder}/style.css")
+  gulp.src("#{destinationFolder}/index.css")
     .pipe(uncss(html: ["index.html"]))
     .pipe(minifyCSS(keepSpecialComments: 0))
     .pipe gulp.dest(destinationFolder)

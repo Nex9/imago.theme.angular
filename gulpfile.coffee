@@ -76,7 +76,7 @@ gulp.task "images", ->
 
 
 gulp.task "watch", ->
-  gulp.watch "app/styles/*.sass", ["styles"]
+  gulp.watch "app/styles/*.styl", ["styles"]
   gulp.watch "app/**/*.coffee", ["coffee"]
   gulp.watch "app/views/*.jade", ["jade"]
 

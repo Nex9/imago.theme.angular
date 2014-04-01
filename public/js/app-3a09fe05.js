@@ -1,0 +1,1 @@
+angular.module("templatesApp",[]).run(["$templateCache",function(a){a.put("app/views/main.html","")}]);var app;app=angular.module("app",["ngRoute","ngAnimate","ngTouch"]);

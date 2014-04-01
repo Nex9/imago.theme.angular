@@ -1,0 +1,1 @@
+angular.module("templatesApp", []).run(["$templateCache", function($templateCache) {$templateCache.put("app/views/main.html","");}]);

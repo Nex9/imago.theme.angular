@@ -49,10 +49,14 @@ gulp.task "coffee", ->
     .pipe plumber()
     .pipe coffee(bare: true)
     .pipe coffeelint()
-    .pipe order([
-      "#{src}/index.js",
-      "#{src}/**/*.js"
-    ])
+    .pipe gulp.dest("#{tmp}/coffee")
+
+gulp.task "concat", ["coffee"], ->
+  gulp.src("#{tmp}/coffee/**/*.js")
+    .pipe(order([
+      "**/index.*",
+      "**/*.*"
+    ]))
     .pipe concat("./application.js")
     .pipe gulp.dest(tmp)
 
@@ -61,11 +65,11 @@ gulp.task "templates", ->
   gulp.src "#{src}/views/*.jade"
     .pipe plumber()
     .pipe jade({locals: YOUR_LOCALS})
-    .pipe(templateCache(
+    .pipe templateCache(
       standalone: true
       root: "/#{src}/views/"
       module: "templatesApp"
-    ))
+    )
     .pipe gulp.dest(tmp)
 
 gulp.task "images", ->
@@ -102,10 +106,9 @@ gulp.task "usemin", ->
         uglify()
       ]))
     .pipe gulp.dest(destinationFolder)
-    .pipe notify({
+    .pipe notify
       message: "Build complete",
-      title: "Gulp"
-      })
+      title: "gulp"
 
 
 ## Essentials Task
@@ -113,7 +116,7 @@ gulp.task "usemin", ->
 gulp.task "browser-sync", ->
   browserSync.init ["#{tmp}/**/*.*", "#{src}/index.html"],
     server:
-      baseDir: "./app"
+      baseDir: "#{src}"
     # logConnections: false
     debugInfo: false
     notify: false
@@ -123,7 +126,7 @@ gulp.task "watch", ["browser-sync"], ->
     gulp.start "styles"
 
   watch {glob: "#{src}/**/*.coffee"}, (files) ->
-    gulp.start "coffee"
+    gulp.start "concat"
 
   watch {glob: "#{src}/views/*.jade"}, (files) ->
     gulp.start "templates"
@@ -132,7 +135,7 @@ gulp.task "build", ["clean"], ->
 
   runSequence [
         "templates"
-        "coffee"
+        "concat"
         "styles"
         "images"
     ],

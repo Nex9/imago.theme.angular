@@ -64,7 +64,7 @@ gulp.task "templates", ->
     .pipe jade({locals: YOUR_LOCALS})
     .pipe(templateCache(
       standalone: true
-      root: "./app/views/"
+      root: "/app/views/"
       module: "templatesApp"
     ))
     .pipe gulp.dest(tmp)

@@ -1,1 +1,2 @@
-angular.module("templatesApp", []).run(["$templateCache", function($templateCache) {$templateCache.put("app/views/main.html","");}]);
+angular.module("templatesApp", []).run(["$templateCache", function($templateCache) {$templateCache.put("/app/views/helloworld.html","<h1>Hello World {{ message }}</h1>");
+$templateCache.put("/app/views/main.html","");}]);

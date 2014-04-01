@@ -5,8 +5,7 @@ app.config ($routeProvider) ->
   $routeProvider
     .when '/',
       templateUrl: '/app/views/helloworld.html'
-      controlller: 'HelloWorld'
-
+      controller: 'HelloWorld'
 
 app.controller 'HelloWorld', ($scope) ->
   $scope.message = 'FUCK'

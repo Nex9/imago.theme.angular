@@ -14,6 +14,7 @@ inject          = require("gulp-inject")
 jade            = require("gulp-jade")
 minifyCSS       = require("gulp-minify-css")
 ngmin           = require("gulp-ngmin")
+notify          = require("gulp-notify")
 order           = require("gulp-order")
 plumber         = require("gulp-plumber")
 prefix          = require("gulp-autoprefixer")
@@ -28,7 +29,6 @@ watch           = require("gulp-watch")
 
 # Defaults
 
-production = false
 destinationFolder = "./public"
 src = "./src"
 tmp = "#{src}/.tmp"
@@ -54,8 +54,6 @@ gulp.task "coffee", ->
       "#{src}/**/*.js"
     ])
     .pipe concat("./application.js")
-    .pipe gulpif(production, ngmin())
-    .pipe gulpif(production, uglify())
     .pipe gulp.dest(tmp)
 
 gulp.task "templates", ->
@@ -102,12 +100,12 @@ gulp.task "usemin", ->
       js: [
         ngmin()
         uglify()
-      ],
-      js_libs: [
-        ngmin()
-        uglify()
       ]))
     .pipe gulp.dest(destinationFolder)
+    .pipe notify({
+      message: "Build complete",
+      title: "Gulp"
+      })
 
 
 ## Essentials Task

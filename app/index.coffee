@@ -1,11 +1,11 @@
-app = angular.module 'app', ['ngRoute', 'ngAnimate', 'ngTouch']
+app = angular.module 'app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']
 
 
 app.config ($routeProvider) ->
   $routeProvider
-    .when '/'
+    .when '/',
       templateUrl: '/app/views/helloworld.html'
-      controlller: 'HelloWorld'
+      controller: 'HelloWorld'
 
 
 app.controller 'HelloWorld', ($scope) ->

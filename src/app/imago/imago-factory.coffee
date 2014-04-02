@@ -1,20 +1,22 @@
-app.factory 'imagoPanel', ($http, imagoUtils) ->
+app.factory 'imagoPanel', ($http, $log, imagoUtils) ->
 
     getData: (query) ->
-      return console.log "Panel: query is empty, aborting #{query}" unless query
+      return $log "Panel: query is empty, aborting #{query}" unless query
       # return if path is @path
-      if imagoUtils.toType(query) is 'string'
+      if angular.isString(query)
         @query =
           [path: query]
 
-      else if imagoUtils.toType(query) is 'array'
+      else if angular.isArray(query)
         @query = query
 
-      else if imagoUtils.toType(query) is 'object'
+      else if iangular.isObject(query)
         # @log 'I am an Object'
         @query = [query]
 
       else
-        return console.log 'Panel: no valid query'
+        return $log 'Panel: no valid query'
 
       # @log '@query: ', @query
+
+      angular.forEach @query, (value, key) ->

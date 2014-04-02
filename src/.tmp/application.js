@@ -21,25 +21,26 @@ app.controller('HelloWorld', function($scope, imagoUtils) {
   return $scope.message = 'Test';
 });
 
-app.factory('imagoPanel', function($http, imagoUtils) {
+app.factory('imagoPanel', function($http, $log, imagoUtils) {
   return {
     getData: function(query) {
       if (!query) {
-        return console.log("Panel: query is empty, aborting " + query);
+        return $log("Panel: query is empty, aborting " + query);
       }
-      if (imagoUtils.toType(query) === 'string') {
-        return this.query = [
+      if (angular.isString(query)) {
+        this.query = [
           {
             path: query
           }
         ];
-      } else if (imagoUtils.toType(query) === 'array') {
-        return this.query = query;
-      } else if (imagoUtils.toType(query) === 'object') {
-        return this.query = [query];
+      } else if (angular.isArray(query)) {
+        this.query = query;
+      } else if (iangular.isObject(query)) {
+        this.query = [query];
       } else {
-        return console.log('Panel: no valid query');
+        return $log('Panel: no valid query');
       }
+      return angular.forEach(this.query, function(value, key) {});
     }
   };
 });

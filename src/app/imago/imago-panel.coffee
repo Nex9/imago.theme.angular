@@ -11,12 +11,9 @@ app.factory 'imagoPanel', ($http, $log, imagoUtils) ->
         @query = query
 
       else if iangular.isObject(query)
-        # @log 'I am an Object'
         @query = [query]
 
       else
         return $log 'Panel: no valid query'
-
-      # @log '@query: ', @query
 
       angular.forEach @query, (value, key) ->

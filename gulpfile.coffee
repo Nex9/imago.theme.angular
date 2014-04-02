@@ -122,13 +122,13 @@ gulp.task "browser-sync", ->
     notify: false
 
 gulp.task "watch", ["browser-sync"], ->
-  watch {glob: "#{src}/styles/*.styl"}, (files) ->
+  watch {glob: "#{src}/**/*.styl"}, (files) ->
     gulp.start "styles"
 
   watch {glob: "#{src}/**/*.coffee"}, (files) ->
     gulp.start "concat"
 
-  watch {glob: "#{src}/views/*.jade"}, (files) ->
+  watch {glob: "#{src}/**/*.jade"}, (files) ->
     gulp.start "templates"
 
 gulp.task "build", ["clean"], ->

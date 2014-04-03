@@ -62,12 +62,12 @@ gulp.task "concat", ["coffee"], ->
 
 gulp.task "templates", ->
   YOUR_LOCALS = {};
-  gulp.src "#{src}/views/*.jade"
+  gulp.src "#{src}/**/*.jade"
     .pipe plumber()
     .pipe jade({locals: YOUR_LOCALS})
     .pipe templateCache(
       standalone: true
-      root: "/#{src}/views/"
+      root: "/#{src}/"
       module: "templatesApp"
     )
     .pipe gulp.dest(tmp)

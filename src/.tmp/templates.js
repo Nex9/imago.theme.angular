@@ -1,1 +1,2 @@
-angular.module("templatesApp", []).run(["$templateCache", function($templateCache) {$templateCache.put("/src/views/helloworld.html","<h1>Hello World {{ message }}</h1>");}]);
+angular.module("templatesApp", []).run(["$templateCache", function($templateCache) {$templateCache.put("/src/views/helloworld.html","<h1>Hello World {{ message }}</h1><div class=\"classimages\"><div ng-repeat=\"image in images\"><imago-image sizemode=\"crop\" fit=\"center center\"></imago-image></div></div>");
+$templateCache.put("/src/app/directives/views/image-widget.html","<div ng-style=\"elementStyle\" class=\"imagoimage\"><div ng-style=\"imageStyle\" class=\"image\"></div></div>");}]);

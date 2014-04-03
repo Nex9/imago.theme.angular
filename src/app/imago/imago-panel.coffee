@@ -16,4 +16,8 @@ app.factory 'imagoPanel', ($http, $log, imagoUtils) ->
       else
         return $log 'Panel: no valid query'
 
+      @promises = []
+      @data = []
+
       angular.forEach @query, (value, key) ->
+        @promises.push($http.post(@query))

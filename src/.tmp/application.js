@@ -17,8 +17,134 @@ app.config(function($routeProvider) {
   });
 });
 
-app.controller('HelloWorld', function($scope, imagoUtils) {
-  return $scope.message = 'Test';
+app.controller('HelloWorld', function($scope, $http, imagoUtils) {
+  var mockup;
+  $scope.message = 'Test';
+  mockup = [
+    {
+      "serving_url": "http://lh5.ggpht.com/tWQC6pDQlM5_T10ffd2mI3Evg8SXtDsZQtwHPtFu4r1RJPjDmpCdG3kossSRtbChXllEU0JidR4mlgmtmA",
+      "kind": "Image",
+      "name": "BILLY BOB THORTON LIFE COVER",
+      "normname": "billy-bob-thorton-life-cover",
+      "contained_in": [],
+      "meta": {
+        "headline": {
+          "value": ""
+        },
+        "title": {
+          "value": ""
+        },
+        "description": {
+          "value": ""
+        },
+        "creator": {
+          "value": ""
+        }
+      },
+      "path": "/portraits/billy-bob-thorton/billy-bob-thorton-life-cover",
+      "date_created": "1390254856",
+      "variants": [],
+      "canonical": "Collection-34645e4b-5607-1c93-ec67-b98d78e3c897",
+      "resolution": "836x1026",
+      "id": "32167622-a5a2-6958-b1c6-30f2c96a16ab",
+      "localsettings": {}
+    }
+  ];
+  return $scope.images = mockup;
+});
+
+app.directive('imagoImage', function($log) {
+  return {
+    replace: true,
+    templateUrl: '/src/app/directives/views/image-widget.html',
+    restrict: 'EA',
+    controller: function($scope, $element, $attrs, $transclude) {},
+    compile: function(tElement, tAttrs, transclude) {
+      return {
+        pre: function(scope, iElement, iAttrs, controller) {
+          var assetRatio, backgroundSize, dpr, height, r, servingSize, sizemode, width, wrapperRatio;
+          this.defaults = {
+            align: 'center center',
+            sizemode: 'fit',
+            hires: true,
+            scale: 1,
+            lazy: true,
+            maxSize: 2560,
+            noResize: false,
+            mediasize: false,
+            width: 'auto',
+            height: 'auto'
+          };
+          angular.forEach(this.defaults, function(value, key) {
+            return this[key] = value;
+          });
+          angular.forEach(iAttrs, function(value, key) {
+            return this[key] = value;
+          });
+          this.image = angular.copy(scope.image);
+          width = this.width || iElement[0].clientWidth;
+          height = this.height || iElement[0].clientHeight;
+          sizemode = this.sizemode;
+          scope.elementStyle = {};
+          if (angular.isString(this.image.resolution)) {
+            r = this.image.resolution.split('x');
+            this.resolution = {
+              width: r[0],
+              height: r[1]
+            };
+          }
+          assetRatio = this.resolution.width / this.resolution.height;
+          if (width === 'auto' || height === 'auto') {
+            if (angular.isNumber(width) && angular.isNumber(height)) {
+
+            } else if (height === 'auto' && angular.isNumber(width)) {
+              height = width * assetRatio;
+              scope.elementStyle.height = height;
+            } else if (width === 'auto' && angular.isNumber(height)) {
+              width = height * assetRatio;
+              scope.elementStyle.width = width;
+            } else {
+              width = iElement[0].clientWidth;
+              height = iElement[0].clientHeight;
+            }
+          }
+          wrapperRatio = width / height;
+          dpr = Math.ceil(window.devicePixelRatio) || 1;
+          if (sizemode === 'crop') {
+            if (assetRatio <= wrapperRatio) {
+              servingSize = Math.round(Math.max(width, width / assetRatio));
+            } else {
+              servingSize = Math.round(Math.max(height, height * assetRatio));
+            }
+          } else {
+            if (assetRatio <= wrapperRatio) {
+              servingSize = Math.round(Math.max(height, height * assetRatio));
+            } else {
+              servingSize = Math.round(Math.max(width, width / assetRatio));
+            }
+          }
+          servingSize = Math.min(servingSize * dpr, this.maxSize);
+          this.servingSize = servingSize;
+          this.servingUrl = "" + this.image.serving_url + "=s" + (this.servingSize * this.scale);
+          if (sizemode === 'crop') {
+            backgroundSize = assetRatio < wrapperRatio ? "100% auto" : "auto 100%";
+          } else {
+            backgroundSize = assetRatio > wrapperRatio ? "100% auto" : "auto 100%";
+          }
+          return scope.imageStyle = {
+            "background-image": "url(" + this.servingUrl + ")",
+            "background-size": backgroundSize,
+            "background-position": this.align,
+            "display": "inline-block",
+            "width": "100%",
+            "height": "100%"
+          };
+        },
+        post: function(scope, iElement, iAttrs, controller) {}
+      };
+    },
+    link: function(scope, iElement, iAttrs) {}
+  };
 });
 
 app.factory('imagoPanel', function($http, $log, imagoUtils) {
@@ -41,6 +167,34 @@ app.factory('imagoPanel', function($http, $log, imagoUtils) {
         return $log('Panel: no valid query');
       }
       return angular.forEach(this.query, function(value, key) {});
+    }
+  };
+});
+
+app.factory('imagoPanel', function($http, $log, imagoUtils) {
+  return {
+    getData: function(query) {
+      if (!query) {
+        return $log("Panel: query is empty, aborting " + query);
+      }
+      if (angular.isString(query)) {
+        this.query = [
+          {
+            path: query
+          }
+        ];
+      } else if (angular.isArray(query)) {
+        this.query = query;
+      } else if (iangular.isObject(query)) {
+        this.query = [query];
+      } else {
+        return $log('Panel: no valid query');
+      }
+      this.promises = [];
+      this.data = [];
+      return angular.forEach(this.query, function(value, key) {
+        return this.promises.push($http.post(this.query));
+      });
     }
   };
 });
@@ -492,4 +646,30 @@ app.factory('imagoUtils', function() {
       return CURRENCY_MAPPING[country];
     }
   };
+});
+
+app.factory('widgetImage', function($log) {
+  ({
+    defaults: {
+      align: 'center center',
+      sizemode: 'fit',
+      hires: true,
+      scale: 1,
+      lazy: true,
+      maxSize: 2560,
+      noResize: false,
+      mediasize: false,
+      width: 'auto',
+      height: 'auto'
+    }
+  });
+  angular.forEach(defaults, function(value, key) {
+    return this[key] = value;
+  });
+  if (!this.src) {
+    return $log('Error: image widget rquires src');
+  }
+  if (!this.resolution) {
+    return $log('Error: image widget rquires resolution');
+  }
 });

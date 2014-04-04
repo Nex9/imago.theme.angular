@@ -1,7 +1,6 @@
 app.directive 'imagoImage', ($log) ->
   replace: true
   templateUrl: '/src/app/directives/views/image-widget.html'
-  restrict: 'EA'
   controller: ($scope, $element, $attrs, $transclude) ->
 
   compile: (tElement, tAttrs, transclude) ->
@@ -24,7 +23,7 @@ app.directive 'imagoImage', ($log) ->
       angular.forEach iAttrs, (value, key) ->
         @[key] = value
 
-      @image = angular.copy(scope.image)
+      @image = angular.copy(scope[@source])
 
         # if image.width is 'auto' then image.width is iElement[0].offsetWidth
       width    = @width    or iElement[0].clientWidth
@@ -57,7 +56,7 @@ app.directive 'imagoImage', ($log) ->
         else if height is 'auto' and angular.isNumber(width)
           # @log 'fit width', width, height
           # width = width
-          height = width * assetRatio
+          height = width / assetRatio
           # @el.height(height)
           scope.elementStyle.height = height
 
@@ -119,7 +118,7 @@ app.directive 'imagoImage', ($log) ->
           # @log 'fit full width', width, height, assetRatio, height / assetRatio
           servingSize = Math.round(Math.max(width, width / assetRatio))
 
-      servingSize = Math.min(servingSize * dpr, @maxSize)
+      servingSize = parseInt Math.min(servingSize * dpr, @maxSize)
 
       # @log 'servingSize', servingSize, width, height
 

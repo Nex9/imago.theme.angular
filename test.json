@@ -1,0 +1,28 @@
+[{
+    "kind": "Collection",
+    "name": "Slider",
+    "meta": {
+        "headline": {
+            "value": "Slider"
+        }
+    },
+    "path": "/docs/assets/slider",
+    "serving_url": "",
+    "variants": [],
+    "date_created": "1393956183",
+    "resolution": null,
+    "sort_by": "date",
+    "sort_order": "desc",
+    "assets": [
+        "d020a9c6-8983-a7d3-7f58-9ca52e698cd8",
+        "ee335218-927e-0422-a312-acfd54f60ae0",
+        "75b3b941-c31d-002c-ba88-1ca305ba4c19",
+        "a078aec5-4733-1ba3-dbe4-3d0570526e17",
+        "c93f3716-14c0-8955-4228-7a3524732830",
+        "8126bd56-45f7-05be-4b8e-4e659164c901",
+        "1e9d4b0d-cfbd-e995-bf9e-ed4d72eb6e1f"
+    ],
+    "normname": "slider",
+    "canonical": "Collection-38a9a43e-1c6d-5042-dbf0-ea5a91821f5b",
+    "id": "Collection-3372560f-aba2-f9c2-6b77-bf5f7336b18d"
+}]

@@ -50,14 +50,13 @@ app.controller('HelloWorld', function($scope, $http, imagoUtils) {
       "localsettings": {}
     }
   ];
-  return $scope.images = mockup;
+  return $scope.assets = mockup;
 });
 
 app.directive('imagoImage', function($log) {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/image-widget.html',
-    restrict: 'EA',
     controller: function($scope, $element, $attrs, $transclude) {},
     compile: function(tElement, tAttrs, transclude) {
       return {
@@ -81,7 +80,7 @@ app.directive('imagoImage', function($log) {
           angular.forEach(iAttrs, function(value, key) {
             return this[key] = value;
           });
-          this.image = angular.copy(scope.image);
+          this.image = angular.copy(scope[this.source]);
           width = this.width || iElement[0].clientWidth;
           height = this.height || iElement[0].clientHeight;
           sizemode = this.sizemode;
@@ -98,7 +97,7 @@ app.directive('imagoImage', function($log) {
             if (angular.isNumber(width) && angular.isNumber(height)) {
 
             } else if (height === 'auto' && angular.isNumber(width)) {
-              height = width * assetRatio;
+              height = width / assetRatio;
               scope.elementStyle.height = height;
             } else if (width === 'auto' && angular.isNumber(height)) {
               width = height * assetRatio;
@@ -123,7 +122,7 @@ app.directive('imagoImage', function($log) {
               servingSize = Math.round(Math.max(width, width / assetRatio));
             }
           }
-          servingSize = Math.min(servingSize * dpr, this.maxSize);
+          servingSize = parseInt(Math.min(servingSize * dpr, this.maxSize));
           this.servingSize = servingSize;
           this.servingUrl = "" + this.image.serving_url + "=s" + (this.servingSize * this.scale);
           if (sizemode === 'crop') {
@@ -139,6 +138,112 @@ app.directive('imagoImage', function($log) {
             "width": "100%",
             "height": "100%"
           };
+        },
+        post: function(scope, iElement, iAttrs, controller) {}
+      };
+    },
+    link: function(scope, iElement, iAttrs) {}
+  };
+});
+
+app.directive('imagoSlider', function($window, imagoUtils) {
+  return {
+    replace: true,
+    templateUrl: '/src/app/directives/views/slider-widget.html',
+    controller: function($scope, $element, $attrs, $transclude) {
+      $scope.currentIndex = 0;
+      $scope.setCurrentSlideIndex = function(index) {
+        return $scope.currentIndex = index;
+      };
+      $scope.isCurrentSlideIndex = function(index) {
+        return $scope.currentIndex === index;
+      };
+      $scope.goPrev = function() {
+        console.log('go Prev');
+        return $scope.currentIndex = ($scope.currentIndex < $scope.slideSource.length - 1 ? ++$scope.currentIndex : 0);
+      };
+      $scope.goNext = function() {
+        console.log('go Next');
+        return $scope.currentIndex = ($scope.currentIndex > 0 ? --$scope.currentIndex : $scope.slideSource.length - 1);
+      };
+      return angular.element($window).on('keydown', function(e) {
+        if (!$scope.confSlider.enablekeys) {
+          return;
+        }
+        switch (e.keyCode) {
+          case 37:
+            return $scope.goPrev();
+          case 39:
+            return $scope.goNext();
+        }
+      });
+    },
+    compile: function(tElement, tAttrs, transclude) {
+      return {
+        pre: function(scope, iElement, iAttrs, controller) {
+          scope.confSlider = {};
+          this.defaults = {
+            animation: 'fade',
+            sizemode: 'fit',
+            current: 0,
+            enablekeys: true,
+            enablearrows: true,
+            enablehtml: true,
+            subslides: false,
+            loop: true,
+            noResize: false,
+            current: 0,
+            lazy: false,
+            align: 'center center'
+          };
+          angular.forEach(this.defaults, function(value, key) {
+            return scope.confSlider[key] = value;
+          });
+          angular.forEach(iAttrs, function(value, key) {
+            return scope.confSlider[key] = value;
+          });
+          scope.slideSource = angular.copy(scope[scope.confSlider.source]);
+          if (scope.slideSource.length === 1) {
+            scope.confSlider.enablearrows = false;
+            scope.confSlider.enablekeys = false;
+          }
+          return this.id = imagoUtils.uuid();
+        },
+        post: function(scope, iElement, iAttrs, controller) {}
+      };
+    },
+    link: function(scope, iElement, iAttrs) {}
+  };
+});
+
+app.directive('imagoVideo', function($log, imagoUtils) {
+  return {
+    replace: true,
+    templateUrl: '/src/app/directives/views/video-widget.html',
+    restrict: 'EAC',
+    controller: function($scope, $element, $attrs, $transclude) {},
+    compile: function(tElement, tAttrs, transclude) {
+      return {
+        pre: function(scope, iElement, iAttrs, controller) {
+          this.defaults = {
+            autobuffer: null,
+            autoplay: false,
+            controls: true,
+            preload: 'none',
+            size: 'hd',
+            align: 'left top',
+            sizemode: 'fit',
+            lazy: true
+          };
+          angular.forEach(this.defaults, function(value, key) {
+            return this[key] = value;
+          });
+          angular.forEach(iAttrs, function(value, key) {
+            return this[key] = value;
+          });
+          this.video = angular.copy(scope.video);
+          this.id = imagoUtils.uuid();
+          return scope.elementStyle = "" + (this["class"] || '') + " " + this.size + " " + this.align + " " + this.sizemode;
         },
         post: function(scope, iElement, iAttrs, controller) {}
       };

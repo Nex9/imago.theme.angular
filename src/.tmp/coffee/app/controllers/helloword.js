@@ -31,5 +31,5 @@ app.controller('HelloWorld', function($scope, $http, imagoUtils) {
       "localsettings": {}
     }
   ];
-  return $scope.images = mockup;
+  return $scope.assets = mockup;
 });

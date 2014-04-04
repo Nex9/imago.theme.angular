@@ -108,6 +108,46 @@ ul.list
   // height: 128px
 
 .imagoimage
+.imagoslider
   height: 300px
 
+.imagoimage
+.imagovideo
+  // pos()
+.nexslider
+  // pos()
+  > .slides
+    // pos()
 
+  .next
+  .prev
+    display:  block
+    width:  20px
+    height: 20px
+    border-top:    1px solid white
+    border-right:  1px solid white
+    position: absolute
+    z-index: 10
+    top: 50%
+    margin-top: -10px
+    transition: all .15s
+    cursor: pointer
+    &:before
+      content: ""
+      position: absolute
+      left: -2px
+      top: 0px
+      width:  20px
+      height: 20px
+      border-top:    1px solid black
+      border-right:  1px solid black
+  .prev
+    left: 50px
+    transform: rotate(225deg)
+    &:hover
+      transform: scale(1.2) rotate(225deg)
+  .next
+    right: 50px
+    transform: rotate(45deg)
+    &:hover
+      transform: scale(1.2) rotate(45deg)

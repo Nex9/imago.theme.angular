@@ -2,7 +2,6 @@ app.directive('imagoImage', function($log) {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/image-widget.html',
-    restrict: 'EA',
     controller: function($scope, $element, $attrs, $transclude) {},
     compile: function(tElement, tAttrs, transclude) {
       return {
@@ -26,7 +25,7 @@ app.directive('imagoImage', function($log) {
           angular.forEach(iAttrs, function(value, key) {
             return this[key] = value;
           });
-          this.image = angular.copy(scope.image);
+          this.image = angular.copy(scope[this.source]);
           width = this.width || iElement[0].clientWidth;
           height = this.height || iElement[0].clientHeight;
           sizemode = this.sizemode;
@@ -43,7 +42,7 @@ app.directive('imagoImage', function($log) {
             if (angular.isNumber(width) && angular.isNumber(height)) {
 
             } else if (height === 'auto' && angular.isNumber(width)) {
-              height = width * assetRatio;
+              height = width / assetRatio;
               scope.elementStyle.height = height;
             } else if (width === 'auto' && angular.isNumber(height)) {
               width = height * assetRatio;
@@ -68,7 +67,7 @@ app.directive('imagoImage', function($log) {
               servingSize = Math.round(Math.max(width, width / assetRatio));
             }
           }
-          servingSize = Math.min(servingSize * dpr, this.maxSize);
+          servingSize = parseInt(Math.min(servingSize * dpr, this.maxSize));
           this.servingSize = servingSize;
           this.servingUrl = "" + this.image.serving_url + "=s" + (this.servingSize * this.scale);
           if (sizemode === 'crop') {

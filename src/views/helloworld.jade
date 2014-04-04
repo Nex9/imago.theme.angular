@@ -1,9 +1,16 @@
 h1 Hello World {{ message }}
-.classimages
+
 
   //- div(ng-repeat="image in images")
   //-   imago-image
 
 
-  div(ng-repeat="image in images")
-    imago-image(sizemode="crop", fit="center center")
+div(ng-repeat="asset in assets")
+  //- div(imago-image,
+  //-     source="asset"
+  //-     )
+
+    //- div(imago-video,  sizemode="crop", align="center center", ng-if="asset.kind === 'Video'")
+div(imago-slider,
+    source="assets"
+    )

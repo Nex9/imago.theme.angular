@@ -8,4 +8,4 @@ app.controller 'HelloWorld', ($scope, $http, imagoUtils, imagoPanel) ->
 
   $scope.assets = mockup;
 
-  imagoPanel.getData {'path': '/exhibitions'}
+  imagoPanel.getData {'path': '/mats/drake'}

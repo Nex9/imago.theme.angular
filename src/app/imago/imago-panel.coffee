@@ -19,19 +19,19 @@ app.factory 'imagoPanel', ($http, imagoUtils) ->
     @promises = []
     @data = []
 
-    angular.forEach @query, (value, key) =>
-      @promises.push(@search(@query).then ((data)=>
-        console.log data
-        # @data.push arguments...
-        console.log @promises
+    angular.forEach @query, (value) =>
+      @search(value).then ((data)=>
+        # console.log data
+        @data.push arguments...
+        # @data.push data.data
+        console.log @data
       ), (error) ->
         console.log error
-      )
 
   toArray: (elem) ->
-    type = imagoUtils.toType(elem)
-    return console.log 'Panel: no valid query' unless type in ['object', 'string', ' array']
-    if imagoUtils.toType(elem) is 'array' then elem else [elem]
+    # type = imagoUtils.toType(elem)
+    # return console.log 'Panel: no valid query' unless type in ['object', 'string', ' array']
+    if angular.isArray(elem) then elem else [elem]
 
   objListToDict: (obj_or_list) ->
     querydict = {}

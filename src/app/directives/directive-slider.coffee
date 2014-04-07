@@ -2,7 +2,17 @@ app.directive 'imagoSlider', (imagoUtils) ->
   replace: true
   templateUrl: '/src/app/directives/views/slider-widget.html'
   controller: ($scope, $element, $attrs, $window) ->
-    # @slider = angular.copy($scope[$attrs.source])
+
+    $scope.$watch 'assets', (assetsData) ->
+      if assetsData
+        $scope.slideSource = angular.copy(assetsData)
+
+          #If slider has one slide
+        if $scope.slideSource?.length is 1 or !$scope.slideSource
+          $scope.confSlider.enablearrows = false
+          $scope.confSlider.enablekeys   = false
+
+        @id = imagoUtils.uuid()
 
     $scope.currentIndex = 0;
 
@@ -56,16 +66,5 @@ app.directive 'imagoSlider', (imagoUtils) ->
 
       angular.forEach iAttrs, (value, key) ->
         scope.confSlider[key] = value
-
-      # return unless scope.video
-      # @slider = angular.copy(scope[scope.confSlider.source])
-      scope.slideSource = angular.copy(scope[scope.confSlider.source])
-
-      #If slider has one slide
-      if scope.slideSource.length is 1
-        scope.confSlider.enablearrows = false
-        scope.confSlider.enablekeys   = false
-
-      @id = imagoUtils.uuid()
 
       scope.elementStyle = scope.confSlider.animation

@@ -1,32 +1,48 @@
-app.factory 'imagoPanel', ($http, imagoUtils) ->
+app.factory 'imagoPanel', ($http, imagoUtils, $q) ->
 
 
   search: (query) ->
+    # console.log 'search...', query
     params = @objListToDict query
-    $http.post(@getSearchUrl(), angular.toJson(params))
+    return $http.post(@getSearchUrl(), angular.toJson(params))
 
   getData: (query) ->
     # console.log 'query in getData', query
     return console.log "Panel: query is empty, aborting #{query}" unless query
     # return if path is @path
     @query = query
-    if imagoUtils.toType(query) is 'string'
+    if angular.isString(query)
       @query =
         [path: query]
 
     @query = @toArray(@query)
 
+
     @promises = []
     @data = []
 
+    # console.log 'before', @query
     angular.forEach @query, (value) =>
-      @search(value).then ((data)=>
-        # console.log data
-        @data.push arguments...
-        # @data.push data.data
-        console.log @data
-      ), (error) ->
-        console.log error
+      # console.log 'in foreach', value
+      @promises.push @search(value).success((data) =>
+
+        # if the data is one single item and its a collection
+        if data.length is 1 and data[0].kind is 'Collection'
+          @data.push data[0]
+        else
+          result =
+            items : data
+            count : data.length
+
+          @data.push(result)
+        # else construct a result object
+        # {items : data, count : data.length}
+      )
+    $q.all(@promises).then ((response)=>
+      return @data
+      # console.log response
+      # console.log @data
+    )
 
   toArray: (elem) ->
     # type = imagoUtils.toType(elem)
@@ -54,5 +70,4 @@ app.factory 'imagoPanel', ($http, imagoUtils) ->
     querydict
 
   getSearchUrl: ->
-    # 'http://localhost:8080/api/v3/search'
-    if (data is 'online' and debug) then "http://#{tenant}.ng.imagoapp.com/api/v3/search" else "/api/v3/search"
+    if (data is 'online' and debug) then "http://#{tenant}.ng.imagoapp.com/api/v2/search" else "/api/v2/search"

@@ -318,30 +318,6 @@ app.directive('imagoVideo', function(imagoUtils) {
   };
 });
 
-app.factory('imagoPanel', function($http, $log, imagoUtils) {
-  return {
-    getData: function(query) {
-      if (!query) {
-        return $log("Panel: query is empty, aborting " + query);
-      }
-      if (angular.isString(query)) {
-        this.query = [
-          {
-            path: query
-          }
-        ];
-      } else if (angular.isArray(query)) {
-        this.query = query;
-      } else if (iangular.isObject(query)) {
-        this.query = [query];
-      } else {
-        return $log('Panel: no valid query');
-      }
-      return angular.forEach(this.query, function(value, key) {});
-    }
-  };
-});
-
 app.factory('imagoPanel', function($http, imagoUtils) {
   return {
     search: function(query) {
@@ -365,23 +341,19 @@ app.factory('imagoPanel', function($http, imagoUtils) {
       this.promises = [];
       this.data = [];
       return angular.forEach(this.query, (function(_this) {
-        return function(value, key) {
-          return _this.promises.push(_this.search(_this.query).then((function(data) {
-            console.log(data);
-            return console.log(_this.promises);
+        return function(value) {
+          return _this.search(value).then((function(data) {
+            var _ref;
+            (_ref = _this.data).push.apply(_ref, arguments);
+            return console.log(_this.data);
           }), function(error) {
             return console.log(error);
-          }));
+          });
         };
       })(this));
     },
     toArray: function(elem) {
-      var type;
-      type = imagoUtils.toType(elem);
-      if (type !== 'object' && type !== 'string' && type !== ' array') {
-        return console.log('Panel: no valid query');
-      }
-      if (imagoUtils.toType(elem) === 'array') {
+      if (angular.isArray(elem)) {
         return elem;
       } else {
         return [elem];

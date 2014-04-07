@@ -21,23 +21,19 @@ app.factory('imagoPanel', function($http, imagoUtils) {
       this.promises = [];
       this.data = [];
       return angular.forEach(this.query, (function(_this) {
-        return function(value, key) {
-          return _this.promises.push(_this.search(_this.query).then((function(data) {
-            console.log(data);
-            return console.log(_this.promises);
+        return function(value) {
+          return _this.search(value).then((function(data) {
+            var _ref;
+            (_ref = _this.data).push.apply(_ref, arguments);
+            return console.log(_this.data);
           }), function(error) {
             return console.log(error);
-          }));
+          });
         };
       })(this));
     },
     toArray: function(elem) {
-      var type;
-      type = imagoUtils.toType(elem);
-      if (type !== 'object' && type !== 'string' && type !== ' array') {
-        return console.log('Panel: no valid query');
-      }
-      if (imagoUtils.toType(elem) === 'array') {
+      if (angular.isArray(elem)) {
         return elem;
       } else {
         return [elem];

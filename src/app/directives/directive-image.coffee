@@ -1,4 +1,4 @@
-app.directive 'imagoImage', ($log) ->
+app.directive 'imagoImage', () ->
   replace: true
   templateUrl: '/src/app/directives/views/image-widget.html'
   controller: ($scope, $element, $attrs, $transclude) ->

@@ -1,4 +1,4 @@
-app.directive('imagoImage', function($log) {
+app.directive('imagoImage', function() {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/image-widget.html',

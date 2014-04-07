@@ -1,7 +1,6 @@
-app.directive 'imagoVideo', ($log, imagoUtils) ->
+app.directive 'imagoVideo', (imagoUtils) ->
   replace: true
   templateUrl: '/src/app/directives/views/video-widget.html'
-  restrict: 'EAC'
   controller: ($scope, $element, $attrs, $transclude) ->
 
   compile: (tElement, tAttrs, transclude) ->
@@ -22,13 +21,24 @@ app.directive 'imagoVideo', ($log, imagoUtils) ->
       angular.forEach iAttrs, (value, key) ->
         @[key] = value
 
+      if @controls
+        scope.controls = @controls
+
       @video = angular.copy(scope.video)
 
       @id = imagoUtils.uuid()
 
-      scope.elementStyle = "#{@class or ''} #{@size} #{@align} #{@sizemode}"
+      scope.elementStyle = "#{@class} #{@size} #{@align} #{@sizemode}"
+
+      # convert resolution string to object
+      if angular.isString(@resolution)
+        @resolution =
+          width:  r[0]
+          height: r[1]
+
+      # Sizemode
+
+
 
 
     post: (scope, iElement, iAttrs, controller) ->
-
-  link: (scope, iElement, iAttrs) ->

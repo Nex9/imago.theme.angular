@@ -4,20 +4,21 @@ tenant = 'pablosbirthday';
 
 data = 'online';
 
-debug = false;
+debug = true;
 
 host = data === 'online' ? "//" + tenant + ".imagoapp.com/api/v2" : "/api/v2";
 
 app = angular.module('app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']);
 
-app.config(function($routeProvider) {
+app.config(function($routeProvider, $httpProvider) {
+  $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
   return $routeProvider.when('/', {
     templateUrl: '/src/views/helloworld.html',
     controller: 'HelloWorld'
   });
 });
 
-app.controller('HelloWorld', function($scope, $http, imagoUtils) {
+app.controller('HelloWorld', function($scope, $http, imagoUtils, imagoPanel) {
   var mockup;
   $scope.message = 'Test';
   mockup = [
@@ -48,12 +49,69 @@ app.controller('HelloWorld', function($scope, $http, imagoUtils) {
       "resolution": "836x1026",
       "id": "32167622-a5a2-6958-b1c6-30f2c96a16ab",
       "localsettings": {}
+    }, {
+      "serving_url": "http://lh4.ggpht.com/plJiN08IZRrHwDHdP4euAfHxpHVwnWKDahl-TurUljEnOUkNXH4gZ_mV2R7BkktJjCaNRGWIcFxjZ54hf9w",
+      "kind": "Image",
+      "name": "BILLY BOB THORTON LIFE COVER",
+      "normname": "billy-bob-thorton-life-cover",
+      "contained_in": [],
+      "meta": {
+        "headline": {
+          "value": ""
+        },
+        "title": {
+          "value": ""
+        },
+        "description": {
+          "value": ""
+        },
+        "creator": {
+          "value": ""
+        }
+      },
+      "path": "/portraits/billy-bob-thorton/billy-bob-thorton-life-cover",
+      "date_created": "1390254856",
+      "variants": [],
+      "canonical": "Collection-34645e4b-5607-1c93-ec67-b98d78e3c897",
+      "resolution": "836x1026",
+      "id": "32167622-a5a2-6958-b1c6-30f2c96a16ab",
+      "localsettings": {}
+    }, {
+      "serving_url": "http://lh6.ggpht.com/e2TWWzOPwwCE6QSoo-YZHo_sQ7fk7cdhO13sRnjtVCP0sLVYCkDIyiyjemkZHxz8Mvqcboj_pPUg1XGZ8A",
+      "kind": "Image",
+      "name": "BILLY BOB THORTON LIFE COVER",
+      "normname": "billy-bob-thorton-life-cover",
+      "contained_in": [],
+      "meta": {
+        "headline": {
+          "value": ""
+        },
+        "title": {
+          "value": ""
+        },
+        "description": {
+          "value": ""
+        },
+        "creator": {
+          "value": ""
+        }
+      },
+      "path": "/portraits/billy-bob-thorton/billy-bob-thorton-life-cover",
+      "date_created": "1390254856",
+      "variants": [],
+      "canonical": "Collection-34645e4b-5607-1c93-ec67-b98d78e3c897",
+      "resolution": "836x1026",
+      "id": "32167622-a5a2-6958-b1c6-30f2c96a16ab",
+      "localsettings": {}
     }
   ];
-  return $scope.assets = mockup;
+  $scope.assets = mockup;
+  return imagoPanel.getData({
+    'path': '/exhibitions'
+  });
 });
 
-app.directive('imagoImage', function($log) {
+app.directive('imagoImage', function() {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/image-widget.html',
@@ -146,11 +204,11 @@ app.directive('imagoImage', function($log) {
   };
 });
 
-app.directive('imagoSlider', function($window, imagoUtils) {
+app.directive('imagoSlider', function(imagoUtils) {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/slider-widget.html',
-    controller: function($scope, $element, $attrs, $transclude) {
+    controller: function($scope, $element, $attrs, $window) {
       $scope.currentIndex = 0;
       $scope.setCurrentSlideIndex = function(index) {
         return $scope.currentIndex = index;
@@ -159,12 +217,10 @@ app.directive('imagoSlider', function($window, imagoUtils) {
         return $scope.currentIndex === index;
       };
       $scope.goPrev = function() {
-        console.log('go Prev');
-        return $scope.currentIndex = ($scope.currentIndex < $scope.slideSource.length - 1 ? ++$scope.currentIndex : 0);
+        return $scope.currentIndex = $scope.currentIndex < $scope.slideSource.length - 1 ? ++$scope.currentIndex : 0;
       };
       $scope.goNext = function() {
-        console.log('go Next');
-        return $scope.currentIndex = ($scope.currentIndex > 0 ? --$scope.currentIndex : $scope.slideSource.length - 1);
+        return $scope.currentIndex = $scope.currentIndex > 0 ? --$scope.currentIndex : $scope.slideSource.length - 1;
       };
       return angular.element($window).on('keydown', function(e) {
         if (!$scope.confSlider.enablekeys) {
@@ -172,9 +228,13 @@ app.directive('imagoSlider', function($window, imagoUtils) {
         }
         switch (e.keyCode) {
           case 37:
-            return $scope.goPrev();
+            return $scope.$apply(function() {
+              return $scope.goPrev();
+            });
           case 39:
-            return $scope.goNext();
+            return $scope.$apply(function() {
+              return $scope.goNext();
+            });
         }
       });
     },
@@ -207,20 +267,18 @@ app.directive('imagoSlider', function($window, imagoUtils) {
             scope.confSlider.enablearrows = false;
             scope.confSlider.enablekeys = false;
           }
-          return this.id = imagoUtils.uuid();
-        },
-        post: function(scope, iElement, iAttrs, controller) {}
+          this.id = imagoUtils.uuid();
+          return scope.elementStyle = scope.confSlider.animation;
+        }
       };
-    },
-    link: function(scope, iElement, iAttrs) {}
+    }
   };
 });
 
-app.directive('imagoVideo', function($log, imagoUtils) {
+app.directive('imagoVideo', function(imagoUtils) {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/video-widget.html',
-    restrict: 'EAC',
     controller: function($scope, $element, $attrs, $transclude) {},
     compile: function(tElement, tAttrs, transclude) {
       return {
@@ -241,14 +299,22 @@ app.directive('imagoVideo', function($log, imagoUtils) {
           angular.forEach(iAttrs, function(value, key) {
             return this[key] = value;
           });
+          if (this.controls) {
+            scope.controls = this.controls;
+          }
           this.video = angular.copy(scope.video);
           this.id = imagoUtils.uuid();
-          return scope.elementStyle = "" + (this["class"] || '') + " " + this.size + " " + this.align + " " + this.sizemode;
+          scope.elementStyle = "" + this["class"] + " " + this.size + " " + this.align + " " + this.sizemode;
+          if (angular.isString(this.resolution)) {
+            return this.resolution = {
+              width: r[0],
+              height: r[1]
+            };
+          }
         },
         post: function(scope, iElement, iAttrs, controller) {}
       };
-    },
-    link: function(scope, iElement, iAttrs) {}
+    }
   };
 });
 
@@ -276,30 +342,81 @@ app.factory('imagoPanel', function($http, $log, imagoUtils) {
   };
 });
 
-app.factory('imagoPanel', function($http, $log, imagoUtils) {
+app.factory('imagoPanel', function($http, imagoUtils) {
   return {
+    search: function(query) {
+      var params;
+      params = this.objListToDict(query);
+      return $http.post(this.getSearchUrl(), angular.toJson(params));
+    },
     getData: function(query) {
       if (!query) {
-        return $log("Panel: query is empty, aborting " + query);
+        return console.log("Panel: query is empty, aborting " + query);
       }
-      if (angular.isString(query)) {
+      this.query = query;
+      if (imagoUtils.toType(query) === 'string') {
         this.query = [
           {
             path: query
           }
         ];
-      } else if (angular.isArray(query)) {
-        this.query = query;
-      } else if (iangular.isObject(query)) {
-        this.query = [query];
-      } else {
-        return $log('Panel: no valid query');
       }
+      this.query = this.toArray(this.query);
       this.promises = [];
       this.data = [];
-      return angular.forEach(this.query, function(value, key) {
-        return this.promises.push($http.post(this.query));
+      return angular.forEach(this.query, (function(_this) {
+        return function(value, key) {
+          return _this.promises.push(_this.search(_this.query).then((function(data) {
+            console.log(data);
+            return console.log(_this.promises);
+          }), function(error) {
+            return console.log(error);
+          }));
+        };
+      })(this));
+    },
+    toArray: function(elem) {
+      var type;
+      type = imagoUtils.toType(elem);
+      if (type !== 'object' && type !== 'string' && type !== ' array') {
+        return console.log('Panel: no valid query');
+      }
+      if (imagoUtils.toType(elem) === 'array') {
+        return elem;
+      } else {
+        return [elem];
+      }
+    },
+    objListToDict: function(obj_or_list) {
+      var querydict;
+      querydict = {};
+      if (angular.isArray(obj_or_list)) {
+        angular.forEach(obj_or_list, function(elem, key) {
+          return angular.forEach(elem, function(value, key) {
+            value = elem[key];
+            querydict[key] || (querydict[key] = []);
+            return querydict[key].push(value);
+          });
+        });
+      } else {
+        angular.forEach(obj_or_list, function(value, key) {
+          value = obj_or_list[key];
+          return querydict[key] = angular.isArray(value) ? value : [value];
+        });
+      }
+      angular.forEach(['page', 'pagesize'], function(value, key) {
+        if (querydict.hasOwnProperty(key)) {
+          return querydict[key] = querydict[key][0];
+        }
       });
+      return querydict;
+    },
+    getSearchUrl: function() {
+      if (data === 'online' && debug) {
+        return "http://" + tenant + ".ng.imagoapp.com/api/v2/search";
+      } else {
+        return "/api/v2/search";
+      }
     }
   };
 });
@@ -338,6 +455,8 @@ app.factory('imagoUtils', function() {
     EUR: '&#128;',
     USD: '&#36;',
     SEK: 'SEK',
+    YEN: '&#165;',
+    GBP: '&#163;',
     GENERIC: '&#164;'
   };
   CURRENCY_MAPPING = {

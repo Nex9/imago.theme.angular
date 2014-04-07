@@ -1,8 +1,7 @@
-app.directive('imagoVideo', function($log, imagoUtils) {
+app.directive('imagoVideo', function(imagoUtils) {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/video-widget.html',
-    restrict: 'EAC',
     controller: function($scope, $element, $attrs, $transclude) {},
     compile: function(tElement, tAttrs, transclude) {
       return {
@@ -23,13 +22,21 @@ app.directive('imagoVideo', function($log, imagoUtils) {
           angular.forEach(iAttrs, function(value, key) {
             return this[key] = value;
           });
+          if (this.controls) {
+            scope.controls = this.controls;
+          }
           this.video = angular.copy(scope.video);
           this.id = imagoUtils.uuid();
-          return scope.elementStyle = "" + (this["class"] || '') + " " + this.size + " " + this.align + " " + this.sizemode;
+          scope.elementStyle = "" + this["class"] + " " + this.size + " " + this.align + " " + this.sizemode;
+          if (angular.isString(this.resolution)) {
+            return this.resolution = {
+              width: r[0],
+              height: r[1]
+            };
+          }
         },
         post: function(scope, iElement, iAttrs, controller) {}
       };
-    },
-    link: function(scope, iElement, iAttrs) {}
+    }
   };
 });

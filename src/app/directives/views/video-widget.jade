@@ -1,2 +1,15 @@
-.imagowrapper(ng-style="elementStyle")
-  .image(ng-style="imageStyle")
+.imagovideo.imagowrapper(ng-class="elementStyle")
+  a.playbig.icon-play(ng-click="togglePlay()")
+  .controls(ng-if="controls")
+    a.play.icon-play(ng-click="play()")
+    a.pause.icon-pause(ng-click="pause()")
+      span.time 00:00
+      span.seekbar
+        input.seek(type='range', value='0',ng-model="seek", ng-change="seek()")
+      a.size(ng-click="toggleSize()") hd
+      span.volume
+        span.icon-volume-up(ng-click="volumeUp()")
+        input(type='range', value='100')
+        span.icon-volume-down(ng-click="volumeDown()")
+      a.fullscreen.icon-resize-full(ng-click="fullScreen()")
+      a.screen.icon-resize-small

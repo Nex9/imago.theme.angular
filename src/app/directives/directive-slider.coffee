@@ -1,7 +1,7 @@
-app.directive 'imagoSlider', ($window, imagoUtils) ->
+app.directive 'imagoSlider', (imagoUtils) ->
   replace: true
   templateUrl: '/src/app/directives/views/slider-widget.html'
-  controller: ($scope, $element, $attrs, $transclude) ->
+  controller: ($scope, $element, $attrs, $window) ->
     # @slider = angular.copy($scope[$attrs.source])
 
     $scope.currentIndex = 0;
@@ -13,20 +13,24 @@ app.directive 'imagoSlider', ($window, imagoUtils) ->
       return $scope.currentIndex is index;
 
     $scope.goPrev = () ->
-      console.log 'go Prev'
-      $scope.currentIndex = (if ($scope.currentIndex < $scope.slideSource.length - 1) then ++$scope.currentIndex else 0)
+      # console.log 'go prev'
+      $scope.currentIndex = if ($scope.currentIndex < $scope.slideSource.length - 1) then ++$scope.currentIndex else 0
 
     $scope.goNext = () ->
-      console.log 'go Next'
-      $scope.currentIndex = (if ($scope.currentIndex > 0) then --$scope.currentIndex else $scope.slideSource.length - 1)
+      # console.log 'go next'
+      $scope.currentIndex = if ($scope.currentIndex > 0) then --$scope.currentIndex else $scope.slideSource.length - 1
 
     angular.element($window).on 'keydown', (e) ->
       return unless $scope.confSlider.enablekeys
       switch e.keyCode
-        when 37 then $scope.goPrev()
-        when 39 then $scope.goNext()
-
-    
+        when 37
+          $scope.$apply(()->
+            $scope.goPrev()
+          )
+        when 39
+          $scope.$apply(()->
+            $scope.goNext()
+          )
 
   compile: (tElement, tAttrs, transclude) ->
     pre: (scope, iElement, iAttrs, controller) ->
@@ -64,7 +68,4 @@ app.directive 'imagoSlider', ($window, imagoUtils) ->
 
       @id = imagoUtils.uuid()
 
-
-    post: (scope, iElement, iAttrs, controller) ->
-
-  link: (scope, iElement, iAttrs) ->
+      scope.elementStyle = scope.confSlider.animation

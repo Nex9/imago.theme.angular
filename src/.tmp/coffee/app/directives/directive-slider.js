@@ -1,8 +1,8 @@
-app.directive('imagoSlider', function($window, imagoUtils) {
+app.directive('imagoSlider', function(imagoUtils) {
   return {
     replace: true,
     templateUrl: '/src/app/directives/views/slider-widget.html',
-    controller: function($scope, $element, $attrs, $transclude) {
+    controller: function($scope, $element, $attrs, $window) {
       $scope.currentIndex = 0;
       $scope.setCurrentSlideIndex = function(index) {
         return $scope.currentIndex = index;
@@ -11,12 +11,10 @@ app.directive('imagoSlider', function($window, imagoUtils) {
         return $scope.currentIndex === index;
       };
       $scope.goPrev = function() {
-        console.log('go Prev');
-        return $scope.currentIndex = ($scope.currentIndex < $scope.slideSource.length - 1 ? ++$scope.currentIndex : 0);
+        return $scope.currentIndex = $scope.currentIndex < $scope.slideSource.length - 1 ? ++$scope.currentIndex : 0;
       };
       $scope.goNext = function() {
-        console.log('go Next');
-        return $scope.currentIndex = ($scope.currentIndex > 0 ? --$scope.currentIndex : $scope.slideSource.length - 1);
+        return $scope.currentIndex = $scope.currentIndex > 0 ? --$scope.currentIndex : $scope.slideSource.length - 1;
       };
       return angular.element($window).on('keydown', function(e) {
         if (!$scope.confSlider.enablekeys) {
@@ -24,9 +22,13 @@ app.directive('imagoSlider', function($window, imagoUtils) {
         }
         switch (e.keyCode) {
           case 37:
-            return $scope.goPrev();
+            return $scope.$apply(function() {
+              return $scope.goPrev();
+            });
           case 39:
-            return $scope.goNext();
+            return $scope.$apply(function() {
+              return $scope.goNext();
+            });
         }
       });
     },
@@ -59,11 +61,10 @@ app.directive('imagoSlider', function($window, imagoUtils) {
             scope.confSlider.enablearrows = false;
             scope.confSlider.enablekeys = false;
           }
-          return this.id = imagoUtils.uuid();
-        },
-        post: function(scope, iElement, iAttrs, controller) {}
+          this.id = imagoUtils.uuid();
+          return scope.elementStyle = scope.confSlider.animation;
+        }
       };
-    },
-    link: function(scope, iElement, iAttrs) {}
+    }
   };
 });

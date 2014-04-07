@@ -6,11 +6,11 @@ h1 Hello World {{ message }}
 
 
 div(ng-repeat="asset in assets")
+div(imago-video, source="assets")
   //- div(imago-image,
   //-     source="asset"
   //-     )
 
-    //- div(imago-video,  sizemode="crop", align="center center", ng-if="asset.kind === 'Video'")
-div(imago-slider,
-    source="assets"
-    )
+//- div(imago-slider,
+//-     source="assets"
+//-     )

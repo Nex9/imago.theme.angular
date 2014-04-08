@@ -1,5 +1,6 @@
 .imagovideo.imagowrapper(ng-class="elementStyle", ng-style="videoBackground")
   a.playbig.icon-play(ng-click="togglePlay()")
+  video(ng-repeat="formats in videoFormats", ng-style="styleFormats")
   .controls(ng-if="controls")
     a.play.icon-play(ng-click="play()")
     a.pause.icon-pause(ng-click="pause()")

@@ -25,6 +25,8 @@ app.directive 'imagoImage', () ->
 
       @image = angular.copy(scope[@source])
 
+      unless @image.serving_url then return
+
         # if image.width is 'auto' then image.width is iElement[0].offsetWidth
       width    = @width    or iElement[0].clientWidth
       height   = @height   or iElement[0].clientHeight

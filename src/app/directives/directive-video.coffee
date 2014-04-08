@@ -2,6 +2,17 @@ app.directive 'imagoVideo', (imagoUtils) ->
   replace: true
   templateUrl: '/src/app/directives/views/video-widget.html'
   controller: ($scope, $element, $attrs, $transclude) ->
+    $scope.$watch 'assets', (assetsData) ->
+      if assetsData
+        $scope.videoSource = []
+        for video in assetsData
+          if video?.kind is "Video"
+            console.log video
+            $scope.videoBackground["background-image"] = "url(#{video.serving_url})"
+            $scope.videoBackground["background-repeat"]= "no-repeat"
+            $scope.videoBackground["background-size"]  = "auto 100%"
+
+        @id = imagoUtils.uuid()
 
   compile: (tElement, tAttrs, transclude) ->
     pre: (scope, iElement, iAttrs, controller) ->
@@ -24,11 +35,10 @@ app.directive 'imagoVideo', (imagoUtils) ->
       if @controls
         scope.controls = @controls
 
-      @video = angular.copy(scope.video)
-
-      @id = imagoUtils.uuid()
-
       scope.elementStyle = "#{@class} #{@size} #{@align} #{@sizemode}"
+
+      scope.videoBackground =
+        "background-position" : "#{@align}"
 
       # convert resolution string to object
       if angular.isString(@resolution)

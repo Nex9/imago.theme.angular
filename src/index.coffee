@@ -1,4 +1,4 @@
-tenant     = 'pablosbirthday'
+tenant     = 'imagoapp'
 data       = 'online'
 debug      = true
 

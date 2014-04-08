@@ -15,7 +15,7 @@ app.factory 'imagoPanel', ($http, imagoUtils, $q) ->
       @query =
         [path: query]
 
-    @query = @toArray(@query)
+    @query = imagoUtils.toArray(@query)
 
 
     @promises = []
@@ -44,27 +44,22 @@ app.factory 'imagoPanel', ($http, imagoUtils, $q) ->
       # console.log @data
     )
 
-  toArray: (elem) ->
-    # type = imagoUtils.toType(elem)
-    # return console.log 'Panel: no valid query' unless type in ['object', 'string', ' array']
-    if angular.isArray(elem) then elem else [elem]
-
   objListToDict: (obj_or_list) ->
     querydict = {}
     if angular.isArray(obj_or_list)
-      angular.forEach obj_or_list, (elem, key) ->
-        angular.forEach elem, (value, key) ->
+      for elem in obj_or_list
+        for key of elem
           value = elem[key]
           querydict[key] or= []
           querydict[key].push(value)
     else
-      angular.forEach obj_or_list, (value, key) ->
+      for key of obj_or_list
         value = obj_or_list[key]
         querydict[key] = if angular.isArray(value) then value else [value]
     # if querydict.collection?
     #   querydict['path'] = querydict.collection
     #   delete querydict.collection
-    angular.forEach ['page', 'pagesize'], (value, key) ->
+    for key in ['page', 'pagesize']
       if querydict.hasOwnProperty(key)
         querydict[key] = querydict[key][0]
     querydict

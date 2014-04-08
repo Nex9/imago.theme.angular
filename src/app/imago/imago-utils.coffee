@@ -418,3 +418,9 @@ app.factory 'imagoUtils', ->
 
   getCurrency: (country) ->
     CURRENCY_MAPPING[country]
+
+
+  toArray: (elem) ->
+    # type = imagoUtils.toType(elem)
+    # return console.log 'Panel: no valid query' unless type in ['object', 'string', ' array']
+    if angular.isArray(elem) then elem else [elem]

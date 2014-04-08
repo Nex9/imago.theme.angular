@@ -5,12 +5,16 @@ app.directive 'imagoSlider', (imagoUtils) ->
 
     $scope.$watch 'assets', (assetsData) ->
       if assetsData
-        $scope.slideSource = angular.copy(assetsData)
+        $scope.slideSource = []
 
           #If slider has one slide
-        if $scope.slideSource?.length is 1 or !$scope.slideSource
-          $scope.confSlider.enablearrows = false
-          $scope.confSlider.enablekeys   = false
+        for item in assetsData
+          if item.serving_url
+            $scope.slideSource.push item
+
+        if $scope.slideSource?.length <= 1 or !$scope.slideSource
+            $scope.confSlider.enablearrows = false
+            $scope.confSlider.enablekeys   = false
 
         @id = imagoUtils.uuid()
 

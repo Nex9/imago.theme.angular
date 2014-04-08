@@ -1,9 +1,7 @@
 app.directive 'imagoVideo', (imagoUtils) ->
   replace: true
   templateUrl: '/src/app/directives/views/video-widget.html'
-  controller: ($scope, $element, $attrs, $transclude) ->
-
-    # $scope.videoSource = []
+  controller: ($scope, $element, $attrs, $transclude, $timeout) ->
 
     renderVideo = (video) ->
       console.log video
@@ -19,19 +17,23 @@ app.directive 'imagoVideo', (imagoUtils) ->
         $scope.optionsVideo.resolution =
           width:  r[0]
           height: r[1]
-      $scope.videoBackground["background-image"] = "url(#{@serving_url})"
-      $scope.videoBackground["background-repeat"]= "no-repeat"
-      $scope.videoBackground["background-size"]  = "auto 100%"
+      $scope.videoBackground["background-image"]  = "url(#{@serving_url})"
+      $scope.videoBackground["background-repeat"] = "no-repeat"
+      $scope.videoBackground["background-size"]   = "auto 100%"
       $scope.videoBackground["width"]  = width if angular.isNumber(width)
       $scope.videoBackground["height"] = height if angular.isNumber(height)
       $scope.styleFormats =
-        "autoplay" : 'autoplay'
-        "preload" : 'autoplay'
-        "autobuffer" : 'autoplay'
+        "autoplay" : $scope.optionsVideo["autoplay"]
+        "preload" : $scope.optionsVideo["preload"]
+        "autobuffer" : $scope.optionsVideo["autobuffer"]
         "x-webkit-airplay" : 'allow'
         "webkitAllowFullscreen" : 'true'
 
+      @id = imagoUtils.uuid()
+
       resize()
+      videoElement(video)
+      $scope.videoWrapper = $element[0].children[1]
 
 
     $scope.$watch $attrs['source'], (assetsData) ->
@@ -41,13 +43,23 @@ app.directive 'imagoVideo', (imagoUtils) ->
             renderVideo video
 
 
-        @id = imagoUtils.uuid()
-
     $scope.play       = ->
+      $scope.videoWrapper.play()
+      $scope.optionsVideo.state = 'playing'
 
     $scope.togglePlay = ->
 
+      # console.log $scope.videoWrapper
+      # console.log angular.element($element)
+      if $scope.optionsVideo.state is 'playing'
+        $scope.videoWrapper.pause()
+      else
+        $scope.videoWrapper.play()
+        $scope.fullScreen()
+
     $scope.pause      = ->
+      $scope.videoWrapper.pause()
+      $scope.optionsVideo.state = 'pause'
 
     $scope.toggleSize = ->
 
@@ -58,9 +70,19 @@ app.directive 'imagoVideo', (imagoUtils) ->
     $scope.volumeDown = ->
 
     $scope.fullScreen = ->
+      if $scope.videoWrapper.requestFullscreen
+        $scope.videoWrapper.requestFullscreen();
+      else if $scope.videoWrapper.mozRequestFullScreen
+        $scope.videoWrapper.mozRequestFullScreen();
+      else if $scope.videoWrapper.webkitRequestFullscreen
+        $scope.videoWrapper.webkitRequestFullscreen();
+      else if $scope.videoWrapper.msRequestFullscreen
+        $scope.videoWrapper.msRequestFullscreen();
+
 
 
     resize = ->
+
       assetRatio   = $scope.optionsVideo.resolution.width / $scope.optionsVideo.resolution.height
 
       if $scope.optionsVideo.sizemode is "crop"
@@ -68,7 +90,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
         height = $element[0].clientHeight
         wrapperRatio = width / height
         if assetRatio < wrapperRatio
-          # $scope.optionsVideo.log 'full width'
+
           if imagoUtils.isiOS()
               $scope.styleFormats["width"]  =  "100%"
               $scope.styleFormats["height"] = "100%"
@@ -90,7 +112,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
           $scope.videoBackground["background-position"] = $scope.optionsVideo.align
 
         else
-          # $scope.optionsVideo.log "full height"
+
           if imagoUtils.isiOS()
               $scope.styleFormats["width"] = "100%"
               $scope.styleFormats["height"]= "100%"
@@ -111,9 +133,8 @@ app.directive 'imagoVideo', (imagoUtils) ->
           $scope.videoBackground["background-size"] = "auto 100%"
           $scope.videoBackground["background-position"] = $scope.optionsVideo.align
 
-      # sizemode fit
       else
-        # $scope.optionsVideo.log $scope.optionsVideo.el, $scope.optionsVideo.el.width(), $scope.optionsVideo.el.height()
+
         width  = $element[0].clientWidth
         height = $element[0].clientHeight
         wrapperRatio = width / height
@@ -132,6 +153,36 @@ app.directive 'imagoVideo', (imagoUtils) ->
           $scope.videoBackground["background-position"] = $scope.optionsVideo.align
           $scope.videoBackground["width"] =  "#{ parseInt(height * assetRatio, 10) }px"
           $scope.videoBackground["height"] = "#{ height }px"
+
+    videoElement = (video) ->
+      $scope.videoFormats = []
+      @codecs  = ['mp4', 'webm']
+      codec = detectCodec()
+      for format, i in video.formats
+        continue unless codec is format.codec
+        $scope.videoFormats.push(
+          result =
+            "src" : "http://#{tenant}.imagoapp.com/assets/api/play_redirect?uuid=#{video.id}&codec=#{format.codec}&quality=hd&max_size=#{format.size}"
+            "size": format.size
+            "codec": format.codec
+            "type": "video/#{codec}"
+        )
+
+    detectCodec = ->
+      tag = document.createElement 'video'
+      return unless tag.canPlayType
+
+      codecs =
+        mp4:  'video/mp4; codecs="mp4v.20.8"'
+        mp4:  'video/mp4; codecs="avc1.42E01E"'
+        mp4:  'video/mp4; codecs="avc1.42E01E, mp4a.40.2"'
+        webm: 'video/webm; codecs="vp8, vorbis"'
+        ogg:  'video/ogg; codecs="theora"'
+
+      for key, value of codecs
+        if tag.canPlayType value
+          return key
+
 
   compile: (tElement, tAttrs, transclude) ->
     pre: (scope, iElement, iAttrs, controller) ->

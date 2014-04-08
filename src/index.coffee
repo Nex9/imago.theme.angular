@@ -6,7 +6,9 @@ host       = if (data is 'online') then "//#{tenant}.ng.imagoapp.com/api/v3" els
 
 app = angular.module 'app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']
 
-app.config ($routeProvider, $httpProvider) ->
+app.config ($routeProvider, $httpProvider, $sceProvider) ->
+
+  $sceProvider.enabled(false)
 
   # http defaults config START
   $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'

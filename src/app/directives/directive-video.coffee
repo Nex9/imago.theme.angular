@@ -1,7 +1,11 @@
 app.directive 'imagoVideo', (imagoUtils) ->
   replace: true
+  scope: true
   templateUrl: '/src/app/directives/views/video-widget.html'
   controller: ($scope, $element, $attrs, $transclude, $timeout) ->
+
+    $scope.videoWrapper = $element[0].children[1]
+    $scope.time = "00:00"
 
     renderVideo = (video) ->
       console.log video
@@ -33,15 +37,18 @@ app.directive 'imagoVideo', (imagoUtils) ->
 
       resize()
       videoElement(video)
-      $scope.videoWrapper = $element[0].children[1]
+      $scope.seekTime = 0
 
+    angular.element($scope.videoWrapper).bind 'timeupdate', (e) ->
+      $scope.$apply(()->
+        $scope.seekTime = $scope.videoWrapper.currentTime / $scope.videoWrapper.duration * 100
+      )
 
     $scope.$watch $attrs['source'], (assetsData) ->
       if assetsData
         for video in assetsData
           if video.kind is "Video"
             renderVideo video
-
 
     $scope.play       = ->
       $scope.videoWrapper.play()
@@ -55,7 +62,6 @@ app.directive 'imagoVideo', (imagoUtils) ->
         $scope.videoWrapper.pause()
       else
         $scope.videoWrapper.play()
-        $scope.fullScreen()
 
     $scope.pause      = ->
       $scope.videoWrapper.pause()
@@ -63,11 +69,13 @@ app.directive 'imagoVideo', (imagoUtils) ->
 
     $scope.toggleSize = ->
 
-    $scope.seek       = ->
+    $scope.seek       = (e) ->
+      seek = parseFloat(e / 100)
+      $scope.seekTime = parseFloat($scope.videoWrapper.duration * seek)
+      $scope.videoWrapper.currentTime = angular.copy($scope.seekTime)
 
-    $scope.volumeUp   = ->
-
-    $scope.volumeDown = ->
+    $scope.onVolumeChange = (e) ->
+      $scope.videoWrapper.volume = parseFloat(e / 100)
 
     $scope.fullScreen = ->
       if $scope.videoWrapper.requestFullscreen
@@ -78,8 +86,6 @@ app.directive 'imagoVideo', (imagoUtils) ->
         $scope.videoWrapper.webkitRequestFullscreen();
       else if $scope.videoWrapper.msRequestFullscreen
         $scope.videoWrapper.msRequestFullscreen();
-
-
 
     resize = ->
 

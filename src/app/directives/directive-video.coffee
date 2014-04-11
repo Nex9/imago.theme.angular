@@ -2,10 +2,32 @@ app.directive 'imagoVideo', (imagoUtils) ->
   replace: true
   scope: true
   templateUrl: '/src/app/directives/views/video-widget.html'
-  controller: ($scope, $element, $attrs, $transclude, $timeout) ->
+  controller: ($scope, $element, $attrs, $transclude, $window) ->
+
+    # console.log $element[0].childen('video')
 
     $scope.videoWrapper = $element[0].children[1]
-    $scope.time = "00:00"
+    $scope.time = 0
+    $scope.seekTime = 0
+    # TODO: Remember users preference by localStorage
+    $scope.volumeInput = 100
+
+    $scope.$watch $attrs['source'], (video) ->
+      if video and video.kind is "Video"
+        renderVideo video
+        videoElement video
+        resize()
+
+    angular.element($scope.videoWrapper).bind 'timeupdate', (e) ->
+      $scope.$apply(()->
+        $scope.seekTime = $scope.videoWrapper.currentTime / $scope.videoWrapper.duration * 100
+        $scope.time = $scope.videoWrapper.currentTime
+      )
+
+    angular.element($window).bind 'resize', (e) ->
+      $scope.$apply(()->
+        resize()
+      )
 
     renderVideo = (video) ->
       console.log video
@@ -35,29 +57,11 @@ app.directive 'imagoVideo', (imagoUtils) ->
 
       @id = imagoUtils.uuid()
 
-      resize()
-      videoElement(video)
-      $scope.seekTime = 0
-
-    angular.element($scope.videoWrapper).bind 'timeupdate', (e) ->
-      $scope.$apply(()->
-        $scope.seekTime = $scope.videoWrapper.currentTime / $scope.videoWrapper.duration * 100
-      )
-
-    $scope.$watch $attrs['source'], (assetsData) ->
-      if assetsData
-        for video in assetsData
-          if video.kind is "Video"
-            renderVideo video
-
     $scope.play       = ->
       $scope.videoWrapper.play()
       $scope.optionsVideo.state = 'playing'
 
     $scope.togglePlay = ->
-
-      # console.log $scope.videoWrapper
-      # console.log angular.element($element)
       if $scope.optionsVideo.state is 'playing'
         $scope.videoWrapper.pause()
       else
@@ -67,7 +71,21 @@ app.directive 'imagoVideo', (imagoUtils) ->
       $scope.videoWrapper.pause()
       $scope.optionsVideo.state = 'pause'
 
+    setSize: (size) ->
+      # srcs = @el.children('source')
+      # return unless srcs.length > 1
+
+      # poster = @player.el.css('backgroundImage')
+      # @player.el.css('backgroundImage', '')
+
+      # $scope.pause()
+      # @el.attr 'src', srcs[(if size is "hd" then 0 else srcs.length - 1)].src
+
     $scope.toggleSize = ->
+      if $scope.optionsVideo.size is 'hd'
+        $scope.optionsVideo.size = 'sd'
+      else
+        $scope.optionsVideo.size = 'hd'
 
     $scope.seek       = (e) ->
       seek = parseFloat(e / 100)
@@ -80,15 +98,14 @@ app.directive 'imagoVideo', (imagoUtils) ->
     $scope.fullScreen = ->
       if $scope.videoWrapper.requestFullscreen
         $scope.videoWrapper.requestFullscreen();
-      else if $scope.videoWrapper.mozRequestFullScreen
-        $scope.videoWrapper.mozRequestFullScreen();
       else if $scope.videoWrapper.webkitRequestFullscreen
         $scope.videoWrapper.webkitRequestFullscreen();
+      else if $scope.videoWrapper.mozRequestFullScreen
+        $scope.videoWrapper.mozRequestFullScreen();
       else if $scope.videoWrapper.msRequestFullscreen
         $scope.videoWrapper.msRequestFullscreen();
 
     resize = ->
-
       assetRatio   = $scope.optionsVideo.resolution.width / $scope.optionsVideo.resolution.height
 
       if $scope.optionsVideo.sizemode is "crop"
@@ -164,6 +181,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
       $scope.videoFormats = []
       @codecs  = ['mp4', 'webm']
       codec = detectCodec()
+      $scope.videoFormats.formats.sort( (a, b) -> return b.height - a.height )
       for format, i in video.formats
         continue unless codec is format.codec
         $scope.videoFormats.push(
@@ -192,7 +210,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
 
   compile: (tElement, tAttrs, transclude) ->
     pre: (scope, iElement, iAttrs, controller) ->
-      @options = []
+      @options = {}
       @defaults =
         autobuffer  : null
         autoplay    : false
@@ -209,14 +227,14 @@ app.directive 'imagoVideo', (imagoUtils) ->
       angular.forEach iAttrs, (value, key) ->
         @options[key] = value
 
-      if @options.controls
-        scope.controls = @options.controls
+      scope.optionsVideo = @options
 
-      scope.elementStyle = "#{@options.class} #{@options.size} #{@options.align} #{@options.sizemode}"
+      if @options.controls
+        scope.controls = angular.copy(scope.optionsVideo.controls)
+
+      # scope.elementStyle = "#{scope.optionsVideo.class} #{scope.optionsVideo.size} #{scope.optionsVideo.align} #{scope.optionsVideo.sizemode}"
 
       scope.videoBackground =
         "background-position" : "#{@options.align}"
-
-      scope.optionsVideo = @options
 
       # Sizemode

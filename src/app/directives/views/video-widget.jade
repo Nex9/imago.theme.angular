@@ -1,17 +1,17 @@
-.imagovideo.imagowrapper(ng-class="elementStyle", ng-style="videoBackground", ng-click="videoActive = true")
+div(ng-style="videoBackground", ng-click="videoActive = true", class="imagovideo imagowrapper {{optionsVideo.align}} {{optionsVideo.size}} {{optionsVideo.sizemode}}")
   a.playbig.icon-play(ng-click="togglePlay()")
   video(ng-style="styleFormats", ng-show="videoActive")
     source(ng-repeat="format in videoFormats", src="{{format.src}}", data-size="{{format.size}}", data-codec="{{format.codec}}", type="{{format.type}}")
   .controls(ng-if="controls")
     a.play.icon-play(ng-click="play()")
     a.pause.icon-pause(ng-click="pause()")
-    span.time(ng-bind="time")
+    span.time {{time | date: 'mm:ss'}}
     span.seekbar
-      input.seek(type='range', value='0',ng-model="seekTime", ng-change="seek(seekTime)")
+      input.seek(type='range',ng-model="seekTime", ng-change="seek(seekTime)")
     a.size(ng-click="toggleSize()") hd
     span.volume
       //- span.icon-volume-up(ng-click="volumeUp()")
-      input(type='range', value='100', ng-model="volumeInput" ng-change="onVolumeChange(volumeInput)")
+      input(type='range', ng-model="volumeInput", ng-change="onVolumeChange(volumeInput)")
       //- span.icon-volume-down(ng-click="volumeDown()")
     a.fullscreen.icon-resize-full(ng-click="fullScreen()")
     a.screen.icon-resize-small

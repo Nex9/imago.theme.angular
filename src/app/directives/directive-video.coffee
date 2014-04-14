@@ -21,7 +21,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
     angular.element($scope.videoWrapper).bind 'timeupdate', (e) ->
       $scope.$apply(()->
         $scope.seekTime = $scope.videoWrapper.currentTime / $scope.videoWrapper.duration * 100
-        $scope.time = $scope.videoWrapper.currentTime
+        # $scope.time = $scope.videoWrapper.currentTime
       )
 
     angular.element($window).bind 'resize', (e) ->
@@ -181,7 +181,8 @@ app.directive 'imagoVideo', (imagoUtils) ->
       $scope.videoFormats = []
       @codecs  = ['mp4', 'webm']
       codec = detectCodec()
-      $scope.videoFormats.formats.sort( (a, b) -> return b.height - a.height )
+      console.log $scope.videoFormats
+      # $scope.videoFormats.formats.sort( (a, b) -> return b.height - a.height )
       for format, i in video.formats
         continue unless codec is format.codec
         $scope.videoFormats.push(

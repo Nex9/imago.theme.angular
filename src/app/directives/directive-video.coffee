@@ -14,9 +14,10 @@ app.directive 'imagoVideo', (imagoUtils) ->
 
     $scope.$watch $attrs['source'], (video) ->
       if video and video.kind is "Video"
-        renderVideo video
-        videoElement video
-        resize()
+        compile video
+      else
+        $scope.videoBackground =
+          "display" : "none"
 
     angular.element($scope.videoWrapper).bind 'timeupdate', (e) ->
       $scope.$apply(()->
@@ -28,6 +29,35 @@ app.directive 'imagoVideo', (imagoUtils) ->
       $scope.$apply(()->
         resize()
       )
+    compile = (video) ->
+      @options = {}
+      @defaults =
+        autobuffer  : null
+        autoplay    : false
+        controls    : true
+        preload     : 'none'
+        size        : 'hd'
+        align       : 'left top'
+        sizemode    : 'fit'
+        lazy        : true
+
+      angular.forEach @defaults, (value, key) ->
+        @options[key] = value
+
+      angular.forEach $attrs, (value, key) ->
+        @options[key] = value
+
+      $scope.optionsVideo = @options
+
+      if @options.controls
+        $scope.controls = angular.copy($scope.optionsVideo.controls)
+
+      $scope.videoBackground =
+        "background-position" : "#{@options.align}"
+
+      renderVideo video
+      videoElement video
+      resize()
 
     renderVideo = (video) ->
       console.log video
@@ -223,35 +253,3 @@ app.directive 'imagoVideo', (imagoUtils) ->
       for key, value of codecs
         if tag.canPlayType value
           return key
-
-
-  compile: (tElement, tAttrs, transclude) ->
-    pre: (scope, iElement, iAttrs, controller) ->
-      @options = {}
-      @defaults =
-        autobuffer  : null
-        autoplay    : false
-        controls    : true
-        preload     : 'none'
-        size        : 'hd'
-        align       : 'left top'
-        sizemode    : 'fit'
-        lazy        : true
-
-      angular.forEach @defaults, (value, key) ->
-        @options[key] = value
-
-      angular.forEach iAttrs, (value, key) ->
-        @options[key] = value
-
-      scope.optionsVideo = @options
-
-      if @options.controls
-        scope.controls = angular.copy(scope.optionsVideo.controls)
-
-      # scope.elementStyle = "#{scope.optionsVideo.class} #{scope.optionsVideo.size} #{scope.optionsVideo.align} #{scope.optionsVideo.sizemode}"
-
-      scope.videoBackground =
-        "background-position" : "#{@options.align}"
-
-      # Sizemode

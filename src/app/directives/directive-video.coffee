@@ -106,6 +106,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
         $scope.videoWrapper.msRequestFullscreen();
 
     resize = ->
+      unless $scope.optionsVideo.resolution then return
       assetRatio   = $scope.optionsVideo.resolution.width / $scope.optionsVideo.resolution.height
 
       if $scope.optionsVideo.sizemode is "crop"
@@ -181,8 +182,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
       $scope.videoFormats = []
       @codecs  = ['mp4', 'webm']
       codec = detectCodec()
-      console.log $scope.videoFormats
-      # $scope.videoFormats.formats.sort( (a, b) -> return b.height - a.height )
+      $scope.videoFormats.sort( (a, b) -> return b.height - a.height )
       for format, i in video.formats
         continue unless codec is format.codec
         $scope.videoFormats.push(

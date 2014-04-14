@@ -7,7 +7,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
     # console.log $element[0].childen('video')
 
     $scope.videoWrapper = $element[0].children[1]
-    $scope.time = 0
+    $scope.time = '00:00'
     $scope.seekTime = 0
     # TODO: Remember users preference by localStorage
     $scope.volumeInput = 100
@@ -21,7 +21,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
     angular.element($scope.videoWrapper).bind 'timeupdate', (e) ->
       $scope.$apply(()->
         $scope.seekTime = $scope.videoWrapper.currentTime / $scope.videoWrapper.duration * 100
-        # $scope.time = $scope.videoWrapper.currentTime
+        updateTime($scope.videoWrapper.currentTime)
       )
 
     angular.element($window).bind 'resize', (e) ->
@@ -56,6 +56,22 @@ app.directive 'imagoVideo', (imagoUtils) ->
         "webkitAllowFullscreen" : 'true'
 
       @id = imagoUtils.uuid()
+
+    pad = (num)->
+      return "0" + num  if num < 10
+      num
+
+    updateTime = (sec) ->
+      calc = []
+      minutes = Math.floor(sec / 60)
+      hours = Math.floor(sec / 3600)
+      seconds = (if (sec is 0) then 0 else (sec % 60))
+      seconds = Math.round(seconds)
+      calc.push pad(hours)  if hours > 0
+      calc.push pad(minutes)
+      calc.push pad(seconds)
+      result = calc.join ":"
+      $scope.time = result
 
     $scope.play       = ->
       $scope.videoWrapper.play()
@@ -182,7 +198,7 @@ app.directive 'imagoVideo', (imagoUtils) ->
       $scope.videoFormats = []
       @codecs  = ['mp4', 'webm']
       codec = detectCodec()
-      $scope.videoFormats.sort( (a, b) -> return b.height - a.height )
+      # $scope.videoFormats.formats.sort( (a, b) -> return b.height - a.height )
       for format, i in video.formats
         continue unless codec is format.codec
         $scope.videoFormats.push(

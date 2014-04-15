@@ -13,7 +13,7 @@ app.config ($routeProvider, $httpProvider, $sceProvider) ->
   # http defaults config START
   $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'
   $httpProvider.defaults.headers.common['NexClient']    = 'public'
-  # http defaults config EMDS
+  # http defaults config ENDS
 
   $routeProvider
     .when '/',

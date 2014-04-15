@@ -95,6 +95,10 @@ gulp.task "copy", ->
   gulp.src("./theme.yaml")
     .pipe gulp.dest("#{destinationFolder}")
 
+gulp.task "copyDev", ->
+  gulp.src("#{src}/static/**/*.*")
+    .pipe gulp.dest("#{tmp}/static")
+
 gulp.task "usemin", ->
   gulp.src("#{src}/index.html")
     .pipe(usemin(
@@ -130,6 +134,9 @@ gulp.task "watch", ["browser-sync"], ->
 
   watch {glob: "#{src}/**/*.jade"}, (files) ->
     gulp.start "templates"
+
+  watch {glob: "#{src}/static/**/*.*"}, (files) ->
+    gulp.start "copyDev"
 
 
 gulp.task "build", ["clean"], ->

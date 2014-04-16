@@ -1,4 +1,4 @@
-app.factory 'imagoPanel', ($http, imagoUtils, $q) ->
+app.factory 'imagoPanel', ($http, imagoUtils, $q, $location) ->
 
 
   search: (query) ->
@@ -7,6 +7,7 @@ app.factory 'imagoPanel', ($http, imagoUtils, $q) ->
     return $http.post(@getSearchUrl(), angular.toJson(params))
 
   getData: (query) ->
+    unless query then query = $location.$$path
     # console.log 'query in getData', query
     return console.log "Panel: query is empty, aborting #{query}" unless query
     # return if path is @path
@@ -65,4 +66,4 @@ app.factory 'imagoPanel', ($http, imagoUtils, $q) ->
     querydict
 
   getSearchUrl: ->
-    if (data is 'online' and debug) then "http://#{tenant}.ng.imagoapp.com/api/v2/search" else "/api/v2/search"
+    if (data is 'online' and debug) then "http://#{tenant}.imagoapp.com/api/v2/search" else "/api/v2/search"

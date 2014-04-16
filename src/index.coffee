@@ -1,8 +1,8 @@
-tenant     = 'imagoapp'
+tenant     = 'pablosbirthday'
 data       = 'online'
 debug      = true
 
-host       = if (data is 'online') then "//#{tenant}.ng.imagoapp.com/api/v3" else "/api/v2"
+host       = if (data is 'online') then "//#{tenant}.imagoapp.com/api/v3" else "/api/v2"
 
 app = angular.module 'app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']
 

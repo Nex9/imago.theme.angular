@@ -65,6 +65,8 @@ app.factory 'imagoPanel', ($http, imagoUtils, $q, $location) ->
         querydict[key] = querydict[key][0]
     querydict
 
+  getMeta: (field) ->
+
+
   getSearchUrl: ->
-    # 'http://localhost:8080/api/v3/search'
     if (data is 'online' and debug) then "http://#{tenant}.imagoapp.com/api/v3/search" else "/api/v3/search"

@@ -9,13 +9,13 @@
   "author": "Nex9 LLC",
   "license": "ISC",
   "dependencies": {
-    "gulp": "^3.6.0",
+    "gulp": "^3.6",
     "gulp-angular-templatecache": "^1.1.1",
     "gulp-autoprefixer": "0.0.6",
     "gulp-coffee": "^1.4.1",
     "gulp-coffeelint": "^0.3.1",
     "gulp-concat": "^2.2.0",
-    "gulp-if": "0.0.5",
+    "gulp-if": "1.2",
     "gulp-imagemin": "^0.1.5",
     "gulp-inject": "^0.4.1",
     "gulp-jade": "^0.4.2",
@@ -24,18 +24,24 @@
     "gulp-ngmin": "^0.1.2",
     "gulp-order": "^1.0.6",
     "gulp-plumber": "^0.5.6",
+    "gulp-rename": "^1.2.0",
     "gulp-rev": "^0.3.1",
     "gulp-sass": "^0.7.1",
     "gulp-stylus": "^0.1.0",
     "gulp-uglify": "^0.2.1",
     "gulp-uncss": "^0.4.1",
     "gulp-usemin": "^0.3.3",
-    "gulp-watch": "^0.5.3",
+    "gulp-util": "^2.2.14",
+    "gulp-watch": "^0.6.4",
+    "gutil": "^1.0.6",
     "run-sequence": "^0.3.6"
   },
   "devDependencies": {
-    "browser-sync": "^0.7.4",
+    "browser-sync": "^0.9",
+    "connect-modrewrite": "^0.7.5",
     "gulp-clean": "^0.2.4",
-    "gulp-notify": "^1.2.5"
+    "gulp-if": "^1.2.0",
+    "gulp-notify": "^1.2.5",
+    "node-notifier": "^2.0.4"
   }
 }

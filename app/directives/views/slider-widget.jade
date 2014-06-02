@@ -3,12 +3,14 @@ div(ng-class="elementStyle")
             ng-swipe-left="goPrev()",
             ng-swipe-right="goNext()")
     //- .debug {{slideSource | json}}
-    .prev(ng-show="confSlider.enablearrows",
+    .prev(ng-show="confSlider.enablearrows && loadedData",
           ng-click="goPrev()")
-    .next(ng-show="confSlider.enablearrows",
+    .next(ng-show="confSlider.enablearrows && loadedData",
           ng-click="goNext()")
     .slide(ng-class="{'active':isCurrentSlideIndex($index)}",
           ng-repeat="slide in slideSource",
           ng-hide="!isCurrentSlideIndex($index)")
       div(imago-image,
-          source="slide")
+          source="slide",
+          sizemode="{{$parent.confSlider.sizemode}}"
+          )

@@ -1,6 +1,6 @@
 app.directive 'imagoImage', () ->
   replace: true
-  templateUrl: '/src/app/directives/views/image-widget.html'
+  templateUrl: '/app/directives/views/image-widget.html'
   controller: ($scope, $element, $attrs, $transclude) ->
 
   compile: (tElement, tAttrs, transclude) ->

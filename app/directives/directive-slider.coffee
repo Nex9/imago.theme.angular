@@ -1,10 +1,11 @@
 app.directive 'imagoSlider', (imagoUtils) ->
   replace: true
-  templateUrl: '/src/app/directives/views/slider-widget.html'
+  templateUrl: '/app/directives/views/slider-widget.html'
   controller: ($scope, $element, $attrs, $window) ->
 
     $scope.$watch 'assets', (assetsData) ->
       if assetsData
+        $scope.loadedData = true
         $scope.slideSource = []
 
           #If slider has one slide
@@ -63,7 +64,7 @@ app.directive 'imagoSlider', (imagoUtils) ->
         noResize:     false
         current:      0
         lazy:         false
-        align:         'center center'
+        align:        'center center'
 
       angular.forEach @defaults, (value, key) ->
         scope.confSlider[key] = value

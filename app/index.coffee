@@ -1,3 +1,9 @@
+tenant     = 'TENANT'
+data       = 'online'
+debug      = true
+
+host       = if (data is 'online') then "//#{tenant}.imagoapp.com/api/v3" else "/api/v3"
+
 app = angular.module 'app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']
 
 app.config ($routeProvider, $httpProvider, $sceProvider, $locationProvider) ->

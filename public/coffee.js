@@ -1,4 +1,12 @@
-var app;
+var app, data, debug, host, tenant;
+
+tenant = 'TENANT';
+
+data = 'online';
+
+debug = true;
+
+host = data === 'online' ? "//" + tenant + ".imagoapp.com/api/v3" : "/api/v3";
 
 app = angular.module('app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']);
 
@@ -8,6 +16,14 @@ app.config(function($routeProvider, $httpProvider, $sceProvider, $locationProvid
   $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
   $httpProvider.defaults.headers.common['NexClient'] = 'public';
   return $locationProvider.html5Mode(true);
+});
+
+app.controller('Home', function($scope, $http, imagoUtils, imagoPanel, $location) {
+  return imagoPanel.getData('/home').then((function(_this) {
+    return function(response) {
+      return $scope.assets = response[0].items;
+    };
+  })(this));
 });
 
 app.directive('imagoImage', function() {
@@ -506,81 +522,6 @@ app.directive('navigation', function() {
       });
     }
   };
-});
-
-app.controller('About', function($scope, $http, imagoPanel) {
-  return imagoPanel.getData().then((function(_this) {
-    return function(response) {
-      $scope.info = response[0];
-      return $scope.assets = response[0].items;
-    };
-  })(this));
-});
-
-app.controller('artistView', function($scope, $http, imagoPanel) {
-  imagoPanel.getData().then((function(_this) {
-    return function(response) {
-      return $scope.assets = response[0];
-    };
-  })(this));
-  $scope.zoomIn = function(asset) {
-    $scope.zoomInSrc = "" + asset + "=s1000";
-    return $scope.zoom = true;
-  };
-  return $scope.zoomOut = function(asset) {
-    return $scope.zoom = false;
-  };
-});
-
-app.controller('Artists', function($scope, $http, imagoPanel, $location) {
-  return imagoPanel.getData().then((function(_this) {
-    return function(response) {
-      return $scope.assets = response[0].items;
-    };
-  })(this));
-});
-
-app.controller('body', function($scope, $http, imagoPanel) {});
-
-app.controller('Contact', function($scope, $http, imagoPanel) {
-  return imagoPanel.getData().then((function(_this) {
-    return function(response) {
-      return $scope.info = response[0];
-    };
-  })(this));
-});
-
-app.controller('Exhibitions', function($scope, $http, imagoPanel, $location) {
-  return imagoPanel.getData().then((function(_this) {
-    return function(response) {
-      return $scope.assets = response[0].items;
-    };
-  })(this));
-});
-
-app.controller('HelloWorld', function($scope, $http, imagoUtils, imagoPanel) {
-  $scope.message = 'Test';
-  return imagoPanel.getData('/docs/assets').then((function(_this) {
-    return function(response) {
-      return $scope.assets = response[0].items;
-    };
-  })(this));
-});
-
-app.controller('Home', function($scope, $http, imagoUtils, imagoPanel, $location) {
-  return imagoPanel.getData('/home').then((function(_this) {
-    return function(response) {
-      return $scope.assets = response[0].items;
-    };
-  })(this));
-});
-
-app.controller('News', function($scope, $http, imagoPanel) {
-  return imagoPanel.getData().then((function(_this) {
-    return function(response) {
-      return $scope.assets = response[0];
-    };
-  })(this));
 });
 
 app.filter("meta", function() {

@@ -9,7 +9,8 @@
   "author": "Nex9 LLC",
   "license": "ISC",
   "dependencies": {
-    "gulp": "^3.6",
+    "coffee-script": "^1.7.1",
+    "gulp": "^3",
     "gulp-angular-templatecache": "^1.1.1",
     "gulp-autoprefixer": "0.0.6",
     "gulp-coffee": "^1.4.1",
@@ -42,6 +43,8 @@
     "gulp-clean": "^0.2.4",
     "gulp-if": "^1.2.0",
     "gulp-notify": "^1.2.5",
+    "gulp-resolve-dependencies": "^0.2.0",
+    "gulp-ruby-sass": "^0.5.0",
     "node-notifier": "^2.0.4"
   }
 }

@@ -207,6 +207,11 @@ gulp.task "build", ["js"], ->
 
 gulp.task "b", ["build"]
 
+gulp.task "deploy", ["build"], ->
+  exec "deploy .", (error, stdout, stderr) ->
+    console.log "result: " + stdout
+    console.log "exec error: " + error  if error isnt null
+
 
 ## Essentials Task
 

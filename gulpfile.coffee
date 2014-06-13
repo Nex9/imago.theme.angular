@@ -61,6 +61,12 @@ paths =
     "!#{src}/bower_components/**/*.jade"
     "#{src}/**/*.jade"
   ]
+  libs: [
+    "bower_components/angular/angular.js"
+    "bower_components/angular-animate/angular-animate.js"
+    "bower_components/angular-touch/angular-touch.js"
+    "bower_components/angular-route/angular-route.js"
+  ]
 
 # END Defaults
 
@@ -136,11 +142,10 @@ gulp.task "jade", ->
     .pipe gulp.dest dest
 
 gulp.task "scripts", ->
-  gulp.src paths.js
+  gulp.src paths.libs
     .pipe plumber(
       errorHandler: reportError
     )
-    .pipe resolveDependencies(pattern: /\/\/ @requires [\s-]*(.*?\.js)/g)
     .pipe concat targets.scripts
     .pipe gulp.dest dest
 

@@ -73,6 +73,11 @@ app.directive 'imagoImage', () ->
 
         # width and height dynamic, needs to be defined via css
         # either width height or position
+        else if height is 'auto' and width is 'auto'
+          width = iElement[0].clientWidth
+          height = width / assetRatio
+          scope.elementStyle.height = height
+
         else
           # @log 'dynamic height and width', width, height
           width  = iElement[0].clientWidth

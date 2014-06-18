@@ -62,10 +62,10 @@ paths =
     "#{src}/**/*.jade"
   ]
   libs: [
-    "bower_components/angular/angular.js"
-    "bower_components/angular-animate/angular-animate.js"
-    "bower_components/angular-touch/angular-touch.js"
-    "bower_components/angular-route/angular-route.js"
+    "#{src}/bower_components/angular/angular.js"
+    "#{src}/bower_components/angular-animate/angular-animate.js"
+    "#{src}/bower_components/angular-touch/angular-touch.js"
+    "#{src}/bower_components/angular-route/angular-route.js"
   ]
 
 # END Defaults

@@ -6,6 +6,9 @@ host       = if (data is 'online') then "//#{tenant}.imagoapp.com/api/v3" else "
 
 app = angular.module 'app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp']
 
+app.run ($rootScope) ->
+  $rootScope.jsVersion = true
+
 app.config ($routeProvider, $httpProvider, $sceProvider, $locationProvider) ->
 
   $sceProvider.enabled(false)

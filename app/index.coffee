@@ -9,7 +9,7 @@ app = angular.module 'app', [
   'ngAnimate'
   'ngTouch'
   'templatesApp'
-  'imago.widgets.angualar'
+  'imago.widgets.angular'
 ]
 
 app.run ($rootScope) ->

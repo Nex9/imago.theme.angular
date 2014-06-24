@@ -38,7 +38,7 @@
         "run-sequence": "*"
     },
     "devDependencies": {
-        "browser-sync": "^0.9",
+        "browser-sync": "*",
         "connect-modrewrite": "*",
         "gulp-clean": "*",
         "gulp-if": "*",

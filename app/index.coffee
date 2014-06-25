@@ -9,6 +9,7 @@ app = angular.module 'app', [
   'ngAnimate'
   'ngTouch'
   'templatesApp'
+  'angular-underscore'
   'imago.widgets.angular'
 ]
 

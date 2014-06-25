@@ -10,8 +10,79 @@ host = data === 'online' ? "//" + tenant + ".imagoapp.com/api/v3" : "/api/v3";
 
 app = angular.module('app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp', 'imago.widgets.angular']);
 
-app.run(function($rootScope) {
-  return $rootScope.jsVersion = true;
+app.run(function($rootScope, $window) {
+  var onMouseWheelStart, onResizeStart, onScrollStart, w;
+  $rootScope.jsVersion = true;
+  w = angular.element($window);
+  onResizeStart = (function(_this) {
+    return function(e) {
+      if (_this.resizeing) {
+        return;
+      }
+      $rootScope.$broadcast('resizestart');
+      _this.resizeing = true;
+      return w.one('resizestop', function() {
+        return _this.resizeing = false;
+      });
+    };
+  })(this);
+  onScrollStart = (function(_this) {
+    return function(e) {
+      if (_this.scrolling) {
+        return;
+      }
+      $rootScope.$broadcast('scrollstart');
+      _this.scrolling = true;
+      return w.one('scrollstop', function() {
+        return _this.scrolling = false;
+      });
+    };
+  })(this);
+  onMouseWheelStart = (function(_this) {
+    return function(e) {
+      if (_this.isMouseWheeling) {
+        return;
+      }
+      $rootScope.$broadcast('mousewheelstart');
+      _this.isMouseWheeling = true;
+      return w.one('mousewheelstop', function() {
+        return _this.isMouseWheeling = false;
+      });
+    };
+  })(this);
+  w.on('resize', onResizeStart);
+  w.on('resize', _.debounce(((function(_this) {
+    return function() {
+      return $rootScope.$broadcast('resizestop');
+    };
+  })(this)), 200));
+  w.on('resize', _.throttle(((function(_this) {
+    return function() {
+      return $rootScope.$broadcast('resizelimit');
+    };
+  })(this)), 150));
+  w.on('scroll', onScrollStart);
+  w.on('scroll', _.debounce(((function(_this) {
+    return function() {
+      return $rootScope.$broadcast('scrollstop');
+    };
+  })(this)), 200));
+  w.on('scroll', _.throttle(((function(_this) {
+    return function() {
+      return $rootScope.$broadcast('scrolllimit');
+    };
+  })(this)), 150));
+  w.on('mousewheel', onMouseWheelStart);
+  w.on('mousewheel', _.debounce(((function(_this) {
+    return function() {
+      return $rootScope.$broadcast('mousewheelstop');
+    };
+  })(this)), 200));
+  return w.on('mousewheel', _.throttle(((function(_this) {
+    return function() {
+      return $rootScope.$broadcast('mousewheellimit');
+    };
+  })(this)), 150));
 });
 
 app.config(function($routeProvider, $httpProvider, $sceProvider, $locationProvider) {

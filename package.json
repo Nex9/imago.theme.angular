@@ -18,20 +18,17 @@
         "gulp-concat": "*",
         "gulp-if": "*",
         "gulp-imagemin": "*",
-        "gulp-inject": "*",
         "gulp-jade": "*",
         "gulp-minify-css": "*",
         "gulp-minify-html": "*",
         "gulp-ngmin": "*",
         "gulp-order": "*",
         "gulp-plumber": "*",
-        "gulp-rename": "*",
         "gulp-rev": "*",
         "gulp-sass": "*",
         "gulp-stylus": "*",
         "gulp-uglify": "*",
         "gulp-uncss": "*",
-        "gulp-usemin": "*",
         "gulp-util": "*",
         "gulp-watch": "*",
         "gutil": "*",
@@ -43,8 +40,9 @@
         "gulp-clean": "*",
         "gulp-if": "*",
         "gulp-notify": "*",
-        "gulp-resolve-dependencies": "*",
+        "gulp-protractor": "0.0.7",
         "gulp-ruby-sass": "*",
-        "node-notifier": "*"
+        "node-notifier": "*",
+        "protractor": "^0.24.2"
     }
 }

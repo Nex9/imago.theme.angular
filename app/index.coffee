@@ -12,8 +12,39 @@ app = angular.module 'app', [
   'imago.widgets.angular'
 ]
 
-app.run ($rootScope) ->
+app.run ($rootScope, $window) ->
   $rootScope.jsVersion = true
+  w = angular.element($window)
+
+  onResizeStart = (e) =>
+    return if @resizeing
+    $rootScope.$broadcast 'resizestart'
+    @resizeing = true
+    w.one 'resizestop', => @resizeing = false
+
+  onScrollStart = (e) =>
+    return if @scrolling
+    $rootScope.$broadcast 'scrollstart'
+    @scrolling = true
+    w.one 'scrollstop', => @scrolling = false
+
+  onMouseWheelStart = (e) =>
+    return if @isMouseWheeling
+    $rootScope.$broadcast 'mousewheelstart'
+    @isMouseWheeling = true
+    w.one 'mousewheelstop', => @isMouseWheeling = false
+
+  w.on 'resize', onResizeStart
+  w.on 'resize', _.debounce ( => $rootScope.$broadcast('resizestop') ),  200
+  w.on 'resize', _.throttle ( => $rootScope.$broadcast('resizelimit') ), 150
+
+  w.on 'scroll', onScrollStart
+  w.on 'scroll', _.debounce ( => $rootScope.$broadcast('scrollstop') ),  200
+  w.on 'scroll', _.throttle ( => $rootScope.$broadcast('scrolllimit') ), 150
+
+  w.on 'mousewheel', onMouseWheelStart
+  w.on 'mousewheel', _.debounce ( => $rootScope.$broadcast('mousewheelstop') ),  200
+  w.on 'mousewheel', _.throttle ( => $rootScope.$broadcast('mousewheellimit') ), 150
 
 app.config ($routeProvider, $httpProvider, $sceProvider, $locationProvider) ->
 

@@ -10,24 +10,24 @@ gulp            = require 'gulp'
 gulpif          = require 'gulp-if'
 
 imagemin        = require 'gulp-imagemin'
-inject          = require 'gulp-inject'
+
 jade            = require 'gulp-jade'
 minifyCSS       = require 'gulp-minify-css'
 ngmin           = require 'gulp-ngmin'
-notify          = require 'gulp-notify'
+
+protractor      = require("gulp-protractor").protractor
+webdriver_standalone = require("gulp-protractor").webdriver_standalone
+
 order           = require 'gulp-order'
 plumber         = require 'gulp-plumber'
 prefix          = require 'gulp-autoprefixer'
 runSequence     = require 'run-sequence'
-# stylus          = require 'gulp-stylus'
+
 sass            = require 'gulp-ruby-sass'
 templateCache   = require 'gulp-angular-templatecache'
-resolveDependencies  = require 'gulp-resolve-dependencies'
 uglify          = require 'gulp-uglify'
 uncss           = require 'gulp-uncss'
-usemin          = require 'gulp-usemin'
 watch           = require 'gulp-watch'
-rename          = require 'gulp-rename'
 gutil           = require 'gulp-util'
 modRewrite      = require 'connect-modrewrite'
 Notification    = require 'node-notifier'
@@ -123,7 +123,6 @@ gulp.task "coffee", ->
       bare: true
     ).on('error', reportError)
     .pipe coffeelint()
-    # .pipe rename extname: ""
     .pipe concat targets.coffee
     .pipe gulp.dest dest
 
@@ -206,6 +205,19 @@ gulp.task "js", ["scripts", "coffee", "jade"], (next) ->
 gulp.task "prepare", ["js"], ->
   generateSass()
   combineJs()
+
+gulp.task "webdriver_standalone", webdriver_standalone
+
+gulp.task "test", ["webdriver_standalone"], ->
+  gulp.src(["test/e2e/**/*.spec.coffee"])
+    .pipe(protractor(
+      configFile: "test/protractor.config.js"
+      args: [
+        "--baseUrl"
+        "http://localhost:3002"
+      ]
+    )).on "error", (e) ->
+      reportError e
 
 gulp.task "build", ["js"], ->
   generateSassWMaps()

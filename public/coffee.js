@@ -51,38 +51,26 @@ onLoad = (function() {
       };
     })(this);
     w.on('resize', onResizeStart);
-    w.on('resize', _.debounce(((function(_this) {
-      return function() {
-        return $rootScope.$broadcast('resizestop');
-      };
-    })(this)), 200));
-    w.on('resize', _.throttle(((function(_this) {
-      return function() {
-        return $rootScope.$broadcast('resizelimit');
-      };
-    })(this)), 150));
+    w.on('resize', _.debounce((function() {
+      return $rootScope.$broadcast('resizestop');
+    }), 200));
+    w.on('resize', _.throttle((function() {
+      return $rootScope.$broadcast('resizelimit');
+    }), 150));
     w.on('scroll', onScrollStart);
-    w.on('scroll', _.debounce(((function(_this) {
-      return function() {
-        return $rootScope.$broadcast('scrollstop');
-      };
-    })(this)), 200));
-    w.on('scroll', _.throttle(((function(_this) {
-      return function() {
-        return $rootScope.$broadcast('scrolllimit');
-      };
-    })(this)), 150));
+    w.on('scroll', _.debounce((function() {
+      return $rootScope.$broadcast('scrollstop');
+    }), 200));
+    w.on('scroll', _.throttle((function() {
+      return $rootScope.$broadcast('scrolllimit');
+    }), 150));
     w.on('mousewheel', onMouseWheelStart);
-    w.on('mousewheel', _.debounce(((function(_this) {
-      return function() {
-        return $rootScope.$broadcast('mousewheelstop');
-      };
-    })(this)), 200));
-    w.on('mousewheel', _.throttle(((function(_this) {
-      return function() {
-        return $rootScope.$broadcast('mousewheellimit');
-      };
-    })(this)), 150));
+    w.on('mousewheel', _.debounce((function() {
+      return $rootScope.$broadcast('mousewheelstop');
+    }), 200));
+    w.on('mousewheel', _.throttle((function() {
+      return $rootScope.$broadcast('mousewheellimit');
+    }), 150));
   }
 
   return onLoad;

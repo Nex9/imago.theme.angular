@@ -38,16 +38,16 @@ class onLoad extends Run
       w.one 'mousewheelstop', => @isMouseWheeling = false
 
     w.on 'resize', onResizeStart
-    w.on 'resize', _.debounce ( => $rootScope.$broadcast('resizestop') ),  200
-    w.on 'resize', _.throttle ( => $rootScope.$broadcast('resizelimit') ), 150
+    w.on 'resize', _.debounce ( -> $rootScope.$broadcast 'resizestop' ),  200
+    w.on 'resize', _.throttle ( -> $rootScope.$broadcast 'resizelimit' ), 150
 
     w.on 'scroll', onScrollStart
-    w.on 'scroll', _.debounce ( => $rootScope.$broadcast('scrollstop') ),  200
-    w.on 'scroll', _.throttle ( => $rootScope.$broadcast('scrolllimit') ), 150
+    w.on 'scroll', _.debounce ( -> $rootScope.$broadcast 'scrollstop' ),  200
+    w.on 'scroll', _.throttle ( -> $rootScope.$broadcast 'scrolllimit' ), 150
 
     w.on 'mousewheel', onMouseWheelStart
-    w.on 'mousewheel', _.debounce ( => $rootScope.$broadcast('mousewheelstop') ),  200
-    w.on 'mousewheel', _.throttle ( => $rootScope.$broadcast('mousewheellimit') ), 150
+    w.on 'mousewheel', _.debounce ( -> $rootScope.$broadcast 'mousewheelstop' ),  200
+    w.on 'mousewheel', _.throttle ( -> $rootScope.$broadcast 'mousewheellimit' ), 150
 
 
 class Setup extends Config

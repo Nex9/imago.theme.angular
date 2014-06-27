@@ -1,10 +1,7 @@
-app.controller 'Home', ($scope, $http, imagoUtils, imagoPanel, $location) ->
+class Home extends Controller
 
-  class Home
-    constructor: ->
+  constructor: ($scope, $http, imagoUtils, imagoPanel, $location) ->
 
-      imagoPanel.getData('/home').then (response) =>
-        # console.log response[0].items
-        $scope.assets = response[0].items
-
-  new Home
+    imagoPanel.getData('/home').then (response) =>
+      # console.log response[0].items
+      $scope.assets = response[0].items

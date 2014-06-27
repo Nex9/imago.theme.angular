@@ -1,19 +1,17 @@
 browserSync     = require 'browser-sync'
 
-clean           = require 'gulp-clean'
 coffee          = require 'gulp-coffee'
 coffeelint      = require 'gulp-coffeelint'
 
 concat          = require 'gulp-concat'
 
 gulp            = require 'gulp'
-gulpif          = require 'gulp-if'
 
 imagemin        = require 'gulp-imagemin'
 
 jade            = require 'gulp-jade'
-minifyCSS       = require 'gulp-minify-css'
 ngmin           = require 'gulp-ngmin'
+ngClassify      = require('gulp-ng-classify')
 
 protractor      = require("gulp-protractor").protractor
 webdriver_standalone = require("gulp-protractor").webdriver_standalone
@@ -21,12 +19,10 @@ webdriver_standalone = require("gulp-protractor").webdriver_standalone
 order           = require 'gulp-order'
 plumber         = require 'gulp-plumber'
 prefix          = require 'gulp-autoprefixer'
-runSequence     = require 'run-sequence'
 
 sass            = require 'gulp-ruby-sass'
 templateCache   = require 'gulp-angular-templatecache'
 uglify          = require 'gulp-uglify'
-uncss           = require 'gulp-uncss'
 watch           = require 'gulp-watch'
 gutil           = require 'gulp-util'
 modRewrite      = require 'connect-modrewrite'
@@ -50,7 +46,6 @@ targets =
   modules : 'modules.js'
 
 paths =
-  stylus: ['css/index.styl']
   sass: ['css/index.sass']
   coffee: [
     "!#{src}/bower_components/**/*.coffee"
@@ -67,28 +62,10 @@ paths =
     "#{src}/bower_components/angular-touch/angular-touch.js"
     "#{src}/bower_components/angular-route/angular-route.js"
     "#{src}/bower_components/underscore/underscore.js"
-    "#{src}/bower_components/angular-underscore/angular-underscore.js"
     "#{src}/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
   ]
 
 # END Defaults
-
-# customNotify = notify.withReporter (options, callback) ->
-#   # console.log options
-#   console.log "Title:", options.title
-#   console.log "Message:", options.message
-#   callback()
-
-# generateCss = (production = false) ->
-#   gulp.src paths.stylus
-#     .pipe plumber
-#       errorHandler: reportError
-#     .pipe stylus({errors: true, use: ['nib'], set:["compress"]})
-#     .pipe prefix("last 1 version")
-#     .pipe concat targets.css
-#     .pipe gulp.dest dest
-
-# gulp.task "stylus", generateCss
 
 generateSass = () ->
   gulp.src paths.sass
@@ -121,6 +98,10 @@ gulp.task "coffee", ->
     .pipe plumber(
       errorHandler: reportError
     )
+    .pipe ngClassify(
+      factory:
+        format: 'camelCase'
+      )
     .pipe coffee(
       bare: true
     ).on('error', reportError)
@@ -156,32 +137,14 @@ gulp.task "images", ->
     .pipe imagemin()
     .pipe gulp.dest("#{dest}/static")
 
-gulp.task "uncss", ->
-  gulp.src("#{dest}/application.css")
-    .pipe uncss(html: ["index.html"])
-    .pipe minifyCSS(keepSpecialComments: 0)
-    .pipe gulp.dest(destinationFolder)
-
-gulp.task "usemin", ->
-  gulp.src("#{src}/index.html")
-    .pipe usemin(
-      css: [
-        minifyCSS()
-      ]
-      js: [
-        ngmin()
-        uglify()
-      ])
-    .pipe gulp.dest(destinationFolder)
-    .pipe notify
-      message: "Build complete",
-      title: "gulp"
-
 minify = ->
   gulp.src "#{dest}/#{targets.js}"
     .pipe uglify()
-    .pipe concat targets.jsMin
+    .pipe ngmin()
+    .pipe concat targets.js
     .pipe gulp.dest dest
+
+gulp.task "minify", ['build'], minify
 
 combineJs = (production = false) ->
   # We need to rethrow jade errors to see them
@@ -204,9 +167,9 @@ gulp.task "combine", combineJs
 gulp.task "js", ["scripts", "coffee", "jade"], (next) ->
   next()
 
-gulp.task "prepare", ["js"], ->
-  generateSass()
-  combineJs()
+# gulp.task "prepare", ["js"], ->
+#   generateSass()
+#   combineJs()
 
 gulp.task "webdriver_standalone", webdriver_standalone
 
@@ -246,9 +209,9 @@ gulp.task "browser-sync", ->
     debugInfo: false
     notify: false
 
-gulp.task "watch", ["prepare", "browser-sync"], ->
+gulp.task "watch", ["browser-sync"], ->
   watch
-    glob: "./css/*.sass"
+    glob: "css/*.sass"
   , ->
     gulp.start('sass')
 
@@ -282,18 +245,6 @@ reportError = (err) ->
     message: err.message
   gutil.log err.message
   @emit 'end'
-
-
-# gulp.task "build", ->
-
-#   runSequence [
-#         "templates"
-#         "concat"
-#         "styles"
-#         "images"
-#     ],
-#     "copy",
-#     "usemin"
 
 ## End essentials tasks
 

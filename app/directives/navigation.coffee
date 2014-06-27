@@ -1,37 +1,42 @@
-app.directive 'navigation', () ->
-  replace: true
-  transclude: true
-  restrict: 'AE'
-  templateUrl: '/app/directives/views/navigation.html'
-  controller: ($scope, $element, $attrs, $transclude, $location, $timeout) ->
-    links = $element.find("a")
-    onClass = "active"
-    currentLink = undefined
-    urlMap = {}
+class Navigation extends Directive
 
-    for l, i in links
-      link = angular.element(links[i])
-      url = link.attr("href")
-      if $location.$$html5
-        urlMap[url] = link
-      else
-        urlMap[url.replace("/^#[^/]*/", "")] = link
+  constructor: ->
 
-    $scope.$on "$routeChangeStart", ->
-      path = $location.path()
-      pathLink = urlMap[$location.path()]
-      # console.log pathLink[0]
-      if pathLink
-        currentLink.removeClass onClass  if currentLink
-        currentLink = pathLink
-        currentLink.addClass onClass
-      else if path is "/" and currentLink
-        currentLink.removeClass onClass
+    return {
+      replace: true
+      transclude: true
+      restrict: 'AE'
+      templateUrl: '/app/directives/views/navigation.html'
+      controller: ($scope, $element, $attrs, $transclude, $location, $timeout) ->
+        links = $element.find("a")
+        onClass = "active"
+        currentLink = undefined
+        urlMap = {}
 
-    # $timeout(->
-    #   $scope.showNav = true;
-    # , 300)
-    # $scope.showNav = true
+        for l, i in links
+          link = angular.element(links[i])
+          url = link.attr("href")
+          if $location.$$html5
+            urlMap[url] = link
+          else
+            urlMap[url.replace("/^#[^/]*/", "")] = link
 
-    # $scope.hideNav = () ->
-    #   $scope.showNav = false;
+        $scope.$on "$routeChangeStart", ->
+          path = $location.path()
+          pathLink = urlMap[$location.path()]
+          # console.log pathLink[0]
+          if pathLink
+            currentLink.removeClass onClass  if currentLink
+            currentLink = pathLink
+            currentLink.addClass onClass
+          else if path is "/" and currentLink
+            currentLink.removeClass onClass
+
+        # $timeout(->
+        #   $scope.showNav = true;
+        # , 300)
+        # $scope.showNav = true
+
+        # $scope.hideNav = () ->
+        #   $scope.showNav = false;
+    }

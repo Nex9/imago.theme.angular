@@ -9,93 +9,86 @@ app = angular.module 'app', [
   'ngAnimate'
   'ngTouch'
   'templatesApp'
-  'angular-underscore'
   'imago.widgets.angular'
 ]
 
-app.run ($rootScope, $window) ->
+class onLoad extends Run
 
-  class Run
+  constructor : ($rootScope, $window) ->
 
-    constructor : ->
+    w = angular.element $window
 
-      @w = angular.element $window
-
-      @w.on 'resize', @onResizeStart
-      @w.on 'resize', _.debounce ( => $rootScope.$broadcast('resizestop') ),  200
-      @w.on 'resize', _.throttle ( => $rootScope.$broadcast('resizelimit') ), 150
-
-      @w.on 'scroll', @onScrollStart
-      @w.on 'scroll', _.debounce ( => $rootScope.$broadcast('scrollstop') ),  200
-      @w.on 'scroll', _.throttle ( => $rootScope.$broadcast('scrolllimit') ), 150
-
-      @w.on 'mousewheel', @onMouseWheelStart
-      @w.on 'mousewheel', _.debounce ( => $rootScope.$broadcast('mousewheelstop') ),  200
-      @w.on 'mousewheel', _.throttle ( => $rootScope.$broadcast('mousewheellimit') ), 150
-
-    onResizeStart : (e) =>
+    onResizeStart = (e) =>
       return if @resizeing
       $rootScope.$broadcast 'resizestart'
       @resizeing = true
-      @w.one 'resizestop', => @resizeing = false
+      w.one 'resizestop', => @resizeing = false
 
-    onScrollStart : (e) =>
+    onScrollStart = (e) =>
       # console.log 'start scrolling', @
       return if @scrolling
       $rootScope.$broadcast 'scrollstart'
       @scrolling = true
-      @w.one 'scrollstop', => @scrolling = false
+      w.one 'scrollstop', => @scrolling = false
 
-    onMouseWheelStart : (e) =>
+    onMouseWheelStart = (e) =>
       return if @isMouseWheeling
       $rootScope.$broadcast 'mousewheelstart'
       @isMouseWheeling = true
-      @w.one 'mousewheelstop', => @isMouseWheeling = false
+      w.one 'mousewheelstop', => @isMouseWheeling = false
 
-  new Run
+    w.on 'resize', onResizeStart
+    w.on 'resize', _.debounce ( => $rootScope.$broadcast('resizestop') ),  200
+    w.on 'resize', _.throttle ( => $rootScope.$broadcast('resizelimit') ), 150
 
-app.config ($routeProvider, $httpProvider, $sceProvider, $locationProvider) ->
+    w.on 'scroll', onScrollStart
+    w.on 'scroll', _.debounce ( => $rootScope.$broadcast('scrollstop') ),  200
+    w.on 'scroll', _.throttle ( => $rootScope.$broadcast('scrolllimit') ), 150
 
-  class Config
-    constructor: ->
+    w.on 'mousewheel', onMouseWheelStart
+    w.on 'mousewheel', _.debounce ( => $rootScope.$broadcast('mousewheelstop') ),  200
+    w.on 'mousewheel', _.throttle ( => $rootScope.$broadcast('mousewheellimit') ), 150
 
-      $sceProvider.enabled false
 
-      # http defaults config START
-      $httpProvider.defaults.cache = true
-      $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'
-      $httpProvider.defaults.headers.common['NexClient']    = 'public'
-      # http defaults config ENDS
+class Setup extends Config
 
-      $locationProvider.html5Mode true
+  constructor: ($routeProvider, $httpProvider, $sceProvider, $locationProvider) ->
 
-      # $routeProvider
-      #   .when '/',
-      #     templateUrl: '/app/views/home.html'
-      #     controller: 'Home'
-      #   .when '/exhibitions',
-      #     templateUrl: '/app/views/artists.html'
-      #     controller: 'Artists'
-      #   .when '/exhibitions/:exhibition',
-      #     templateUrl: '/app/views/exhibitionView.html'
-      #     controller: 'artistView'
-      #   .when '/artists',
-      #     templateUrl: '/app/views/artists.html'
-      #     controller: 'Artists'
-      #   .when '/artists/:artist',
-      #     templateUrl: '/app/views/artistView.html'
-      #     controller: 'artistView'
-      #   .when '/news',
-      #     templateUrl: '/app/views/news.html'
-      #     controller: 'News'
-      #   .when '/about',
-      #     templateUrl: '/app/views/about.html'
-      #     controller: 'About'
-      #   .when '/publications',
-      #     templateUrl: '/app/views/publications.html'
-      #     controller: 'Artists'
-      #   .when '/contact',
-      #     templateUrl: '/app/views/contact.html'
-      #     controller: 'Contact'
+    $sceProvider.enabled false
 
-  new Config
+    # http defaults config START
+    $httpProvider.defaults.cache = true
+    $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'
+    $httpProvider.defaults.headers.common['NexClient']    = 'public'
+    # http defaults config ENDS
+
+    $locationProvider.html5Mode true
+
+    # $routeProvider
+    #   .when '/',
+    #     templateUrl: '/app/views/home.html'
+    #     controller: 'Home'
+    #   .when '/exhibitions',
+    #     templateUrl: '/app/views/artists.html'
+    #     controller: 'Artists'
+    #   .when '/exhibitions/:exhibition',
+    #     templateUrl: '/app/views/exhibitionView.html'
+    #     controller: 'artistView'
+    #   .when '/artists',
+    #     templateUrl: '/app/views/artists.html'
+    #     controller: 'Artists'
+    #   .when '/artists/:artist',
+    #     templateUrl: '/app/views/artistView.html'
+    #     controller: 'artistView'
+    #   .when '/news',
+    #     templateUrl: '/app/views/news.html'
+    #     controller: 'News'
+    #   .when '/about',
+    #     templateUrl: '/app/views/about.html'
+    #     controller: 'About'
+    #   .when '/publications',
+    #     templateUrl: '/app/views/publications.html'
+    #     controller: 'Artists'
+    #   .when '/contact',
+    #     templateUrl: '/app/views/contact.html'
+    #     controller: 'Contact'

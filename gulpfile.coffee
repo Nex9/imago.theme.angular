@@ -184,6 +184,10 @@ gulp.task "test", ["webdriver_standalone"], ->
     )).on "error", (e) ->
       reportError e
 
+gulp.task "prepare", ["js"], ->
+  generateSass()
+  combineJs()
+
 gulp.task "build", ["js"], ->
   generateSassWMaps()
   combineJs()
@@ -209,24 +213,24 @@ gulp.task "browser-sync", ->
     debugInfo: false
     notify: false
 
-gulp.task "watch", ["browser-sync"], ->
+gulp.task "watch", ["prepare", "browser-sync"], ->
   watch
-    glob: "css/*.sass"
+    glob: "css/*.sass", emitOnGlob: false
   , ->
     gulp.start('sass')
 
   watch
-    glob: paths.jade
+    glob: paths.jade, emitOnGlob: false
   , ->
     gulp.start('jade')
 
   watch
-    glob: paths.js
+    glob: paths.js, emitOnGlob: false
   , ->
     gulp.start('scripts')
 
   watch
-    glob: paths.coffee
+    glob: paths.coffee, emitOnGlob: false
   , ->
     gulp.start('coffee')
 
@@ -234,7 +238,7 @@ gulp.task "watch", ["browser-sync"], ->
   sources = ("#{dest}/#{file}" for file in files)
 
   watch
-    glob: sources
+    glob: sources, emitOnGlob: false
   , ->
     gulp.start('combine')
 

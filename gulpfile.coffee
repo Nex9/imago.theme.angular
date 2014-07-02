@@ -230,6 +230,11 @@ gulp.task 'watch', ['prepare', 'browser-sync'], ->
     gulp.start('scripts')
 
   watch
+    glob: "#{src}/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js", emitOnGlob: false
+  , ->
+    gulp.start('scripts')
+
+  watch
     glob: paths.coffee, emitOnGlob: false
   , ->
     gulp.start('coffee')

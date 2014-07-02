@@ -28420,6 +28420,19 @@ host = data === 'online' ? "//" + tenant + ".imagoapp.com/api/v3" : "/api/v3";
 
 app = angular.module('app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp', 'imago.widgets.angular']);
 
+Setup = (function() {
+  function Setup($routeProvider, $httpProvider, $sceProvider, $locationProvider) {
+    $sceProvider.enabled(false);
+    $httpProvider.defaults.cache = true;
+    $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
+    $httpProvider.defaults.headers.common['NexClient'] = 'public';
+    $locationProvider.html5Mode(true);
+  }
+
+  return Setup;
+
+})();
+
 onLoad = (function() {
   function onLoad($rootScope, $window) {
     var onMouseWheelStart, onResizeStart, onScrollStart, w;
@@ -28487,22 +28500,9 @@ onLoad = (function() {
 
 })();
 
-Setup = (function() {
-  function Setup($routeProvider, $httpProvider, $sceProvider, $locationProvider) {
-    $sceProvider.enabled(false);
-    $httpProvider.defaults.cache = true;
-    $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
-    $httpProvider.defaults.headers.common['NexClient'] = 'public';
-    $locationProvider.html5Mode(true);
-  }
-
-  return Setup;
-
-})();
+angular.module('app').config(['$routeProvider', '$httpProvider', '$sceProvider', '$locationProvider', Setup]);
 
 angular.module('app').run(['$rootScope', '$window', onLoad]);
-
-angular.module('app').config(['$routeProvider', '$httpProvider', '$sceProvider', '$locationProvider', Setup]);
 
 var Home;
 

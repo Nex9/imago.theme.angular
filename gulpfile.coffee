@@ -74,7 +74,7 @@ generateSass = () ->
     .pipe sass
       sourcemap: true
       trace: true
-    .pipe prefix("last 2 versions")
+    .pipe prefix 'last 2 versions'
     .pipe concat targets.css
     .pipe gulp.dest dest
     .pipe browserSync.reload({stream:true})
@@ -86,14 +86,14 @@ generateSassWMaps = () ->
     .pipe sass
       sourcemap: false
       style: 'compressed'
-    .pipe prefix("last 2 versions")
+    .pipe prefix 'last 2 versions'
     .pipe concat targets.css
     .pipe gulp.dest dest
 
 
-gulp.task "sass", generateSass
+gulp.task 'sass', generateSass
 
-gulp.task "coffee", ->
+gulp.task 'coffee', ->
   gulp.src paths.coffee
     .pipe plumber(
       errorHandler: reportError
@@ -109,7 +109,7 @@ gulp.task "coffee", ->
     .pipe concat targets.coffee
     .pipe gulp.dest dest
 
-gulp.task "jade", ->
+gulp.task 'jade', ->
   YOUR_LOCALS = {};
   gulp.src paths.jade
     .pipe plumber(
@@ -119,12 +119,12 @@ gulp.task "jade", ->
     .pipe templateCache(
       standalone: true
       root: "/#{src}/"
-      module: "templatesApp"
+      module: 'templatesApp'
     )
     .pipe concat targets.jade
     .pipe gulp.dest dest
 
-gulp.task "scripts", ->
+gulp.task 'scripts', ->
   gulp.src paths.libs
     .pipe plumber(
       errorHandler: reportError
@@ -132,7 +132,7 @@ gulp.task "scripts", ->
     .pipe concat targets.scripts
     .pipe gulp.dest dest
 
-gulp.task "images", ->
+gulp.task 'images', ->
   gulp.src("#{src}/static/*.*")
     .pipe imagemin()
     .pipe gulp.dest("#{dest}/static")
@@ -144,7 +144,7 @@ minify = ->
     .pipe concat targets.js
     .pipe gulp.dest dest
 
-gulp.task "minify", ['build'], minify
+gulp.task 'minify', ['build'], minify
 
 combineJs = (production = false) ->
   # We need to rethrow jade errors to see them
@@ -162,47 +162,47 @@ combineJs = (production = false) ->
     .pipe gulp.dest dest
     .pipe browserSync.reload({stream:true})
 
-gulp.task "combine", combineJs
+gulp.task 'combine', combineJs
 
-gulp.task "js", ["scripts", "coffee", "jade"], (next) ->
+gulp.task 'js', ['scripts', 'coffee', 'jade'], (next) ->
   next()
 
 # gulp.task "prepare", ["js"], ->
 #   generateSass()
 #   combineJs()
 
-gulp.task "webdriver_standalone", webdriver_standalone
+gulp.task 'webdriver_standalone', webdriver_standalone
 
-gulp.task "test", ["webdriver_standalone"], ->
-  gulp.src(["test/e2e/**/*.spec.coffee"])
+gulp.task 'test', ['webdriver_standalone'], ->
+  gulp.src(['test/e2e/**/*.spec.coffee'])
     .pipe(protractor(
-      configFile: "test/protractor.config.js"
+      configFile: 'test/protractor.config.js'
       args: [
-        "--baseUrl"
-        "http://localhost:3002"
+        '--baseUrl'
+        'http://localhost:3002'
       ]
-    )).on "error", (e) ->
+    )).on 'error', (e) ->
       reportError e
 
-gulp.task "prepare", ["js"], ->
+gulp.task 'prepare', ['js'], ->
   generateSass()
   combineJs()
 
-gulp.task "build", ["js"], ->
+gulp.task 'build', ['js'], ->
   generateSassWMaps()
   combineJs()
 
-gulp.task "b", ["build"]
+gulp.task 'b', ['build']
 
-gulp.task "deploy", ["build"], ->
-  exec "deploy .", (error, stdout, stderr) ->
-    console.log "result: " + stdout
-    console.log "exec error: " + error  if error isnt null
+gulp.task 'deploy', ['build'], ->
+  exec 'deploy .', (error, stdout, stderr) ->
+    console.log 'result: ' + stdout
+    console.log 'exec error: ' + error  if error isnt null
 
 
 ## Essentials Task
 
-gulp.task "browser-sync", ->
+gulp.task 'browser-sync', ->
   browserSync.init ["#{dest}/index.html"],
     server:
       baseDir: "#{dest}"
@@ -213,9 +213,9 @@ gulp.task "browser-sync", ->
     debugInfo: false
     notify: false
 
-gulp.task "watch", ["prepare", "browser-sync"], ->
+gulp.task 'watch', ['prepare', 'browser-sync'], ->
   watch
-    glob: "css/*.sass", emitOnGlob: false
+    glob: 'css/*.sass', emitOnGlob: false
   , ->
     gulp.start('sass')
 
@@ -252,4 +252,4 @@ reportError = (err) ->
 
 ## End essentials tasks
 
-gulp.task "default", ["watch"]
+gulp.task 'default', ['watch']

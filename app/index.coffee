@@ -5,8 +5,8 @@ debug      = true
 host       = if (data is 'online') then "//#{tenant}.imagoapp.com/api/v3" else "/api/v3"
 
 app = angular.module 'app', [
-  'ngRoute'
   'ngAnimate'
+  'ui.router'
   'ngTouch'
   'templatesApp'
   'imago.widgets.angular'
@@ -15,7 +15,7 @@ app = angular.module 'app', [
 
 class Setup extends Config
 
-  constructor: ($routeProvider, $httpProvider, $sceProvider, $locationProvider) ->
+  constructor: ($httpProvider, $sceProvider, $locationProvider, $stateProvider, $urlRouterProvider) ->
 
     $sceProvider.enabled false
 
@@ -27,34 +27,31 @@ class Setup extends Config
 
     $locationProvider.html5Mode true
 
-    # $routeProvider
-    #   .when '/',
+    $urlRouterProvider.otherwise '/'
+
+    # $stateProvider
+    #   .state 'home',
+    #     url: '/'
     #     templateUrl: '/app/views/home.html'
-    #     controller: 'Home'
-    #   .when '/exhibitions',
-    #     templateUrl: '/app/views/artists.html'
-    #     controller: 'Artists'
-    #   .when '/exhibitions/:exhibition',
-    #     templateUrl: '/app/views/exhibitionView.html'
-    #     controller: 'artistView'
-    #   .when '/artists',
-    #     templateUrl: '/app/views/artists.html'
-    #     controller: 'Artists'
-    #   .when '/artists/:artist',
-    #     templateUrl: '/app/views/artistView.html'
-    #     controller: 'artistView'
-    #   .when '/news',
-    #     templateUrl: '/app/views/news.html'
-    #     controller: 'News'
-    #   .when '/about',
-    #     templateUrl: '/app/views/about.html'
-    #     controller: 'About'
-    #   .when '/publications',
-    #     templateUrl: '/app/views/publications.html'
-    #     controller: 'Artists'
-    #   .when '/contact',
-    #     templateUrl: '/app/views/contact.html'
-    #     controller: 'Contact'
+    #     controller: 'homeController'
+    #   .state 'settings',
+    #     url: '/settings'
+    #     templateUrl: '/app/views/settings.html'
+    #     controller: 'homeController'
+    #   .state 'settings.menu',
+    #     url: '/:menu'
+    #     views:
+    #       'menuSettings':
+    #         templateUrl: '/app/views/settings.menu.html'
+    #         controller: 'settingsMenuController'
+    #   .state 'trash',
+    #     url: '/trash'
+    #     templateUrl: '/app/views/trash.html'
+    #     controller: 'homeController'
+    #   .state 'search',
+    #     url: '/search/*parameter'
+    #     templateUrl: '/app/views/search.html'
+    #     controller: 'searchPageController'
 
 class onLoad extends Run
 

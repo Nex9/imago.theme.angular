@@ -60,7 +60,7 @@ paths =
     "#{src}/bower_components/angular/angular.js"
     "#{src}/bower_components/angular-animate/angular-animate.js"
     "#{src}/bower_components/angular-touch/angular-touch.js"
-    "#{src}/bower_components/angular-route/angular-route.js"
+    "#{src}/bower_components/angular-ui-router/release/angular-ui-router.js"
     "#{src}/bower_components/underscore/underscore.js"
     "#{src}/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
   ]
@@ -102,10 +102,10 @@ gulp.task 'coffee', ->
       factory:
         format: 'camelCase'
       )
+    .pipe coffeelint()
     .pipe coffee(
       bare: true
     ).on('error', reportError)
-    .pipe coffeelint()
     .pipe concat targets.coffee
     .pipe gulp.dest dest
 

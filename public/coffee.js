@@ -8,15 +8,16 @@ debug = true;
 
 host = data === 'online' ? "//" + tenant + ".imagoapp.com/api/v3" : "/api/v3";
 
-app = angular.module('app', ['ngRoute', 'ngAnimate', 'ngTouch', 'templatesApp', 'imago.widgets.angular']);
+app = angular.module('app', ['ngAnimate', 'ui.router', 'ngTouch', 'templatesApp', 'imago.widgets.angular']);
 
 Setup = (function() {
-  function Setup($routeProvider, $httpProvider, $sceProvider, $locationProvider) {
+  function Setup($httpProvider, $sceProvider, $locationProvider, $stateProvider, $urlRouterProvider) {
     $sceProvider.enabled(false);
     $httpProvider.defaults.cache = true;
     $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
     $httpProvider.defaults.headers.common['NexClient'] = 'public';
     $locationProvider.html5Mode(true);
+    $urlRouterProvider.otherwise('/');
   }
 
   return Setup;
@@ -90,7 +91,7 @@ onLoad = (function() {
 
 })();
 
-angular.module('app').config(['$routeProvider', '$httpProvider', '$sceProvider', '$locationProvider', Setup]);
+angular.module('app').config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]);
 
 angular.module('app').run(['$rootScope', '$window', onLoad]);
 
@@ -120,7 +121,7 @@ Navigation = (function() {
       transclude: true,
       restrict: 'AE',
       templateUrl: '/app/directives/views/navigation.html',
-      controller: function($scope, $element, $attrs, $transclude, $location, $timeout) {
+      controller: function($scope, $element, $attrs, $transclude, $location, $timeout, $urlRouter) {
         var currentLink, i, l, link, links, onClass, url, urlMap, _i, _len;
         links = $element.find("a");
         onClass = "active";
@@ -136,7 +137,7 @@ Navigation = (function() {
             urlMap[url.replace("/^#[^/]*/", "")] = link;
           }
         }
-        return $scope.$on("$routeChangeStart", function() {
+        return $scope.$on("$locationChangeSuccess", function() {
           var path, pathLink;
           path = $location.path();
           pathLink = urlMap[$location.path()];

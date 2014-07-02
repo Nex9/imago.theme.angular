@@ -7,7 +7,7 @@ class Navigation extends Directive
       transclude: true
       restrict: 'AE'
       templateUrl: '/app/directives/views/navigation.html'
-      controller: ($scope, $element, $attrs, $transclude, $location, $timeout) ->
+      controller: ($scope, $element, $attrs, $transclude, $location, $timeout, $urlRouter) ->
         links = $element.find("a")
         onClass = "active"
         currentLink = undefined
@@ -21,7 +21,7 @@ class Navigation extends Directive
           else
             urlMap[url.replace("/^#[^/]*/", "")] = link
 
-        $scope.$on "$routeChangeStart", ->
+        $scope.$on "$locationChangeSuccess", ->
           path = $location.path()
           pathLink = urlMap[$location.path()]
           # console.log pathLink[0]

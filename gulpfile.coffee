@@ -108,8 +108,6 @@ gulp.task 'coffee', ->
       controller:
         format: '*'
         prefix: ''
-      directive:
-        format: '*'
       factory:
         format: '*'
       filter:

@@ -99,8 +99,29 @@ gulp.task 'coffee', ->
       errorHandler: reportError
     )
     .pipe ngClassify(
+      animation:
+        format: '*'
+        prefix: ''
+      constant:
+        format: '*'
+        prefix: ''
+      controller:
+        format: '*'
+        prefix: ''
+      directive:
+        format: '*'
       factory:
-        format: 'camelCase'
+        format: '*'
+      filter:
+        format: '*'
+      provider:
+        format: '*'
+        prefix: ''
+      service:
+        format: '*'
+        prefix: ''
+      value:
+        format: '*'
       )
     .pipe coffeelint()
     .pipe coffee(

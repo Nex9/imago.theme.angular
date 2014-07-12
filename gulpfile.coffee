@@ -72,23 +72,13 @@ generateSass = () ->
     .pipe plumber
       errorHandler: reportError
     .pipe sass
-      sourcemap: true
+      quiet: true
       trace: true
     .pipe prefix 'last 2 versions'
     .pipe concat targets.css
+    .pipe plumber.stop()
     .pipe gulp.dest dest
     .pipe browserSync.reload({stream:true})
-
-generateSassWMaps = () ->
-  gulp.src paths.sass
-    .pipe plumber
-      errorHandler: reportError
-    .pipe sass
-      sourcemap: false
-      style: 'compressed'
-    .pipe prefix 'last 2 versions'
-    .pipe concat targets.css
-    .pipe gulp.dest dest
 
 
 gulp.task 'sass', generateSass
@@ -106,7 +96,6 @@ gulp.task 'coffee', ->
         format: '*'
         prefix: ''
       controller:
-        format: '*'
         prefix: ''
       factory:
         format: '*'
@@ -116,7 +105,6 @@ gulp.task 'coffee', ->
         format: '*'
         prefix: ''
       service:
-        format: '*'
         prefix: ''
       value:
         format: '*'
@@ -208,7 +196,7 @@ gulp.task 'prepare', ['js'], ->
   combineJs()
 
 gulp.task 'build', ['js'], ->
-  generateSassWMaps()
+  generateSass()
   combineJs()
 
 gulp.task 'b', ['build']

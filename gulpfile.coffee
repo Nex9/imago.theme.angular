@@ -73,7 +73,6 @@ generateSass = () ->
       errorHandler: reportError
     .pipe sass
       quiet: true
-      trace: true
     .pipe prefix 'last 2 versions'
     .pipe concat targets.css
     .pipe plumber.stop()

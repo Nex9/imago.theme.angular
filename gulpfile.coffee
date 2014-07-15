@@ -90,24 +90,26 @@ gulp.task 'coffee', ->
     )
     .pipe ngClassify(
       animation:
-        format: '*'
+        format: 'camelCase'
         prefix: ''
       constant:
-        format: '*'
+        format: 'camelCase'
         prefix: ''
       controller:
+        format: 'camelCase'
         suffix: ''
       factory:
-        format: '*'
+        format: 'camelCase'
       filter:
-        format: '*'
+        format: 'camelCase'
       provider:
-        format: '*'
+        format: 'camelCase'
         suffix: ''
       service:
+        format: 'camelCase'
         suffix: ''
       value:
-        format: '*'
+        format: 'camelCase'
       )
     .pipe coffeelint()
     .pipe coffee(

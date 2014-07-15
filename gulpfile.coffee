@@ -23,6 +23,7 @@ prefix          = require 'gulp-autoprefixer'
 sass            = require 'gulp-ruby-sass'
 templateCache   = require 'gulp-angular-templatecache'
 uglify          = require 'gulp-uglify'
+sourcemaps      = require 'gulp-sourcemaps'
 watch           = require 'gulp-watch'
 gutil           = require 'gulp-util'
 modRewrite      = require 'connect-modrewrite'
@@ -164,7 +165,9 @@ combineJs = (production = false) ->
   sources = files.map (file) -> "#{dest}/#{file}"
 
   gulp.src sources
+    .pipe sourcemaps.init()
     .pipe concat targets.js
+    .pipe sourcemaps.write('./maps')
     .pipe gulp.dest dest
     .pipe browserSync.reload({stream:true})
 

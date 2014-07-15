@@ -96,16 +96,16 @@ gulp.task 'coffee', ->
         format: '*'
         prefix: ''
       controller:
-        prefix: ''
+        suffix: ''
       factory:
         format: '*'
       filter:
         format: '*'
       provider:
         format: '*'
-        prefix: ''
+        suffix: ''
       service:
-        prefix: ''
+        suffix: ''
       value:
         format: '*'
       )

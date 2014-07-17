@@ -26,6 +26,7 @@
         "gulp-plumber": "*",
         "gulp-rev": "*",
         "gulp-sass": "*",
+        "gulp-sourcemaps": "*",
         "gulp-uglify": "*",
         "gulp-uncss": "*",
         "gulp-util": "*",

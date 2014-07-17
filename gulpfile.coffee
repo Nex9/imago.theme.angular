@@ -62,7 +62,7 @@ paths =
     "#{src}/bower_components/angular-animate/angular-animate.js"
     "#{src}/bower_components/angular-touch/angular-touch.js"
     "#{src}/bower_components/angular-ui-router/release/angular-ui-router.js"
-    "#{src}/bower_components/underscore/underscore.js"
+    "#{src}/bower_components/lodash/dist/lodash.js"
     "#{src}/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
   ]
 

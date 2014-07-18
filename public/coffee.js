@@ -110,7 +110,7 @@ Home = (function() {
 
 })();
 
-angular.module('app').controller('homeController', ['$scope', '$http', 'imagoUtils', 'imagoPanel', '$location', Home]);
+angular.module('app').controller('home', ['$scope', '$http', 'imagoUtils', 'imagoPanel', '$location', Home]);
 
 var Navigation;
 

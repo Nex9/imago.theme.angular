@@ -49,21 +49,19 @@ targets =
 paths =
   sass: ['css/index.sass']
   coffee: [
-    "!#{src}/bower_components/**/*.coffee"
     "#{src}/**/*.coffee"
   ]
   js: ["#{src}/scripts.js"]
   jade: [
-    "!#{src}/bower_components/**/*.jade"
     "#{src}/**/*.jade"
   ]
   libs: [
-    "#{src}/bower_components/angular/angular.js"
-    "#{src}/bower_components/angular-animate/angular-animate.js"
-    "#{src}/bower_components/angular-touch/angular-touch.js"
-    "#{src}/bower_components/angular-ui-router/release/angular-ui-router.js"
-    "#{src}/bower_components/lodash/dist/lodash.js"
-    "#{src}/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
+    "bower_components/angular/angular.js"
+    "bower_components/angular-animate/angular-animate.js"
+    "bower_components/angular-touch/angular-touch.js"
+    "bower_components/angular-ui-router/release/angular-ui-router.js"
+    "bower_components/lodash/dist/lodash.js"
+    "bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
   ]
 
 # END Defaults
@@ -241,7 +239,7 @@ gulp.task 'watch', ['prepare', 'browser-sync'], ->
     gulp.start('scripts')
 
   watch
-    glob: "#{src}/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js", emitOnGlob: false
+    glob: "bower_components/imago.widgets.angular/dist/imago.widgets.angular.js", emitOnGlob: false
   , ->
     gulp.start('scripts')
 

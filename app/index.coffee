@@ -33,25 +33,25 @@ class Setup extends Config
     #   .state 'home',
     #     url: '/'
     #     templateUrl: '/app/views/home.html'
-    #     controller: 'homeController'
+    #     controller: 'home'
     #   .state 'settings',
     #     url: '/settings'
     #     templateUrl: '/app/views/settings.html'
-    #     controller: 'homeController'
+    #     controller: 'home'
     #   .state 'settings.menu',
     #     url: '/:menu'
     #     views:
     #       'menuSettings':
     #         templateUrl: '/app/views/settings.menu.html'
-    #         controller: 'settingsMenuController'
+    #         controller: 'settingsMenu'
     #   .state 'trash',
     #     url: '/trash'
     #     templateUrl: '/app/views/trash.html'
-    #     controller: 'homeController'
+    #     controller: 'home'
     #   .state 'search',
     #     url: '/search/*parameter'
     #     templateUrl: '/app/views/search.html'
-    #     controller: 'searchPageController'
+    #     controller: 'searchPage'
 
 class onLoad extends Run
 

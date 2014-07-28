@@ -31,7 +31,7 @@ Notification    = require 'node-notifier'
 notifier        = new Notification()
 exec            = require('child_process').exec
 
-config          = require './lib/configGulp.coffee'
+config          = require './lib/config-gulp.coffee'
 
 
 # Defaults

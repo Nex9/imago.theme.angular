@@ -30,6 +30,8 @@ paths =
   ]
 
 configGulp =
+  src     : src
+  dest    : dest
   targets : targets
   paths   : paths
 

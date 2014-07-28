@@ -31,50 +31,24 @@ Notification    = require 'node-notifier'
 notifier        = new Notification()
 exec            = require('child_process').exec
 
+config          = require './lib/configGulp.coffee'
+
 
 # Defaults
 
 dest = 'public'
 src = 'app'
 
-targets =
-  css     : 'application.css'
-  js      : 'application.js'
-  jsMin   : 'application.min.js'
-  jade    : 'templates.js'
-  lib     : 'libs.js'
-  scripts : 'scripts.js'
-  coffee  : 'coffee.js'
-  modules : 'modules.js'
-
-paths =
-  sass: ['css/index.sass']
-  coffee: [
-    "#{src}/**/*.coffee"
-  ]
-  js: ["#{src}/scripts.js"]
-  jade: [
-    "#{src}/**/*.jade"
-  ]
-  libs: [
-    "bower_components/angular/angular.js"
-    "bower_components/angular-animate/angular-animate.js"
-    "bower_components/angular-touch/angular-touch.js"
-    "bower_components/angular-ui-router/release/angular-ui-router.js"
-    "bower_components/lodash/dist/lodash.js"
-    "bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
-  ]
-
 # END Defaults
 
 generateSass = () ->
-  gulp.src paths.sass
+  gulp.src config.paths.sass
     .pipe plumber
       errorHandler: reportError
     .pipe sass
       quiet: true
     .pipe prefix 'last 2 versions'
-    .pipe concat targets.css
+    .pipe concat config.targets.css
     .pipe plumber.stop()
     .pipe gulp.dest dest
     .pipe browserSync.reload({stream:true})
@@ -83,7 +57,7 @@ generateSass = () ->
 gulp.task 'sass', generateSass
 
 gulp.task 'coffee', ->
-  gulp.src paths.coffee
+  gulp.src config.paths.coffee
     .pipe plumber(
       errorHandler: reportError
     )
@@ -114,12 +88,12 @@ gulp.task 'coffee', ->
     .pipe coffee(
       bare: true
     ).on('error', reportError)
-    .pipe concat targets.coffee
+    .pipe concat config.targets.coffee
     .pipe gulp.dest dest
 
 gulp.task 'jade', ->
   YOUR_LOCALS = {};
-  gulp.src paths.jade
+  gulp.src config.paths.jade
     .pipe plumber(
       errorHandler: reportError
     )
@@ -129,15 +103,15 @@ gulp.task 'jade', ->
       root: "/#{src}/"
       module: 'templatesApp'
     )
-    .pipe concat targets.jade
+    .pipe concat config.targets.jade
     .pipe gulp.dest dest
 
 gulp.task 'scripts', ->
-  gulp.src paths.libs
+  gulp.src config.paths.libs
     .pipe plumber(
       errorHandler: reportError
     )
-    .pipe concat targets.scripts
+    .pipe concat config.targets.scripts
     .pipe gulp.dest dest
 
 gulp.task 'images', ->
@@ -146,10 +120,10 @@ gulp.task 'images', ->
     .pipe gulp.dest("#{dest}/static")
 
 minify = ->
-  gulp.src "#{dest}/#{targets.js}"
+  gulp.src "#{dest}/#{config.targets.js}"
     .pipe uglify()
     .pipe ngmin()
-    .pipe concat targets.js
+    .pipe concat config.targets.js
     .pipe gulp.dest dest
 
 gulp.task 'minify', ['build'], minify
@@ -159,15 +133,15 @@ combineJs = (production = false) ->
   rethrow = (err, filename, lineno) -> throw err
 
   files = [
-    targets.scripts
-    targets.coffee
-    targets.jade
+    config.targets.scripts
+    config.targets.coffee
+    config.targets.jade
   ]
   sources = files.map (file) -> "#{dest}/#{file}"
 
   gulp.src sources
     .pipe sourcemaps.init()
-    .pipe concat targets.js
+    .pipe concat config.targets.js
     .pipe sourcemaps.write('./maps')
     .pipe gulp.dest dest
     .pipe browserSync.reload({stream:true})
@@ -230,12 +204,12 @@ gulp.task 'watch', ['prepare', 'browser-sync'], ->
     gulp.start('sass')
 
   watch
-    glob: paths.jade, emitOnGlob: false
+    glob: config.paths.jade, emitOnGlob: false
   , ->
     gulp.start('jade')
 
   watch
-    glob: paths.js, emitOnGlob: false
+    glob: config.paths.js, emitOnGlob: false
   , ->
     gulp.start('scripts')
 
@@ -245,11 +219,11 @@ gulp.task 'watch', ['prepare', 'browser-sync'], ->
     gulp.start('scripts')
 
   watch
-    glob: paths.coffee, emitOnGlob: false
+    glob: config.paths.coffee, emitOnGlob: false
   , ->
     gulp.start('coffee')
 
-  files = [targets.scripts, targets.jade, targets.coffee]
+  files = [config.targets.scripts, config.targets.jade, config.targets.coffee]
   sources = ("#{dest}/#{file}" for file in files)
 
   watch

@@ -11,34 +11,6 @@
     "dependencies": {
         "coffee-script": "*",
         "gulp": "*",
-        "gulp-angular-templatecache": "*",
-        "gulp-autoprefixer": "*",
-        "gulp-coffee": "*",
-        "gulp-coffeelint": "*",
-        "gulp-concat": "*",
-        "gulp-if": "*",
-        "gulp-imagemin": "*",
-        "gulp-jade": "*",
-        "gulp-minify-html": "*",
-        "gulp-ng-classify": "^3.0.0",
-        "gulp-ngmin": "*",
-        "gulp-order": "*",
-        "gulp-plumber": "*",
-        "gulp-rev": "*",
-        "gulp-sass": "*",
-        "gulp-sourcemaps": "*",
-        "gulp-uglify": "*",
-        "gulp-uncss": "*",
-        "gulp-util": "*",
-        "gulp-watch": "*",
-        "gutil": "*"
-    },
-    "devDependencies": {
-        "browser-sync": "*",
-        "connect-modrewrite": "*",
-        "gulp-protractor": "0.0.7",
-        "gulp-ruby-sass": "*",
-        "node-notifier": "*",
-        "protractor": "^0.24.2"
+        "imago-gulp-angular": "git+ssh://git@git.nex9.com/repo/imago.gulp.angular"
     }
 }

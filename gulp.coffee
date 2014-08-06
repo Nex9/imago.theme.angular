@@ -1,5 +1,5 @@
 dest = 'public'
-src = 'app'
+src  = 'app'
 
 targets =
   css     : 'application.css'

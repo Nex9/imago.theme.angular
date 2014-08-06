@@ -11,6 +11,6 @@
     "dependencies": {
         "coffee-script": "*",
         "gulp": "*",
-        "imago-gulp-angular": "git+ssh://git@git.nex9.com/repo/imago.gulp.angular"
+        "imago-gulp-angular": "git+ssh://git@github.com:Nex9/imago.gulp.angular.git"
     }
 }

@@ -21,12 +21,12 @@ paths =
     "#{src}/**/*.jade"
   ]
   libs: [
-    "lib/bower_components/angular/angular.js"
-    "lib/bower_components/angular-animate/angular-animate.js"
-    "lib/bower_components/angular-touch/angular-touch.js"
-    "lib/bower_components/angular-ui-router/release/angular-ui-router.js"
-    "lib/bower_components/lodash/dist/lodash.js"
-    "lib/bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
+    "bower_components/angular/angular.js"
+    "bower_components/angular-animate/angular-animate.js"
+    "bower_components/angular-touch/angular-touch.js"
+    "bower_components/angular-ui-router/release/angular-ui-router.js"
+    "bower_components/lodash/dist/lodash.js"
+    "bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
   ]
 
 configGulp =

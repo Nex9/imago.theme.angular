@@ -9,20 +9,6 @@
 
 
 
-.bold
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
-  text-transform: uppercase
-  font-size: 22px
-  color: black
-  line-height: normal
-
-.fontstyle
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif
-  line-height: normal
-  color: black
-  color: lighten(black, 35%)
-
-
 html,
 body
   margin: 0
@@ -31,23 +17,29 @@ body
   // height: 100%
   background: white
   font-size: 13px
+  font-smoothing: antialiased
+  user-select: none
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0)
+  -webkit-text-size-adjust: 100%
+  -ms-text-size-adjust: 100%
+  -webkit-overflow-scrolling: touch
 
 body
-  @extend .fontstyle
   overflow-y: auto
   overflow-x: hidden
 
+h1, h2, h3, h4, h5, h6
+a, p
+  user-select: auto
+
 a
-  @extend .fontstyle
   text-decoration: none
+  color: black
 
 img
   border: 0
   -ms-interpolation-mode: bicubic
   vertical-align: middle
-
-strong
-  font-weight: bold
 
 h1,
 h2,
@@ -55,14 +47,13 @@ h3,
 h4,
 h5,
 h6
-  @extend .bold
   color: #444
   font-weight: 200
   margin: 10px 0
   font-smoothing: antialiased
 
 h1
-  font-size: 26px
+  font-size: 72px
 h2
   font-size: 18px
   font-weight: 400
@@ -76,11 +67,10 @@ h4
 
 p,
 li
-  @extend .fontstyle
   font-smoothing: antialiased
   line-height: 17px
   color: lighten(black, 50%)
-  font-size: 15px
+  font-size: 36px
 
 
 ul.list
@@ -95,15 +85,20 @@ ul.list
     content: "— "
     position: relative
 
+
+.imagoimage,
+.imagovideo
+  .spin
+    border-top: 6px solid rgba(180,180,180,0.2)
+  .spin2
+    border-top: 3px solid rgba(180,180,180,0.8)
+
 // widgets
 
 
 // sections
 
-// body > .home
-
-
-
+// body .home
 
 
 // Smartphones (portrait and landscape)

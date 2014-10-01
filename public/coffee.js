@@ -1,12 +1,10 @@
-var Setup, app, data, debug, host, onLoad, tenant;
+var Setup, app, data, debug, onLoad, tenant;
 
 tenant = 'TENANT';
 
 data = 'online';
 
 debug = true;
-
-host = data === 'online' ? "//" + tenant + ".imagoapp.com/api/v3" : "/api/v3";
 
 app = angular.module('app', ['ngAnimate', 'ui.router', 'ngTouch', 'templatesApp', 'imago.widgets.angular']);
 
@@ -18,6 +16,11 @@ Setup = (function() {
     $httpProvider.defaults.headers.common['NexClient'] = 'public';
     $locationProvider.html5Mode(true);
     $urlRouterProvider.otherwise('/');
+    $stateProvider.state('home', {
+      url: '/',
+      templateUrl: '/app/views/home.html',
+      controller: 'home'
+    });
   }
 
   return Setup;
@@ -91,15 +94,13 @@ onLoad = (function() {
 
 })();
 
-angular.module('app').config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]);
-
-angular.module('app').run(['$rootScope', '$window', onLoad]);
+angular.module('app').config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$window', onLoad]);
 
 var Home;
 
 Home = (function() {
-  function Home($scope, $http, imagoUtils, imagoPanel, $location) {
-    imagoPanel.getData('/home').then((function(_this) {
+  function Home($scope, imagoModel) {
+    imagoModel.getData('/home').then((function(_this) {
       return function(response) {
         return $scope.assets = response[0].items;
       };
@@ -110,18 +111,43 @@ Home = (function() {
 
 })();
 
-angular.module('app').controller('home', ['$scope', '$http', 'imagoUtils', 'imagoPanel', '$location', Home]);
+angular.module('app').controller('home', ['$scope', 'imagoModel', Home]);
+
+var Page;
+
+Page = (function() {
+  function Page($scope, $state, imagoModel) {
+    imagoModel.getData().then((function(_this) {
+      return function(response) {
+        var data, _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = response.length; _i < _len; _i++) {
+          data = response[_i];
+          $scope.data = data;
+          $scope.assets = imagoModel.findChildren(data);
+          break;
+        }
+        return _results;
+      };
+    })(this));
+  }
+
+  return Page;
+
+})();
+
+angular.module('app').controller('page', ['$scope', '$state', 'imagoModel', Page]);
 
 var Navigation;
 
 Navigation = (function() {
-  function Navigation() {
+  function Navigation($location, $timeout, $urlRouter) {
     return {
       replace: true,
       transclude: true,
       restrict: 'AE',
       templateUrl: '/app/directives/views/navigation.html',
-      controller: function($scope, $element, $attrs, $transclude, $location, $timeout, $urlRouter) {
+      controller: function($scope, $element, $attrs, $transclude) {
         var currentLink, i, l, link, links, onClass, url, urlMap, _i, _len;
         links = $element.find("a");
         onClass = "active";
@@ -159,4 +185,4 @@ Navigation = (function() {
 
 })();
 
-angular.module('app').directive('navigation', [Navigation]);
+angular.module('app').directive('navigation', ['$location', '$timeout', '$urlRouter', Navigation]);

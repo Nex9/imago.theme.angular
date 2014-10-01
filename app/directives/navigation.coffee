@@ -1,13 +1,13 @@
 class Navigation extends Directive
 
-  constructor: ->
+  constructor: ($location, $timeout, $urlRouter) ->
 
     return {
       replace: true
       transclude: true
       restrict: 'AE'
       templateUrl: '/app/directives/views/navigation.html'
-      controller: ($scope, $element, $attrs, $transclude, $location, $timeout, $urlRouter) ->
+      controller: ($scope, $element, $attrs, $transclude) ->
         links = $element.find("a")
         onClass = "active"
         currentLink = undefined

@@ -2,8 +2,6 @@ tenant     = 'TENANT'
 data       = 'online'
 debug      = true
 
-host       = if (data is 'online') then "//#{tenant}.imagoapp.com/api/v3" else "/api/v3"
-
 app = angular.module 'app', [
   'ngAnimate'
   'ui.router'
@@ -29,11 +27,11 @@ class Setup extends Config
 
     $urlRouterProvider.otherwise '/'
 
-    # $stateProvider
-    #   .state 'home',
-    #     url: '/'
-    #     templateUrl: '/app/views/home.html'
-    #     controller: 'home'
+    $stateProvider
+      .state 'home',
+        url: '/'
+        templateUrl: '/app/views/home.html'
+        controller: 'home'
     #   .state 'settings',
     #     url: '/settings'
     #     templateUrl: '/app/views/settings.html'

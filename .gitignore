@@ -2,3 +2,9 @@ node_modules/
 bower_components/
 src/\.tmp*
 /.sass-cache/
+public/coffee.js
+public/scripts.js
+public/templates.js
+public/application.js
+public/application.css
+public/maps/

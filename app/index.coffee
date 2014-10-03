@@ -51,7 +51,19 @@ class Setup extends Config
     #     templateUrl: '/app/views/search.html'
     #     controller: 'searchPage'
 
-class onLoad extends Run
+class Load extends Run
+
+  constructor: ($rootScope, $location, $timeout, $state, $urlRouter) ->
+
+    $rootScope.$on '$locationChangeSuccess', (evt) ->
+      $urlRouter.sync()
+      $timeout ->
+        state = $state.current.name.split('.').join(' ')
+        path  = $location.path().split('/').join(' ')
+        $rootScope.state = state
+        $rootScope.path  = path
+
+class ScrollConfig extends Run
 
   constructor : ($rootScope, $window) ->
 

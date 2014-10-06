@@ -8,6 +8,7 @@ app = angular.module 'app', [
   'ngTouch'
   'templatesApp'
   'imago.widgets.angular'
+  'jilareau.bowser'
 ]
 
 
@@ -65,7 +66,7 @@ class Load extends Run
 
 class ScrollConfig extends Run
 
-  constructor : ($rootScope, $window) ->
+  constructor : ($rootScope, $window, bowser) ->
 
     w = angular.element $window
 

@@ -9,6 +9,7 @@ app = angular.module 'app', [
   'templatesApp'
   'imago.widgets.angular'
   'jilareau.bowser'
+  'lodash'
 ]
 
 

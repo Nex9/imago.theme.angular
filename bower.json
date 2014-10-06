@@ -21,8 +21,7 @@
     "angular-touch": "~1.3",
     "imago.widgets.angular": "master",
     "angular-ui-router": "*",
-    "angular-bowser": "*",
-    "lodash": "*"
+    "angular-bowser": "*"
   },
   "resolutions": {
     "angular": "~1.3"

@@ -55,6 +55,8 @@ class Load extends Run
 
   constructor: ($rootScope, $location, $timeout, $state, $urlRouter) ->
 
+    $rootScope.js = true
+
     $rootScope.$on '$locationChangeSuccess', (evt) ->
       $urlRouter.sync()
       $timeout ->

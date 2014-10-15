@@ -59,13 +59,11 @@ class Load extends Run
 
     $rootScope.js = true
 
-    $rootScope.$on '$locationChangeSuccess', (evt) ->
-      $urlRouter.sync()
-      $timeout ->
-        state = $state.current.name.split('.').join(' ')
-        path  = $location.path().split('/').join(' ')
-        $rootScope.state = state
-        $rootScope.path  = path
+    $rootScope.$on '$stateChangeSuccess', (evt) ->
+      state = $state.current.name.split('.').join(' ')
+      path  = $location.path().split('/').join(' ')
+      $rootScope.state = state
+      $rootScope.path  = path
 
 class ScrollConfig extends Run
 

@@ -1,2 +1,2 @@
 require('coffee-script/register');
-require('imago-gulp-angular');
+var gulp = require('imago-gulp-angular');

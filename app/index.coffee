@@ -12,7 +12,7 @@ app = angular.module 'app', [
   'lodash'
 ]
 
-class WorkerSettings extends Value
+class SortWorker extends Value
 
   constructor: () ->
     return '/sort.worker.js'

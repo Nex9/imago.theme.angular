@@ -5,6 +5,17 @@
     <link rel="stylesheet" href="/application.css">
     <!--[if IE 9]>
     <script src="/ie9.worker.js"></script>
+
+
+    <script src="//cdn.rawgit.com/jpillora/xdomain/0.6.15/dist/0.6/xdomain.js"></script>
+
+    <script>
+        xdomain.slaves({
+          "http://api.2.imagoapp.com": "/api/ieproxy",
+          "https://api.2.imagoapp.com": "/api/ieproxy"
+        });
+    </script>
+
     <![endif]-->
     <script src="/application.js"></script>
   </head>

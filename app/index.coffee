@@ -12,10 +12,18 @@ app = angular.module 'app', [
   'lodash'
 ]
 
-class SortWorker extends Value
+class imagoConf extends Constant
+  constructor: ->
 
-  constructor: () ->
-    return '/sort.worker.js'
+    if (data is 'online' and debug)
+      host = window.location.protocol + "//api.2.imagoapp.com"
+    else
+      host = window.location.protocol + "//localhost:8000"
+
+    return {
+      sort_worker : 'sort.worker.js'
+      host        : host
+    }
 
 
 class Setup extends Config

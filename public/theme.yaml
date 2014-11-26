@@ -1,0 +1,4 @@
+gaeversion : default
+tenant     : TENANT
+debug      : False
+setdefault : True

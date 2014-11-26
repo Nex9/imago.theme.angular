@@ -1,9 +1,9 @@
-class Navigation extends Directive
+class Header extends Directive
 
   constructor: ($location, $timeout, $urlRouter) ->
 
     return {
-      templateUrl: '/app/directives/views/navigation.html'
+      templateUrl: '/app/directives/views/header.html'
       controller: ($scope, $element, $attrs) ->
         links = $element.find("a")
         onClass = "active"

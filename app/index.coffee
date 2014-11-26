@@ -8,7 +8,6 @@ app = angular.module 'app', [
   'ngTouch'
   'templatesApp'
   'imago.widgets.angular'
-  'jilareau.bowser'
   'lodash'
 ]
 
@@ -24,7 +23,6 @@ class imagoConf extends Constant
       sort_worker : 'sort.worker.js'
       host        : host
     }
-
 
 class Setup extends Config
 

@@ -36,6 +36,7 @@ class Setup extends Config
     $httpProvider.defaults.cache = true
     $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'
     $httpProvider.defaults.headers.common['NexClient']    = 'public'
+    $httpProvider.defaults.headers.common['NexTenant']    = "#{tenant}"
     # http defaults config ENDS
 
     $locationProvider.html5Mode true

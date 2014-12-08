@@ -11,7 +11,7 @@ app = angular.module 'app', [
   'lodash'
 ]
 
-class imagoConf extends Constant
+class imagoSettings extends Constant
   constructor: ->
 
     if (data is 'online' and debug)

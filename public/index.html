@@ -3,9 +3,27 @@
   <head>
     <base href="/">
     <link rel="stylesheet" href="/application.css">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <!--[if IE 9]>
+    <script src="/ie9.worker.js"></script>
+
+
+    <script src="//cdn.rawgit.com/jpillora/xdomain/0.6.15/dist/0.6/xdomain.js"></script>
+
+    <script>
+        xdomain.slaves({
+          "http://api.2.imagoapp.com": "/api/ieproxy",
+          "https://api.2.imagoapp.com": "/api/ieproxy"
+        });
+    </script>
+
+    <![endif]-->
     <script src="/application.js"></script>
   </head>
   <body class="{{state}} {{path}}">
+      <header></header>
       <div ui-view></div>
   </body>
 </html>

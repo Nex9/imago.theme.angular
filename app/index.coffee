@@ -8,15 +8,21 @@ app = angular.module 'app', [
   'ngTouch'
   'templatesApp'
   'imago.widgets.angular'
-  'jilareau.bowser'
   'lodash'
 ]
 
-class SortWorker extends Value
+class imagoSettings extends Constant
+  constructor: ->
 
-  constructor: () ->
-    return '/sort.worker.js'
+    if (data is 'online' and debug)
+      host = window.location.protocol + "//api.2.imagoapp.com"
+    else
+      host = window.location.protocol + "//localhost:8000"
 
+    return {
+      sort_worker : 'sort.worker.js'
+      host        : host
+    }
 
 class Setup extends Config
 
@@ -28,6 +34,7 @@ class Setup extends Config
     $httpProvider.defaults.cache = true
     $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'
     $httpProvider.defaults.headers.common['NexClient']    = 'public'
+    $httpProvider.defaults.headers.common['NexTenant']    = "#{tenant}"
     # http defaults config ENDS
 
     $locationProvider.html5Mode true

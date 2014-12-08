@@ -1,0 +1,7 @@
+.post
+  h1 {{ post.data | meta:'title' }}
+  div(imago-image="post.data")
+  .text(ng-bind-html="post.data | meta:'text'")
+  ul.tags
+    li(ng-repeat="tag in post.data | meta:'tags'")
+      a(href="/blog/tag/{{tag}}" ng-click="blog.tags = tag") {{tag}}

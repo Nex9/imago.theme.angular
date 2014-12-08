@@ -57,6 +57,17 @@ class Setup extends Config
     #     url: '/search/*parameter'
     #     templateUrl: '/app/views/search.html'
     #     controller: 'searchPage'
+    # .state 'blog',
+    #     url: '/blog'
+    #     templateUrl: '/app/views/blog.html'
+    #     controller: 'blog as blog'
+    #   .state 'blog.tags',
+    #     url: '/tag/:tag'
+
+    #   .state 'post',
+    #     url: '/blog/:name'
+    #     templateUrl: '/app/views/post.html'
+    #     controller: 'imagoPage as post'
 
 class Load extends Run
 

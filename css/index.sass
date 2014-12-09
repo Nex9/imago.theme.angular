@@ -35,6 +35,18 @@ body
   overflow-y: auto
   overflow-x: hidden
 
+button
+  font-family: inherit
+  text-transform: uppercase
+  background: none
+  border: none
+  letter-spacing: 1px
+  &:hover
+    color: lighten(black, 30%)
+  &[disabled]
+    color: lighten(black, 80%)
+
+
 h1, h2, h3, h4, h5, h6
 a, p
   user-select: auto

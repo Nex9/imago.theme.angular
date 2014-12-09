@@ -65,26 +65,27 @@ class Setup extends Config
     #     url: '/search/*parameter'
     #     templateUrl: '/app/views/search.html'
     #     controller: 'searchPage'
-    # .state 'blog',
-    #     url: '/blog'
-    #     templateUrl: '/app/views/blog.html'
-    #     controller: 'blog as blog'
-    #   .state 'blog.tags',
-    #     url: '/tag/:tag'
 
-    #   .state 'post',
-    #     url: '/blog/:name'
-    #     templateUrl: '/app/views/post.html'
-    #     controller: 'imagoPage as post'
+      .state 'blog',
+          url: '/blog'
+          templateUrl: '/app/views/blog.html'
+          controller: 'blog as blog'
+        .state 'blog.tags',
+          url: '/tag/:tag'
+
+      .state 'post',
+        url: '/blog/:name'
+        templateUrl: '/app/views/post.html'
+        controller: 'imagoPage as post'
 
 class Load extends Run
 
-  constructor: ($rootScope, $location, $timeout, $state, $urlRouter) ->
-
+  constructor: ($rootScope, $location, $state, $urlRouter, $window) ->
     $rootScope.js = true
 
     $rootScope.$on '$stateChangeSuccess', (evt) ->
       state = $state.current.name.split('.').join(' ')
       path  = $location.path().split('/').join(' ')
+      $window.scrollTo(0,0)
       $rootScope.state = state
       $rootScope.path  = path

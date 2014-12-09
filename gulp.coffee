@@ -31,6 +31,7 @@ paths =
     "bower_components/imago/dist/imago-image.js"
     "bower_components/imago/dist/imago-video.js"
     "bower_components/imago/dist/imago-slider.js"
+    "bower_components/angular-inview/angular-inview.js"
   ]
 
 configGulp =

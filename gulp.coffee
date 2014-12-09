@@ -26,7 +26,11 @@ paths =
     "bower_components/angular-touch/angular-touch.js"
     "bower_components/angular-ui-router/release/angular-ui-router.js"
     "bower_components/lodash/dist/lodash.js"
-    "bower_components/imago.widgets.angular/dist/imago.widgets.angular.js"
+    "bower_components/imago/dist/core.js"
+    "bower_components/imago/dist/events.js"
+    "bower_components/imago/dist/imago-image.js"
+    "bower_components/imago/dist/imago-video.js"
+    "bower_components/imago/dist/imago-slider.js"
   ]
 
 configGulp =

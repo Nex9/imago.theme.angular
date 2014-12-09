@@ -42,8 +42,9 @@ div.imago-form
     div.formcontrols
       button.send(type="submit" ng-disabled="imagoContact.$invalid") Send
 
-  div.sucess
-    span Thank You!
+  div.messages(ng-switch="contact.status")
+    div.sucess(ng-switch-when="true")
+      span Thank You!
 
-  div.error
-    span Error!
+    div.error(ng-switch-when="false")
+      span Error: {{contact.error}}

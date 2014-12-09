@@ -70,6 +70,8 @@ class Setup extends Config
           url: '/blog'
           templateUrl: '/app/views/blog.html'
           controller: 'blog as blog'
+          data:
+            path: '/blog'
         .state 'blog.tags',
           url: '/tag/:tag'
 

@@ -1,4 +1,4 @@
-class imagoContact extends Directive
+ass imagoContact extends Directive
 
   constructor: (imagoSubmit)->
     return {
@@ -11,6 +11,7 @@ class imagoContact extends Directive
 
         @submitForm = (isValid) =>
           if isValid
-            console.log 'submit return', imagoSubmit.send(@data)
+            imagoSubmit.send(@data).then (result) =>
+              @status = result
 
     }

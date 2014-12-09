@@ -7,7 +7,8 @@ app = angular.module 'app', [
   'ui.router'
   'ngTouch'
   'templatesApp'
-  'imago.widgets.angular'
+  'angular-inview'
+  'imago'
   'lodash'
 ]
 

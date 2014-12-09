@@ -20,7 +20,8 @@
     "angular-touch": "~1.3",
     "imago": "master",
     "angular-ui-router": "*",
-    "angular-bowser": "*"
+    "angular-bowser": "*",
+    "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer"
   },
   "resolutions": {
     "angular": "~1.3"

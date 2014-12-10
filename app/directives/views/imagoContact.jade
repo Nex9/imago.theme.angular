@@ -1,5 +1,5 @@
 div.imago-form
-  form(name="imagoContact" ng-submit="contact.submitForm(imagoContact.$valid)" novalidate)
+  form(name="imagoContact" ng-submit="contact.submitForm(imagoContact.$valid)" novalidate ng-if="!contact.status")
 
     div.imago-field
       label(for="name") Name

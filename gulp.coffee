@@ -26,6 +26,8 @@ paths =
     "bower_components/angular-touch/angular-touch.js"
     "bower_components/angular-ui-router/release/angular-ui-router.js"
     "bower_components/lodash/dist/lodash.js"
+    "bower_components/hammerjs/hammer.js"
+    "bower_components/ryanmullins-angular-hammer/angular.hammer.js"
     "bower_components/angular-inview/angular-inview.js"
     "bower_components/imago/dist/core.js"
     "bower_components/imago/dist/events.js"
@@ -34,6 +36,7 @@ paths =
     "bower_components/imago/dist/imago-slider.js"
     "bower_components/imago/disst/imago-blog.js"
     "bower_components/imago/disst/imago-social.js"
+    "bower_components/imago/dist/imago-filters.js"
   ]
 
 configGulp =

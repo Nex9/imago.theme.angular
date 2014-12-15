@@ -5,7 +5,8 @@ debug      = true
 app = angular.module 'app', [
   'ngAnimate'
   'ui.router'
-  'ngTouch'
+  # 'ngTouch'
+  'hmTouchEvents'
   'templatesApp'
   'angular-inview'
   'imago'

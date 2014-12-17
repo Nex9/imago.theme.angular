@@ -6,7 +6,6 @@ app = angular.module 'app', [
   'ngAnimate'
   'ui.router'
   # 'ngTouch'
-  'hmTouchEvents'
   'templatesApp'
   'angular-inview'
   'imago'

@@ -1,10 +1,13 @@
 class Blog extends Controller
 
-  constructor: ($scope, $state) ->
-    @path = '/blog'
-    @pageSize = 5
+  constructor: ($scope, $state, $location) ->
+    @path = $state.current.data.path or '/blog'
+    @pageSize = 6
     @tags = $state.params.tag or ''
+    @currentPage = $state.params.page or 1
 
-    # @onNext = ->
+    @onNext = ->
+      $location.path "#{@path}/page/#{parseInt(@currentPage) + 1}"
 
-    # @onPrev = ->
+    @onPrev = ->
+      $location.path "#{@path}/page/#{parseInt(@currentPage) - 1}"

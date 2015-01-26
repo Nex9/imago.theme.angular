@@ -8,6 +8,8 @@
 @import ../bower_components/imago/css/font-awesome/scss/font-awesome
 @import ../bower_components/imago/css/imago-icons/imago-icons.sass
 
+@import ../bower_components/breakpoint-sass/stylesheets/_breakpoint
+@import ../bower_components/fake-breakpoint-slicer/stylesheets/_breakpoint-slicer
 
 
 html
@@ -34,6 +36,18 @@ body
 body
   overflow-y: auto
   overflow-x: hidden
+
+button
+  font-family: inherit
+  text-transform: uppercase
+  background: none
+  border: none
+  letter-spacing: 1px
+  &:hover
+    color: lighten(black, 30%)
+  &[disabled]
+    color: lighten(black, 80%)
+
 
 h1, h2, h3, h4, h5, h6
 a, p
@@ -119,7 +133,7 @@ ul.list
   .imagoimage,
   .imagovideo
     +pos()
-    f
+
 // sections
 
 // body .home

@@ -1,4 +1,4 @@
-var Setup, app, data, debug, onLoad, tenant;
+var Load, Setup, app, data, debug, imagoSettings, tenant;
 
 tenant = 'TENANT';
 
@@ -6,7 +6,25 @@ data = 'online';
 
 debug = true;
 
-app = angular.module('app', ['ngAnimate', 'ui.router', 'ngTouch', 'templatesApp', 'imago.widgets.angular']);
+app = angular.module('app', ['ngAnimate', 'ui.router', 'ngTouch', 'templatesApp', 'imago.widgets.angular', 'lodash']);
+
+imagoSettings = (function() {
+  function imagoSettings() {
+    var host;
+    if (data === 'online' && debug) {
+      host = window.location.protocol + "//api.2.imagoapp.com";
+    } else {
+      host = window.location.protocol + "//localhost:8000";
+    }
+    return {
+      sort_worker: 'sort.worker.js',
+      host: host
+    };
+  }
+
+  return imagoSettings;
+
+})();
 
 Setup = (function() {
   function Setup($httpProvider, $sceProvider, $locationProvider, $stateProvider, $urlRouterProvider) {
@@ -14,6 +32,7 @@ Setup = (function() {
     $httpProvider.defaults.cache = true;
     $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
     $httpProvider.defaults.headers.common['NexClient'] = 'public';
+    $httpProvider.defaults.headers.common['NexTenant'] = "" + tenant;
     $locationProvider.html5Mode(true);
     $urlRouterProvider.otherwise('/');
     $stateProvider.state('home', {
@@ -27,74 +46,38 @@ Setup = (function() {
 
 })();
 
-onLoad = (function() {
-  function onLoad($rootScope, $window) {
-    var onMouseWheelStart, onResizeStart, onScrollStart, w;
-    w = angular.element($window);
-    onResizeStart = (function(_this) {
-      return function(e) {
-        if (_this.resizeing) {
-          return;
-        }
-        $rootScope.$broadcast('resizestart');
-        _this.resizeing = true;
-        return w.one('resizestop', function() {
-          return _this.resizeing = false;
-        });
-      };
-    })(this);
-    onScrollStart = (function(_this) {
-      return function(e) {
-        if (_this.scrolling) {
-          return;
-        }
-        $rootScope.$broadcast('scrollstart');
-        _this.scrolling = true;
-        return w.one('scrollstop', function() {
-          return _this.scrolling = false;
-        });
-      };
-    })(this);
-    onMouseWheelStart = (function(_this) {
-      return function(e) {
-        if (_this.isMouseWheeling) {
-          return;
-        }
-        $rootScope.$broadcast('mousewheelstart');
-        _this.isMouseWheeling = true;
-        return w.one('mousewheelstop', function() {
-          return _this.isMouseWheeling = false;
-        });
-      };
-    })(this);
-    w.on('resize', onResizeStart);
-    w.on('resize', _.debounce((function() {
-      return $rootScope.$broadcast('resizestop');
-    }), 200));
-    w.on('resize', _.throttle((function() {
-      return $rootScope.$broadcast('resizelimit');
-    }), 150));
-    w.on('scroll', onScrollStart);
-    w.on('scroll', _.debounce((function() {
-      return $rootScope.$broadcast('scrollstop');
-    }), 200));
-    w.on('scroll', _.throttle((function() {
-      return $rootScope.$broadcast('scrolllimit');
-    }), 150));
-    w.on('mousewheel', onMouseWheelStart);
-    w.on('mousewheel', _.debounce((function() {
-      return $rootScope.$broadcast('mousewheelstop');
-    }), 200));
-    w.on('mousewheel', _.throttle((function() {
-      return $rootScope.$broadcast('mousewheellimit');
-    }), 150));
+Load = (function() {
+  function Load($rootScope, $location, $timeout, $state, $urlRouter) {
+    $rootScope.js = true;
+    $rootScope.$on('$stateChangeSuccess', function(evt) {
+      var path, state;
+      state = $state.current.name.split('.').join(' ');
+      path = $location.path().split('/').join(' ');
+      $rootScope.state = state;
+      return $rootScope.path = path;
+    });
   }
 
-  return onLoad;
+  return Load;
 
 })();
 
-angular.module('app').config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$window', onLoad]);
+angular.module('app').constant('imagoSettings', imagoSettings()).config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$location', '$timeout', '$state', '$urlRouter', Load]);
+
+var Blog;
+
+Blog = (function() {
+  function Blog($scope, $state) {
+    this.path = '/blog';
+    this.pageSize = 5;
+    this.tags = $state.params.tag || '';
+  }
+
+  return Blog;
+
+})();
+
+angular.module('app').controller('blog', ['$scope', '$state', Blog]);
 
 var Home;
 
@@ -102,7 +85,8 @@ Home = (function() {
   function Home($scope, imagoModel) {
     imagoModel.getData('/home').then((function(_this) {
       return function(response) {
-        return $scope.assets = response[0].items;
+        _this.assets = response[0].assets;
+        return console.log('@assets', _this.assets);
       };
     })(this));
   }
@@ -113,18 +97,17 @@ Home = (function() {
 
 angular.module('app').controller('home', ['$scope', 'imagoModel', Home]);
 
-var Page;
+var imagoPage;
 
-Page = (function() {
-  function Page($scope, $state, imagoModel) {
+imagoPage = (function() {
+  function imagoPage($scope, $location, $state, imagoModel) {
     imagoModel.getData().then((function(_this) {
       return function(response) {
         var data, _i, _len, _results;
         _results = [];
         for (_i = 0, _len = response.length; _i < _len; _i++) {
           data = response[_i];
-          $scope.data = data;
-          $scope.assets = imagoModel.findChildren(data);
+          _this.data = data;
           break;
         }
         return _results;
@@ -132,22 +115,32 @@ Page = (function() {
     })(this));
   }
 
-  return Page;
+  return imagoPage;
 
 })();
 
-angular.module('app').controller('page', ['$scope', '$state', 'imagoModel', Page]);
+angular.module('app').controller('imagoPage', ['$scope', '$location', '$state', 'imagoModel', imagoPage]);
 
-var Navigation;
+var Maintenance;
 
-Navigation = (function() {
-  function Navigation($location, $timeout, $urlRouter) {
+Maintenance = (function() {
+  function Maintenance($scope) {
+    $scope.tenant = tenant;
+  }
+
+  return Maintenance;
+
+})();
+
+angular.module('app').controller('maintenance', ['$scope', Maintenance]);
+
+var Header;
+
+Header = (function() {
+  function Header($location, $timeout, $urlRouter) {
     return {
-      replace: true,
-      transclude: true,
-      restrict: 'AE',
-      templateUrl: '/app/directives/views/navigation.html',
-      controller: function($scope, $element, $attrs, $transclude) {
+      templateUrl: '/app/directives/views/header.html',
+      controller: function($scope, $element, $attrs) {
         var currentLink, i, l, link, links, onClass, url, urlMap, _i, _len;
         links = $element.find("a");
         onClass = "active";
@@ -181,8 +174,8 @@ Navigation = (function() {
     };
   }
 
-  return Navigation;
+  return Header;
 
 })();
 
-angular.module('app').directive('navigation', ['$location', '$timeout', '$urlRouter', Navigation]);
+angular.module('app').directive('header', ['$location', '$timeout', '$urlRouter', Header]);

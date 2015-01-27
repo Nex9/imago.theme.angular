@@ -25,14 +25,10 @@ paths =
     "bower_components/angular-animate/angular-animate.js"
     "bower_components/angular-touch/angular-touch.js"
     "bower_components/angular-ui-router/release/angular-ui-router.js"
-<<<<<<< HEAD
     "bower_components/lodash/lodash.js"
-=======
-    "bower_components/lodash/dist/lodash.js"
     "bower_components/hammerjs/hammer.js"
     "bower_components/ryanmullins-angular-hammer/angular.hammer.js"
     "bower_components/angular-inview/angular-inview.js"
->>>>>>> 9e3a233c94e1a390d4f5ade0d9bcbd0644717535
     "bower_components/imago/dist/core.js"
     "bower_components/imago/dist/events.js"
     "bower_components/imago/dist/imago-image.js"

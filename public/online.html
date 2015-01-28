@@ -38,6 +38,10 @@
 
   <script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
 
+  <!-- GSAP -->
+  <!-- <script src="//static.imagoapp.com/static/lib/greensock/1/TweenMax.min.js" type="text/javascript"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/latest/plugins/ScrollToPlugin.min.js"></script> -->
+
   <!--[if IE 9]>
     <script src="/ie9.worker.js"></script>
 
@@ -57,22 +61,29 @@
   <!--script src="//{{ handler.namespace }}.imagoapp.com/static/lib/greensock/1/TweenMax.min.js" type="text/javascript"></script-->
 
   <script>
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', '{{ handler.get_val(settings, "google-analytics-id") }}']);
+    _gaq.push(['_setDomainName', '{{ handler.get_val(settings, "domain") }}']);
+    _gaq.push(['_setAllowLinker', true]);
+    _gaq.push(['_trackPageview']);
 
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){ (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o), m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m) })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-    ga('create', '{{ handler.get_val(settings, "google-analytics-id") }}', 'auto', {'allowLinker': true});
-    ga('require', 'linker');
-    ga('linker:autoLink', ['{{ handler.namespace }}.2.imagoapp.com'] );
-    ga('send', 'pageview');
-
+    (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript';
+      ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' :
+      'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0];
+      s.parentNode.insertBefore(ga, s);
+    })();
   </script>
 
 
 
 </head>
-  <body class="{{! background }} {{! state }} {{! path }}" ng-class="{'menu': showMenu}" search-watch>
+  <body class="{{! state }} {{! path }}" ng-class="{'navigation': navActive, 'mobile': mobile}">
     <header></header>
     <div ui-view></div>
+    <footer></footer>
 
     <div class="nojs", ng-if="!js">
 

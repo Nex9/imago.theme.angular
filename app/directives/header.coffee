@@ -1,6 +1,6 @@
 class Header extends Directive
 
-  constructor: ($location, $timeout, $urlRouter) ->
+  constructor: ($location, $timeout, $rootScope, $urlRouter, imagoUtils) ->
 
     return {
       templateUrl: '/app/directives/views/header.html'
@@ -9,6 +9,7 @@ class Header extends Directive
         onClass = "active"
         currentLink = undefined
         urlMap = {}
+        $rootScope.navActive = false
 
         for l, i in links
           link = angular.element(links[i])
@@ -21,6 +22,8 @@ class Header extends Directive
         $scope.$on "$locationChangeSuccess", ->
           path = $location.path()
           pathLink = urlMap[$location.path()]
+          $scope.active = false
+          $rootScope.navActive = false
           # console.log pathLink[0]
           if pathLink
             currentLink.removeClass onClass  if currentLink
@@ -29,11 +32,11 @@ class Header extends Directive
           else if path is "/" and currentLink
             currentLink.removeClass onClass
 
-        # $timeout(->
-        #   $scope.showNav = true;
-        # , 300)
-        # $scope.showNav = true
+      link: (scope, element, attrs) ->
 
-        # $scope.hideNav = () ->
-        #   $scope.showNav = false;
+        scope.active = false
+
+        scope.activate = () ->
+          scope.active = !scope.active
+          $rootScope.navActive = !$rootScope.navActive
     }

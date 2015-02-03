@@ -37,6 +37,8 @@ paths =
     "bower_components/imago/disst/imago-blog.js"
     "bower_components/imago/disst/imago-social.js"
     "bower_components/imago/dist/imago-filters.js"
+    "bower_components/imago/dist/imago-submit.js"
+    "bower_components/imago/dist/imago-form.js"
   ]
 
 configGulp =

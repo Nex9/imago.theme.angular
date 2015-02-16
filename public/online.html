@@ -2,8 +2,8 @@
 <!DOCTYPE html>
 <html ng-app="app">
 <head>
-  <title>{{ handler.get_val(settings, 'title') }}</title>
-
+  {% set name =  page.get('name', '') + ' - ' if page.get('name', '') != '/' else '' %}
+  <title>{{ name }}{{ handler.get_val(settings, 'title') }}</title>
   <!-- a nex9.com site -->
 
   <base href="/">
@@ -24,7 +24,7 @@
   <!-- Facebook sharing meta -->
   <meta property="og:site_name" content="{{ handler.get_val(settings, 'title') }}"/>
   <meta property="og:image", content="{{ handler.get_val(page, 'serving_url') }}">
-  <meta property="og:title", content="{{ handler.get_val(page, 'name', '') }}">
+  <meta property="og:title", content="{{ name.replace(' - ', '') }}">
   <meta property="og:description" content="{{ handler.get_val(page, 'description') or handler.get_val(settings, 'description') }}">
   <meta property="og:url", content="{{ handler.url }}/">
   <meta property="og:type" content=""/>

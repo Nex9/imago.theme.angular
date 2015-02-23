@@ -3,6 +3,7 @@ src  = 'app'
 
 targets =
   css     : 'application.css'
+  cssMin  : 'application.min.css'
   js      : 'application.js'
   jsMin   : 'application.min.js'
   jade    : 'templates.js'

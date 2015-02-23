@@ -1,4 +1,4 @@
-tenant     = 'TENANT'
+tenant     = 'creativeandpartners'
 data       = 'online'
 debug      = true
 
@@ -48,38 +48,6 @@ class Setup extends Config
         url: '/'
         templateUrl: '/app/views/home.html'
         controller: 'home'
-    #   .state 'settings',
-    #     url: '/settings'
-    #     templateUrl: '/app/views/settings.html'
-    #     controller: 'home'
-    #   .state 'settings.menu',
-    #     url: '/:menu'
-    #     views:
-    #       'menuSettings':
-    #         templateUrl: '/app/views/settings.menu.html'
-    #         controller: 'settingsMenu'
-    #   .state 'trash',
-    #     url: '/trash'
-    #     templateUrl: '/app/views/trash.html'
-    #     controller: 'home'
-    #   .state 'search',
-    #     url: '/search/*parameter'
-    #     templateUrl: '/app/views/search.html'
-    #     controller: 'searchPage'
-
-      .state 'blog',
-          url: '/blog'
-          templateUrl: '/app/views/blog.html'
-          controller: 'blog as blog'
-          data:
-            path: '/blog'
-        .state 'blog.tags',
-          url: '/tag/:tag'
-
-      .state 'post',
-        url: '/blog/:name'
-        templateUrl: '/app/views/post.html'
-        controller: 'imagoPage as post'
 
 class Load extends Run
 

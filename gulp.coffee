@@ -3,6 +3,7 @@ src  = 'app'
 
 targets =
   css     : 'application.css'
+  cssMin  : 'application.min.css'
   js      : 'application.js'
   jsMin   : 'application.min.js'
   jade    : 'templates.js'
@@ -34,9 +35,11 @@ paths =
     "bower_components/imago/dist/imago-image.js"
     "bower_components/imago/dist/imago-video.js"
     "bower_components/imago/dist/imago-slider.js"
-    "bower_components/imago/disst/imago-blog.js"
-    "bower_components/imago/disst/imago-social.js"
+    "bower_components/imago/dist/imago-blog.js"
+    "bower_components/imago/dist/imago-social.js"
     "bower_components/imago/dist/imago-filters.js"
+    "bower_components/imago/dist/imago-submit.js"
+    "bower_components/imago/dist/imago-form.js"
   ]
 
 configGulp =

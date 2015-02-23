@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.3.10
+ * @license AngularJS v1.3.13
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -54,7 +54,7 @@ function minErr(module, ErrorConstructor) {
       return match;
     });
 
-    message = message + '\nhttp://errors.angularjs.org/1.3.10/' +
+    message = message + '\nhttp://errors.angularjs.org/1.3.13/' +
       (module ? module + '/' : '') + code;
     for (i = 2; i < arguments.length; i++) {
       message = message + (i == 2 ? '?' : '&') + 'p' + (i - 2) + '=' +
@@ -381,8 +381,7 @@ function nextUid() {
 function setHashKey(obj, h) {
   if (h) {
     obj.$$hashKey = h;
-  }
-  else {
+  } else {
     delete obj.$$hashKey;
   }
 }
@@ -691,7 +690,7 @@ function isElement(node) {
 function makeMap(str) {
   var obj = {}, items = str.split(","), i;
   for (i = 0; i < items.length; i++)
-    obj[ items[i] ] = true;
+    obj[items[i]] = true;
   return obj;
 }
 
@@ -1472,8 +1471,12 @@ function bootstrap(element, modules, config) {
     forEach(extraModules, function(module) {
       modules.push(module);
     });
-    doBootstrap();
+    return doBootstrap();
   };
+
+  if (isFunction(angular.resumeDeferredBootstrap)) {
+    angular.resumeDeferredBootstrap();
+  }
 }
 
 /**
@@ -2118,11 +2121,11 @@ function toDebugString(obj) {
  * - `codeName` – `{string}` – Code name of the release, such as "jiggling-armfat".
  */
 var version = {
-  full: '1.3.10',    // all of these placeholder strings will be replaced by grunt's
+  full: '1.3.13',    // all of these placeholder strings will be replaced by grunt's
   major: 1,    // package task
   minor: 3,
-  dot: 10,
-  codeName: 'heliotropic-sundial'
+  dot: 13,
+  codeName: 'meticulous-riffleshuffle'
 };
 
 
@@ -4157,7 +4160,7 @@ function createInjector(modulesToLoad, strictDi) {
       }
 
       var args = [],
-          $inject = annotate(fn, strictDi, serviceName),
+          $inject = createInjector.$$annotate(fn, strictDi, serviceName),
           length, i,
           key;
 
@@ -4196,7 +4199,7 @@ function createInjector(modulesToLoad, strictDi) {
       invoke: invoke,
       instantiate: instantiate,
       get: getService,
-      annotate: annotate,
+      annotate: createInjector.$$annotate,
       has: function(name) {
         return providerCache.hasOwnProperty(name + providerSuffix) || cache.hasOwnProperty(name);
       }
@@ -7870,8 +7873,7 @@ function $CompileProvider($provide, $$sanitizeUriProvider) {
           afterTemplateChildLinkFn,
           beforeTemplateCompileNode = $compileNode[0],
           origAsyncDirective = directives.shift(),
-          // The fact that we have to copy and patch the directive seems wrong!
-          derivedSyncDirective = extend({}, origAsyncDirective, {
+          derivedSyncDirective = inherit(origAsyncDirective, {
             templateUrl: null, transclude: null, replace: null, $$originalDirective: origAsyncDirective
           }),
           templateUrl = (isFunction(origAsyncDirective.templateUrl))
@@ -8324,6 +8326,8 @@ function removeComments(jqNodes) {
   return jqNodes;
 }
 
+var $controllerMinErr = minErr('$controller');
+
 /**
  * @ngdoc provider
  * @name $controllerProvider
@@ -8411,7 +8415,12 @@ function $ControllerProvider() {
       }
 
       if (isString(expression)) {
-        match = expression.match(CNTRL_REG),
+        match = expression.match(CNTRL_REG);
+        if (!match) {
+          throw $controllerMinErr('ctrlfmt',
+            "Badly formed controller string '{0}'. " +
+            "Must match `__name__ as __id__` or `__name__`.", expression);
+        }
         constructor = match[1],
         identifier = identifier || match[3];
         expression = controllers.hasOwnProperty(constructor)
@@ -11320,7 +11329,7 @@ function $LocationProvider() {
       // TODO(vojta): rewrite link when opening in new tab/window (in legacy browser)
       // currently we open nice url link and redirect then
 
-      if (!html5Mode.rewriteLinks || event.ctrlKey || event.metaKey || event.which == 2) return;
+      if (!html5Mode.rewriteLinks || event.ctrlKey || event.metaKey || event.shiftKey || event.which == 2 || event.button == 2) return;
 
       var elm = jqLite(event.target);
 
@@ -11362,7 +11371,7 @@ function $LocationProvider() {
 
 
     // rewrite hashbang url <> html5 url
-    if ($location.absUrl() != initialUrl) {
+    if (trimEmptyHash($location.absUrl()) != trimEmptyHash(initialUrl)) {
       $browser.url($location.absUrl(), true);
     }
 
@@ -12336,6 +12345,11 @@ Parser.prototype = {
             ? fn.apply(context, args)
             : fn(args[0], args[1], args[2], args[3], args[4]);
 
+      if (args) {
+        // Free-up the memory (arguments of the last function call).
+        args.length = 0;
+      }
+
       return ensureSafeObject(v, expressionText);
       };
   },
@@ -13207,8 +13221,7 @@ function qFactory(nextTick, exceptionHandler) {
           'qcycle',
           "Expected promise to be resolved with value other than itself '{0}'",
           val));
-      }
-      else {
+      } else {
         this.$$resolve(val);
       }
 
@@ -17665,6 +17678,9 @@ var htmlAnchorDirective = valueFn({
   compile: function(element, attr) {
     if (!attr.href && !attr.xlinkHref && !attr.name) {
       return function(scope, element) {
+        // If the linked element is not an anchor tag anymore, do nothing
+        if (element[0].nodeName.toLowerCase() !== 'a') return;
+
         // SVGAElement does not use the href attribute, but rather the 'xlinkHref' attribute.
         var href = toString.call(element.prop('href')) === '[object SVGAnimatedString]' ?
                    'xlink:href' : 'href';
@@ -18683,19 +18699,21 @@ var inputType = {
          <script>
            angular.module('textInputExample', [])
              .controller('ExampleController', ['$scope', function($scope) {
-               $scope.text = 'guest';
-               $scope.word = /^\s*\w*\s*$/;
+               $scope.example = {
+                 text: 'guest',
+                 word: /^\s*\w*\s*$/
+               };
              }]);
          </script>
          <form name="myForm" ng-controller="ExampleController">
-           Single word: <input type="text" name="input" ng-model="text"
-                               ng-pattern="word" required ng-trim="false">
+           Single word: <input type="text" name="input" ng-model="example.text"
+                               ng-pattern="example.word" required ng-trim="false">
            <span class="error" ng-show="myForm.input.$error.required">
              Required!</span>
            <span class="error" ng-show="myForm.input.$error.pattern">
              Single word only!</span>
 
-           <tt>text = {{text}}</tt><br/>
+           <tt>text = {{example.text}}</tt><br/>
            <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
            <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
            <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -18703,9 +18721,9 @@ var inputType = {
           </form>
         </file>
         <file name="protractor.js" type="protractor">
-          var text = element(by.binding('text'));
+          var text = element(by.binding('example.text'));
           var valid = element(by.binding('myForm.input.$valid'));
-          var input = element(by.model('text'));
+          var input = element(by.model('example.text'));
 
           it('should initialize to model', function() {
             expect(text.getText()).toContain('guest');
@@ -18767,18 +18785,20 @@ var inputType = {
        <script>
           angular.module('dateInputExample', [])
             .controller('DateController', ['$scope', function($scope) {
-              $scope.value = new Date(2013, 9, 22);
+              $scope.example = {
+                value: new Date(2013, 9, 22)
+              };
             }]);
        </script>
        <form name="myForm" ng-controller="DateController as dateCtrl">
           Pick a date in 2013:
-          <input type="date" id="exampleInput" name="input" ng-model="value"
+          <input type="date" id="exampleInput" name="input" ng-model="example.value"
               placeholder="yyyy-MM-dd" min="2013-01-01" max="2013-12-31" required />
           <span class="error" ng-show="myForm.input.$error.required">
               Required!</span>
           <span class="error" ng-show="myForm.input.$error.date">
               Not a valid date!</span>
-           <tt>value = {{value | date: "yyyy-MM-dd"}}</tt><br/>
+           <tt>value = {{example.value | date: "yyyy-MM-dd"}}</tt><br/>
            <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
            <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
            <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -18786,9 +18806,9 @@ var inputType = {
        </form>
      </file>
      <file name="protractor.js" type="protractor">
-        var value = element(by.binding('value | date: "yyyy-MM-dd"'));
+        var value = element(by.binding('example.value | date: "yyyy-MM-dd"'));
         var valid = element(by.binding('myForm.input.$valid'));
-        var input = element(by.model('value'));
+        var input = element(by.model('example.value'));
 
         // currently protractor/webdriver does not support
         // sending keys to all known HTML5 input controls
@@ -18858,18 +18878,20 @@ var inputType = {
       <script>
         angular.module('dateExample', [])
           .controller('DateController', ['$scope', function($scope) {
-            $scope.value = new Date(2010, 11, 28, 14, 57);
+            $scope.example = {
+              value: new Date(2010, 11, 28, 14, 57)
+            };
           }]);
       </script>
       <form name="myForm" ng-controller="DateController as dateCtrl">
         Pick a date between in 2013:
-        <input type="datetime-local" id="exampleInput" name="input" ng-model="value"
+        <input type="datetime-local" id="exampleInput" name="input" ng-model="example.value"
             placeholder="yyyy-MM-ddTHH:mm:ss" min="2001-01-01T00:00:00" max="2013-12-31T00:00:00" required />
         <span class="error" ng-show="myForm.input.$error.required">
             Required!</span>
         <span class="error" ng-show="myForm.input.$error.datetimelocal">
             Not a valid date!</span>
-        <tt>value = {{value | date: "yyyy-MM-ddTHH:mm:ss"}}</tt><br/>
+        <tt>value = {{example.value | date: "yyyy-MM-ddTHH:mm:ss"}}</tt><br/>
         <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
         <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
         <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -18877,9 +18899,9 @@ var inputType = {
       </form>
     </file>
     <file name="protractor.js" type="protractor">
-      var value = element(by.binding('value | date: "yyyy-MM-ddTHH:mm:ss"'));
+      var value = element(by.binding('example.value | date: "yyyy-MM-ddTHH:mm:ss"'));
       var valid = element(by.binding('myForm.input.$valid'));
-      var input = element(by.model('value'));
+      var input = element(by.model('example.value'));
 
       // currently protractor/webdriver does not support
       // sending keys to all known HTML5 input controls
@@ -18950,18 +18972,20 @@ var inputType = {
      <script>
       angular.module('timeExample', [])
         .controller('DateController', ['$scope', function($scope) {
-          $scope.value = new Date(1970, 0, 1, 14, 57, 0);
+          $scope.example = {
+            value: new Date(1970, 0, 1, 14, 57, 0)
+          };
         }]);
      </script>
      <form name="myForm" ng-controller="DateController as dateCtrl">
         Pick a between 8am and 5pm:
-        <input type="time" id="exampleInput" name="input" ng-model="value"
+        <input type="time" id="exampleInput" name="input" ng-model="example.value"
             placeholder="HH:mm:ss" min="08:00:00" max="17:00:00" required />
         <span class="error" ng-show="myForm.input.$error.required">
             Required!</span>
         <span class="error" ng-show="myForm.input.$error.time">
             Not a valid date!</span>
-        <tt>value = {{value | date: "HH:mm:ss"}}</tt><br/>
+        <tt>value = {{example.value | date: "HH:mm:ss"}}</tt><br/>
         <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
         <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
         <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -18969,9 +18993,9 @@ var inputType = {
      </form>
    </file>
    <file name="protractor.js" type="protractor">
-      var value = element(by.binding('value | date: "HH:mm:ss"'));
+      var value = element(by.binding('example.value | date: "HH:mm:ss"'));
       var valid = element(by.binding('myForm.input.$valid'));
-      var input = element(by.model('value'));
+      var input = element(by.model('example.value'));
 
       // currently protractor/webdriver does not support
       // sending keys to all known HTML5 input controls
@@ -19041,18 +19065,20 @@ var inputType = {
       <script>
       angular.module('weekExample', [])
         .controller('DateController', ['$scope', function($scope) {
-          $scope.value = new Date(2013, 0, 3);
+          $scope.example = {
+            value: new Date(2013, 0, 3)
+          };
         }]);
       </script>
       <form name="myForm" ng-controller="DateController as dateCtrl">
         Pick a date between in 2013:
-        <input id="exampleInput" type="week" name="input" ng-model="value"
+        <input id="exampleInput" type="week" name="input" ng-model="example.value"
             placeholder="YYYY-W##" min="2012-W32" max="2013-W52" required />
         <span class="error" ng-show="myForm.input.$error.required">
             Required!</span>
         <span class="error" ng-show="myForm.input.$error.week">
             Not a valid date!</span>
-        <tt>value = {{value | date: "yyyy-Www"}}</tt><br/>
+        <tt>value = {{example.value | date: "yyyy-Www"}}</tt><br/>
         <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
         <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
         <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -19060,9 +19086,9 @@ var inputType = {
       </form>
     </file>
     <file name="protractor.js" type="protractor">
-      var value = element(by.binding('value | date: "yyyy-Www"'));
+      var value = element(by.binding('example.value | date: "yyyy-Www"'));
       var valid = element(by.binding('myForm.input.$valid'));
-      var input = element(by.model('value'));
+      var input = element(by.model('example.value'));
 
       // currently protractor/webdriver does not support
       // sending keys to all known HTML5 input controls
@@ -19132,18 +19158,20 @@ var inputType = {
      <script>
       angular.module('monthExample', [])
         .controller('DateController', ['$scope', function($scope) {
-          $scope.value = new Date(2013, 9, 1);
+          $scope.example = {
+            value: new Date(2013, 9, 1)
+          };
         }]);
      </script>
      <form name="myForm" ng-controller="DateController as dateCtrl">
-       Pick a month int 2013:
-       <input id="exampleInput" type="month" name="input" ng-model="value"
+       Pick a month in 2013:
+       <input id="exampleInput" type="month" name="input" ng-model="example.value"
           placeholder="yyyy-MM" min="2013-01" max="2013-12" required />
        <span class="error" ng-show="myForm.input.$error.required">
           Required!</span>
        <span class="error" ng-show="myForm.input.$error.month">
           Not a valid month!</span>
-       <tt>value = {{value | date: "yyyy-MM"}}</tt><br/>
+       <tt>value = {{example.value | date: "yyyy-MM"}}</tt><br/>
        <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
        <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
        <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -19151,9 +19179,9 @@ var inputType = {
      </form>
    </file>
    <file name="protractor.js" type="protractor">
-      var value = element(by.binding('value | date: "yyyy-MM"'));
+      var value = element(by.binding('example.value | date: "yyyy-MM"'));
       var valid = element(by.binding('myForm.input.$valid'));
-      var input = element(by.model('value'));
+      var input = element(by.model('example.value'));
 
       // currently protractor/webdriver does not support
       // sending keys to all known HTML5 input controls
@@ -19229,17 +19257,19 @@ var inputType = {
          <script>
            angular.module('numberExample', [])
              .controller('ExampleController', ['$scope', function($scope) {
-               $scope.value = 12;
+               $scope.example = {
+                 value: 12
+               };
              }]);
          </script>
          <form name="myForm" ng-controller="ExampleController">
-           Number: <input type="number" name="input" ng-model="value"
+           Number: <input type="number" name="input" ng-model="example.value"
                           min="0" max="99" required>
            <span class="error" ng-show="myForm.input.$error.required">
              Required!</span>
            <span class="error" ng-show="myForm.input.$error.number">
              Not valid number!</span>
-           <tt>value = {{value}}</tt><br/>
+           <tt>value = {{example.value}}</tt><br/>
            <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
            <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
            <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -19247,9 +19277,9 @@ var inputType = {
           </form>
         </file>
         <file name="protractor.js" type="protractor">
-          var value = element(by.binding('value'));
+          var value = element(by.binding('example.value'));
           var valid = element(by.binding('myForm.input.$valid'));
-          var input = element(by.model('value'));
+          var input = element(by.model('example.value'));
 
           it('should initialize to model', function() {
             expect(value.getText()).toContain('12');
@@ -19317,16 +19347,18 @@ var inputType = {
          <script>
            angular.module('urlExample', [])
              .controller('ExampleController', ['$scope', function($scope) {
-               $scope.text = 'http://google.com';
+               $scope.url = {
+                 text: 'http://google.com'
+               };
              }]);
          </script>
          <form name="myForm" ng-controller="ExampleController">
-           URL: <input type="url" name="input" ng-model="text" required>
+           URL: <input type="url" name="input" ng-model="url.text" required>
            <span class="error" ng-show="myForm.input.$error.required">
              Required!</span>
            <span class="error" ng-show="myForm.input.$error.url">
              Not valid url!</span>
-           <tt>text = {{text}}</tt><br/>
+           <tt>text = {{url.text}}</tt><br/>
            <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
            <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
            <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -19335,9 +19367,9 @@ var inputType = {
           </form>
         </file>
         <file name="protractor.js" type="protractor">
-          var text = element(by.binding('text'));
+          var text = element(by.binding('url.text'));
           var valid = element(by.binding('myForm.input.$valid'));
-          var input = element(by.model('text'));
+          var input = element(by.model('url.text'));
 
           it('should initialize to model', function() {
             expect(text.getText()).toContain('http://google.com');
@@ -19406,16 +19438,18 @@ var inputType = {
          <script>
            angular.module('emailExample', [])
              .controller('ExampleController', ['$scope', function($scope) {
-               $scope.text = 'me@example.com';
+               $scope.email = {
+                 text: 'me@example.com'
+               };
              }]);
          </script>
            <form name="myForm" ng-controller="ExampleController">
-             Email: <input type="email" name="input" ng-model="text" required>
+             Email: <input type="email" name="input" ng-model="email.text" required>
              <span class="error" ng-show="myForm.input.$error.required">
                Required!</span>
              <span class="error" ng-show="myForm.input.$error.email">
                Not valid email!</span>
-             <tt>text = {{text}}</tt><br/>
+             <tt>text = {{email.text}}</tt><br/>
              <tt>myForm.input.$valid = {{myForm.input.$valid}}</tt><br/>
              <tt>myForm.input.$error = {{myForm.input.$error}}</tt><br/>
              <tt>myForm.$valid = {{myForm.$valid}}</tt><br/>
@@ -19424,9 +19458,9 @@ var inputType = {
            </form>
          </file>
         <file name="protractor.js" type="protractor">
-          var text = element(by.binding('text'));
+          var text = element(by.binding('email.text'));
           var valid = element(by.binding('myForm.input.$valid'));
-          var input = element(by.model('text'));
+          var input = element(by.model('email.text'));
 
           it('should initialize to model', function() {
             expect(text.getText()).toContain('me@example.com');
@@ -19473,7 +19507,9 @@ var inputType = {
          <script>
            angular.module('radioExample', [])
              .controller('ExampleController', ['$scope', function($scope) {
-               $scope.color = 'blue';
+               $scope.color = {
+                 name: 'blue'
+               };
                $scope.specialValue = {
                  "id": "12345",
                  "value": "green"
@@ -19481,20 +19517,20 @@ var inputType = {
              }]);
          </script>
          <form name="myForm" ng-controller="ExampleController">
-           <input type="radio" ng-model="color" value="red">  Red <br/>
-           <input type="radio" ng-model="color" ng-value="specialValue"> Green <br/>
-           <input type="radio" ng-model="color" value="blue"> Blue <br/>
-           <tt>color = {{color | json}}</tt><br/>
+           <input type="radio" ng-model="color.name" value="red">  Red <br/>
+           <input type="radio" ng-model="color.name" ng-value="specialValue"> Green <br/>
+           <input type="radio" ng-model="color.name" value="blue"> Blue <br/>
+           <tt>color = {{color.name | json}}</tt><br/>
           </form>
           Note that `ng-value="specialValue"` sets radio item's value to be the value of `$scope.specialValue`.
         </file>
         <file name="protractor.js" type="protractor">
           it('should change state', function() {
-            var color = element(by.binding('color'));
+            var color = element(by.binding('color.name'));
 
             expect(color.getText()).toContain('blue');
 
-            element.all(by.model('color')).get(0).click();
+            element.all(by.model('color.name')).get(0).click();
 
             expect(color.getText()).toContain('red');
           });
@@ -19524,28 +19560,30 @@ var inputType = {
          <script>
            angular.module('checkboxExample', [])
              .controller('ExampleController', ['$scope', function($scope) {
-               $scope.value1 = true;
-               $scope.value2 = 'YES'
+               $scope.checkboxModel = {
+                value1 : true,
+                value2 : 'YES'
+              };
              }]);
          </script>
          <form name="myForm" ng-controller="ExampleController">
-           Value1: <input type="checkbox" ng-model="value1"> <br/>
-           Value2: <input type="checkbox" ng-model="value2"
+           Value1: <input type="checkbox" ng-model="checkboxModel.value1"> <br/>
+           Value2: <input type="checkbox" ng-model="checkboxModel.value2"
                           ng-true-value="'YES'" ng-false-value="'NO'"> <br/>
-           <tt>value1 = {{value1}}</tt><br/>
-           <tt>value2 = {{value2}}</tt><br/>
+           <tt>value1 = {{checkboxModel.value1}}</tt><br/>
+           <tt>value2 = {{checkboxModel.value2}}</tt><br/>
           </form>
         </file>
         <file name="protractor.js" type="protractor">
           it('should change state', function() {
-            var value1 = element(by.binding('value1'));
-            var value2 = element(by.binding('value2'));
+            var value1 = element(by.binding('checkboxModel.value1'));
+            var value2 = element(by.binding('checkboxModel.value2'));
 
             expect(value1.getText()).toContain('true');
             expect(value2.getText()).toContain('YES');
 
-            element(by.model('value1')).click();
-            element(by.model('value2')).click();
+            element(by.model('checkboxModel.value1')).click();
+            element(by.model('checkboxModel.value2')).click();
 
             expect(value1.getText()).toContain('false');
             expect(value2.getText()).toContain('NO');
@@ -22254,7 +22292,7 @@ var ngIncludeFillContentDirective = ['$compile',
  * **Note**: If you have assignment in `ngInit` along with {@link ng.$filter `$filter`}, make
  * sure you have parenthesis for correct precedence:
  * <pre class="prettyprint">
- *   <div ng-init="test1 = (data | orderBy:'name')"></div>
+ * `<div ng-init="test1 = (data | orderBy:'name')"></div>`
  * </pre>
  * </div>
  *
@@ -24526,10 +24564,11 @@ var NG_HIDE_IN_PROGRESS_CLASS = 'ng-hide-animate';
  *
  * By default, the `.ng-hide` class will style the element with `display: none!important`. If you wish to change
  * the hide behavior with ngShow/ngHide then this can be achieved by restating the styles for the `.ng-hide`
- * class in CSS:
+ * class CSS. Note that the selector that needs to be used is actually `.ng-hide:not(.ng-hide-animate)` to cope
+ * with extra animation classes that can be added.
  *
  * ```css
- * .ng-hide {
+ * .ng-hide:not(.ng-hide-animate) {
  *   /&#42; this is just another form of hiding an element &#42;/
  *   display: block!important;
  *   position: absolute;
@@ -26045,7 +26084,7 @@ var maxlengthDirective = function() {
         ctrl.$validate();
       });
       ctrl.$validators.maxlength = function(modelValue, viewValue) {
-        return (maxlength < 0) || ctrl.$isEmpty(modelValue) || (viewValue.length <= maxlength);
+        return (maxlength < 0) || ctrl.$isEmpty(viewValue) || (viewValue.length <= maxlength);
       };
     }
   };
@@ -26090,7 +26129,7 @@ var minlengthDirective = function() {
 
 !window.angular.$$csp() && window.angular.element(document).find('head').prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}</style>');
 /**
- * @license AngularJS v1.3.10
+ * @license AngularJS v1.3.13
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -27424,8 +27463,7 @@ angular.module('ngAnimate', ['ng'])
           } else if (lastAnimation.event == 'setClass') {
             animationsToCancel.push(lastAnimation);
             cleanup(element, className);
-          }
-          else if (runningAnimations[className]) {
+          } else if (runningAnimations[className]) {
             var current = runningAnimations[className];
             if (current.event == animationEvent) {
               skipAnimation = true;
@@ -28229,7 +28267,7 @@ angular.module('ngAnimate', ['ng'])
 })(window, window.angular);
 
 /**
- * @license AngularJS v1.3.10
+ * @license AngularJS v1.3.13
  * (c) 2010-2014 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -33085,7 +33123,7 @@ angular.module('ui.router.state')
 })(window, window.angular);
 /**
  * @license
- * Lo-Dash 3.0.0 (Custom Build) <https://lodash.com/>
+ * lodash 3.3.0 (Custom Build) <https://lodash.com/>
  * Build: `lodash modern -o ./lodash.js`
  * Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
  * Based on Underscore.js 1.7.0 <http://underscorejs.org/LICENSE>
@@ -33094,11 +33132,11 @@ angular.module('ui.router.state')
  */
 ;(function() {
 
-  /** Used as a safe reference for `undefined` in pre ES5 environments. */
+  /** Used as a safe reference for `undefined` in pre-ES5 environments. */
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '3.0.0';
+  var VERSION = '3.3.0';
 
   /** Used to compose bitmasks for wrapper metadata. */
   var BIND_FLAG = 1,
@@ -33173,8 +33211,8 @@ angular.module('ui.router.state')
       reInterpolate = /<%=([\s\S]+?)%>/g;
 
   /**
-   * Used to match ES6 template delimiters.
-   * See the [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-template-literal-lexical-components)
+   * Used to match ES template delimiters.
+   * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-template-literal-lexical-components)
    * for more details.
    */
   var reEsTemplate = /\$\{([^\\}]*(?:\\.[^\\}]*)*)\}/g;
@@ -33412,6 +33450,20 @@ angular.module('ui.router.state')
   }
 
   /**
+   * The base implementation of `_.isFunction` without support for environments
+   * with incorrect `typeof` results.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
+   */
+  function baseIsFunction(value) {
+    // Avoid a Chakra JIT bug in compatibility modes of IE 11.
+    // See https://github.com/jashkenas/underscore/issues/1621 for more details.
+    return typeof value == 'function' || false;
+  }
+
+  /**
    * The base implementation of `_.sortBy` and `_.sortByAll` which uses `comparer`
    * to define the sort order of `array` and replaces criteria objects with their
    * corresponding values.
@@ -33525,11 +33577,12 @@ angular.module('ui.router.state')
       }
     }
     // Fixes an `Array#sort` bug in the JS engine embedded in Adobe applications
-    // that causes it, under certain circumstances, to provide the same value
-    // for `object` and `other`. See https://github.com/jashkenas/underscore/pull/1247.
+    // that causes it, under certain circumstances, to provide the same value for
+    // `object` and `other`. See https://github.com/jashkenas/underscore/pull/1247
+    // for more details.
     //
     // This also ensures a stable sort in V8 and other engines.
-    // See https://code.google.com/p/v8/issues/detail?id=90.
+    // See https://code.google.com/p/v8/issues/detail?id=90 for more details.
     return object.index - other.index;
   }
 
@@ -33749,7 +33802,7 @@ angular.module('ui.router.state')
     // Avoid issues with some ES3 environments that attempt to use values, named
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
-    // See http://es5.github.io/#x11.1.5.
+    // See https://es5.github.io/#x11.1.5 for more details.
     context = context ? _.defaults(root.Object(), context, _.pick(root, contextProps)) : root;
 
     /** Native constructor references. */
@@ -33785,7 +33838,7 @@ angular.module('ui.router.state')
 
     /**
      * Used to resolve the `toStringTag` of values.
-     * See the [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
+     * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.prototype.tostring)
      * for more details.
      */
     var objToString = objectProto.toString;
@@ -33812,7 +33865,6 @@ angular.module('ui.router.state')
         setTimeout = context.setTimeout,
         splice = arrayProto.splice,
         Uint8Array = isNative(Uint8Array = context.Uint8Array) && Uint8Array,
-        unshift = arrayProto.unshift,
         WeakMap = isNative(WeakMap = context.WeakMap) && WeakMap;
 
     /** Used to clone array buffers. */
@@ -33853,7 +33905,7 @@ angular.module('ui.router.state')
 
     /**
      * Used as the maximum length of an array-like value.
-     * See the [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength)
+     * See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.max_safe_integer)
      * for more details.
      */
     var MAX_SAFE_INTEGER = Math.pow(2, 53) - 1;
@@ -33864,7 +33916,7 @@ angular.module('ui.router.state')
     /*------------------------------------------------------------------------*/
 
     /**
-     * Creates a `lodash` object which wraps `value` to enable intuitive chaining.
+     * Creates a `lodash` object which wraps `value` to enable implicit chaining.
      * Methods that operate on and return arrays, collections, and functions can
      * be chained together. Methods that return a boolean or single value will
      * automatically end the chain returning the unwrapped value. Explicit chaining
@@ -33879,65 +33931,71 @@ angular.module('ui.router.state')
      * Chaining is supported in custom builds as long as the `_#value` method is
      * directly or indirectly included in the build.
      *
-     * In addition to Lo-Dash methods, wrappers also have the following `Array` methods:
+     * In addition to lodash methods, wrappers also have the following `Array` methods:
      * `concat`, `join`, `pop`, `push`, `reverse`, `shift`, `slice`, `sort`, `splice`,
      * and `unshift`
      *
-     * The wrapper functions that support shortcut fusion are:
-     * `drop`, `dropRight`, `dropRightWhile`, `dropWhile`, `filter`, `first`,
-     * `initial`, `last`, `map`, `pluck`, `reject`, `rest`, `reverse`, `slice`,
-     * `take`, `takeRight`, `takeRightWhile`, `takeWhile`, and `where`
+     * The wrapper methods that support shortcut fusion are:
+     * `compact`, `drop`, `dropRight`, `dropRightWhile`, `dropWhile`, `filter`,
+     * `first`, `initial`, `last`, `map`, `pluck`, `reject`, `rest`, `reverse`,
+     * `slice`, `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `toArray`,
+     * and `where`
      *
-     * The chainable wrapper functions are:
+     * The chainable wrapper methods are:
      * `after`, `ary`, `assign`, `at`, `before`, `bind`, `bindAll`, `bindKey`,
-     * `callback`, `chain`, `chunk`, `compact`, `concat`, `constant`, `countBy`,
-     * `create`, `curry`, `debounce`, `defaults`, `defer`, `delay`, `difference`,
-     * `drop`, `dropRight`, `dropRightWhile`, `dropWhile`, `filter`, `flatten`,
-     * `flattenDeep`, `flow`, `flowRight`, `forEach`, `forEachRight`, `forIn`,
-     * `forInRight`, `forOwn`, `forOwnRight`, `functions`, `groupBy`, `indexBy`,
-     * `initial`, `intersection`, `invert`, `invoke`, `keys`, `keysIn`, `map`,
-     * `mapValues`, `matches`, `memoize`, `merge`, `mixin`, `negate`, `noop`,
-     * `omit`, `once`, `pairs`, `partial`, `partialRight`, `partition`, `pick`,
-     * `pluck`, `property`, `propertyOf`, `pull`, `pullAt`, `push`, `range`,
-     * `rearg`, `reject`, `remove`, `rest`, `reverse`, `shuffle`, `slice`, `sort`,
-     * `sortBy`, `sortByAll`, `splice`, `take`, `takeRight`, `takeRightWhile`,
-     * `takeWhile`, `tap`, `throttle`, `thru`, `times`, `toArray`, `toPlainObject`,
-     * `transform`, `union`, `uniq`, `unshift`, `unzip`, `values`, `valuesIn`,
-     * `where`, `without`, `wrap`, `xor`, `zip`, and `zipObject`
+     * `callback`, `chain`, `chunk`, `commit`, `compact`, `concat`, `constant`,
+     * `countBy`, `create`, `curry`, `debounce`, `defaults`, `defer`, `delay`,
+     * `difference`, `drop`, `dropRight`, `dropRightWhile`, `dropWhile`, `fill`,
+     * `filter`, `flatten`, `flattenDeep`, `flow`, `flowRight`, `forEach`,
+     * `forEachRight`, `forIn`, `forInRight`, `forOwn`, `forOwnRight`, `functions`,
+     * `groupBy`, `indexBy`, `initial`, `intersection`, `invert`, `invoke`, `keys`,
+     * `keysIn`, `map`, `mapValues`, `matches`, `matchesProperty`, `memoize`, `merge`,
+     * `mixin`, `negate`, `noop`, `omit`, `once`, `pairs`, `partial`, `partialRight`,
+     * `partition`, `pick`, `plant`, `pluck`, `property`, `propertyOf`, `pull`,
+     * `pullAt`, `push`, `range`, `rearg`, `reject`, `remove`, `rest`, `reverse`,
+     * `shuffle`, `slice`, `sort`, `sortBy`, `sortByAll`, `splice`, `spread`,
+     * `take`, `takeRight`, `takeRightWhile`, `takeWhile`, `tap`, `throttle`,
+     * `thru`, `times`, `toArray`, `toPlainObject`, `transform`, `union`, `uniq`,
+     * `unshift`, `unzip`, `values`, `valuesIn`, `where`, `without`, `wrap`, `xor`,
+     * `zip`, and `zipObject`
      *
-     * The wrapper functions that are **not** chainable by default are:
+     * The wrapper methods that are **not** chainable by default are:
      * `attempt`, `camelCase`, `capitalize`, `clone`, `cloneDeep`, `deburr`,
      * `endsWith`, `escape`, `escapeRegExp`, `every`, `find`, `findIndex`, `findKey`,
      * `findLast`, `findLastIndex`, `findLastKey`, `findWhere`, `first`, `has`,
      * `identity`, `includes`, `indexOf`, `isArguments`, `isArray`, `isBoolean`,
      * `isDate`, `isElement`, `isEmpty`, `isEqual`, `isError`, `isFinite`,
-     * `isFunction`, `isMatch` , `isNative`, `isNaN`, `isNull`, `isNumber`,
+     * `isFunction`, `isMatch`, `isNative`, `isNaN`, `isNull`, `isNumber`,
      * `isObject`, `isPlainObject`, `isRegExp`, `isString`, `isUndefined`,
      * `isTypedArray`, `join`, `kebabCase`, `last`, `lastIndexOf`, `max`, `min`,
      * `noConflict`, `now`, `pad`, `padLeft`, `padRight`, `parseInt`, `pop`,
      * `random`, `reduce`, `reduceRight`, `repeat`, `result`, `runInContext`,
      * `shift`, `size`, `snakeCase`, `some`, `sortedIndex`, `sortedLastIndex`,
-     * `startsWith`, `template`, `trim`, `trimLeft`, `trimRight`, `trunc`,
-     * `unescape`, `uniqueId`, `value`, and `words`
+     * `startCase`, `startsWith`, `template`, `trim`, `trimLeft`, `trimRight`,
+     * `trunc`, `unescape`, `uniqueId`, `value`, and `words`
      *
-     * The wrapper function `sample` will return a wrapped value when `n` is provided,
+     * The wrapper method `sample` will return a wrapped value when `n` is provided,
      * otherwise an unwrapped value is returned.
      *
      * @name _
      * @constructor
      * @category Chain
      * @param {*} value The value to wrap in a `lodash` instance.
-     * @returns {Object} Returns a `lodash` instance.
+     * @returns {Object} Returns the new `lodash` wrapper instance.
      * @example
      *
      * var wrapped = _([1, 2, 3]);
      *
      * // returns an unwrapped value
-     * wrapped.reduce(function(sum, n) { return sum + n; });
+     * wrapped.reduce(function(sum, n) {
+     *   return sum + n;
+     * });
      * // => 6
      *
      * // returns a wrapped value
-     * var squares = wrapped.map(function(n) { return n * n; });
+     * var squares = wrapped.map(function(n) {
+     *   return n * n;
+     * });
      *
      * _.isArray(squares);
      * // => false
@@ -33946,15 +34004,24 @@ angular.module('ui.router.state')
      * // => true
      */
     function lodash(value) {
-      if (isObjectLike(value) && !isArray(value)) {
+      if (isObjectLike(value) && !isArray(value) && !(value instanceof LazyWrapper)) {
         if (value instanceof LodashWrapper) {
           return value;
         }
-        if (hasOwnProperty.call(value, '__wrapped__')) {
-          return new LodashWrapper(value.__wrapped__, value.__chain__, arrayCopy(value.__actions__));
+        if (hasOwnProperty.call(value, '__chain__') && hasOwnProperty.call(value, '__wrapped__')) {
+          return wrapperClone(value);
         }
       }
       return new LodashWrapper(value);
+    }
+
+    /**
+     * The function whose prototype all chaining wrappers inherit from.
+     *
+     * @private
+     */
+    function baseLodash() {
+      // No operation performed.
     }
 
     /**
@@ -33966,9 +34033,9 @@ angular.module('ui.router.state')
      * @param {Array} [actions=[]] Actions to peform to resolve the unwrapped value.
      */
     function LodashWrapper(value, chainAll, actions) {
+      this.__wrapped__ = value;
       this.__actions__ = actions || [];
       this.__chain__ = !!chainAll;
-      this.__wrapped__ = value;
     }
 
     /**
@@ -34032,7 +34099,7 @@ angular.module('ui.router.state')
     }(0, 0));
 
     /**
-     * By default, the template delimiters used by Lo-Dash are like those in
+     * By default, the template delimiters used by lodash are like those in
      * embedded Ruby (ERB). Change the following template settings to use
      * alternative delimiters.
      *
@@ -34101,14 +34168,14 @@ angular.module('ui.router.state')
      * @param {*} value The value to wrap.
      */
     function LazyWrapper(value) {
-      this.actions = null;
-      this.dir = 1;
-      this.dropCount = 0;
-      this.filtered = false;
-      this.iteratees = null;
-      this.takeCount = POSITIVE_INFINITY;
-      this.views = null;
-      this.wrapped = value;
+      this.__wrapped__ = value;
+      this.__actions__ = null;
+      this.__dir__ = 1;
+      this.__dropCount__ = 0;
+      this.__filtered__ = false;
+      this.__iteratees__ = null;
+      this.__takeCount__ = POSITIVE_INFINITY;
+      this.__views__ = null;
     }
 
     /**
@@ -34120,18 +34187,18 @@ angular.module('ui.router.state')
      * @returns {Object} Returns the cloned `LazyWrapper` object.
      */
     function lazyClone() {
-      var actions = this.actions,
-          iteratees = this.iteratees,
-          views = this.views,
-          result = new LazyWrapper(this.wrapped);
+      var actions = this.__actions__,
+          iteratees = this.__iteratees__,
+          views = this.__views__,
+          result = new LazyWrapper(this.__wrapped__);
 
-      result.actions = actions ? arrayCopy(actions) : null;
-      result.dir = this.dir;
-      result.dropCount = this.dropCount;
-      result.filtered = this.filtered;
-      result.iteratees = iteratees ? arrayCopy(iteratees) : null;
-      result.takeCount = this.takeCount;
-      result.views = views ? arrayCopy(views) : null;
+      result.__actions__ = actions ? arrayCopy(actions) : null;
+      result.__dir__ = this.__dir__;
+      result.__dropCount__ = this.__dropCount__;
+      result.__filtered__ = this.__filtered__;
+      result.__iteratees__ = iteratees ? arrayCopy(iteratees) : null;
+      result.__takeCount__ = this.__takeCount__;
+      result.__views__ = views ? arrayCopy(views) : null;
       return result;
     }
 
@@ -34144,11 +34211,14 @@ angular.module('ui.router.state')
      * @returns {Object} Returns the new reversed `LazyWrapper` object.
      */
     function lazyReverse() {
-      var filtered = this.filtered,
-          result = filtered ? new LazyWrapper(this) : this.clone();
-
-      result.dir = this.dir * -1;
-      result.filtered = filtered;
+      if (this.__filtered__) {
+        var result = new LazyWrapper(this);
+        result.__dir__ = -1;
+        result.__filtered__ = true;
+      } else {
+        result = this.clone();
+        result.__dir__ *= -1;
+      }
       return result;
     }
 
@@ -34161,20 +34231,20 @@ angular.module('ui.router.state')
      * @returns {*} Returns the unwrapped value.
      */
     function lazyValue() {
-      var array = this.wrapped.value();
+      var array = this.__wrapped__.value();
       if (!isArray(array)) {
-        return baseWrapperValue(array, this.actions);
+        return baseWrapperValue(array, this.__actions__);
       }
-      var dir = this.dir,
+      var dir = this.__dir__,
           isRight = dir < 0,
-          length = array.length,
-          view = getView(0, length, this.views),
+          view = getView(0, array.length, this.__views__),
           start = view.start,
           end = view.end,
-          dropCount = this.dropCount,
-          takeCount = nativeMin(end - start, this.takeCount - dropCount),
+          length = end - start,
+          dropCount = this.__dropCount__,
+          takeCount = nativeMin(length, this.__takeCount__),
           index = isRight ? end : start - 1,
-          iteratees = this.iteratees,
+          iteratees = this.__iteratees__,
           iterLength = iteratees ? iteratees.length : 0,
           resIndex = 0,
           result = [];
@@ -34208,7 +34278,7 @@ angular.module('ui.router.state')
           result[resIndex++] = value;
         }
       }
-      return isRight ? result.reverse() : result;
+      return result;
     }
 
     /*------------------------------------------------------------------------*/
@@ -34619,7 +34689,7 @@ angular.module('ui.router.state')
         return baseCopy(source, object, props);
       }
       var index = -1,
-          length = props.length
+          length = props.length;
 
       while (++index < length) {
         var key = props[index],
@@ -34726,10 +34796,12 @@ angular.module('ui.router.state')
       if (func == null) {
         return identity;
       }
-      // Handle "_.property" and "_.matches" style callback shorthands.
-      return type == 'object'
-        ? baseMatches(func, !argCount)
-        : baseProperty(argCount ? baseToString(func) : func);
+      if (type == 'object') {
+        return baseMatches(func);
+      }
+      return typeof thisArg == 'undefined'
+        ? baseProperty(func + '')
+        : baseMatchesProperty(func + '', thisArg);
     }
 
     /**
@@ -34830,7 +34902,7 @@ angular.module('ui.router.state')
      * @returns {number} Returns the timer id.
      */
     function baseDelay(func, wait, args, fromIndex) {
-      if (!isFunction(func)) {
+      if (typeof func != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       return setTimeout(function() { func.apply(undefined, baseSlice(args, fromIndex)); }, wait);
@@ -34948,6 +35020,36 @@ angular.module('ui.router.state')
         return result;
       });
       return result;
+    }
+
+    /**
+     * The base implementation of `_.fill` without an iteratee call guard.
+     *
+     * @private
+     * @param {Array} array The array to fill.
+     * @param {*} value The value to fill `array` with.
+     * @param {number} [start=0] The start position.
+     * @param {number} [end=array.length] The end position.
+     * @returns {Array} Returns `array`.
+     */
+    function baseFill(array, value, start, end) {
+      var length = array.length;
+
+      start = start == null ? 0 : (+start || 0);
+      if (start < 0) {
+        start = -start > length ? 0 : (length + start);
+      }
+      end = (typeof end == 'undefined' || end > length) ? length : (+end || 0);
+      if (end < 0) {
+        end += length;
+      }
+      length = start > end ? 0 : end >>> 0;
+      start >>>= 0;
+
+      while (start < length) {
+        array[start++] = value;
+      }
+      return array;
     }
 
     /**
@@ -35254,9 +35356,8 @@ angular.module('ui.router.state')
       if (!isSameTag) {
         return false;
       }
-      // Assume cyclic structures are equal.
-      // The algorithm for detecting cyclic structures is adapted from ES 5.1
-      // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3).
+      // Assume cyclic values are equal.
+      // For more information on detecting circular references see https://es5.github.io/#JO.
       stackA || (stackA = []);
       stackB || (stackB = []);
 
@@ -35283,7 +35384,7 @@ angular.module('ui.router.state')
      * shorthands or `this` binding.
      *
      * @private
-     * @param {Object} source The object to inspect.
+     * @param {Object} object The object to inspect.
      * @param {Array} props The source property names to match.
      * @param {Array} values The source values to match.
      * @param {Array} strictCompareFlags Strict comparison flags for source values.
@@ -35345,15 +35446,13 @@ angular.module('ui.router.state')
     }
 
     /**
-     * The base implementation of `_.matches` which supports specifying whether
-     * `source` should be cloned.
+     * The base implementation of `_.matches` which does not clone `source`.
      *
      * @private
      * @param {Object} source The object of property values to match.
-     * @param {boolean} [isCloned] Specify cloning the source object.
      * @returns {Function} Returns the new function.
      */
-    function baseMatches(source, isCloned) {
+    function baseMatches(source) {
       var props = keys(source),
           length = props.length;
 
@@ -35363,12 +35462,9 @@ angular.module('ui.router.state')
 
         if (isStrictComparable(value)) {
           return function(object) {
-            return object != null && value === object[key] && hasOwnProperty.call(object, key);
+            return object != null && object[key] === value && hasOwnProperty.call(object, key);
           };
         }
-      }
-      if (isCloned) {
-        source = baseClone(source, true);
       }
       var values = Array(length),
           strictCompareFlags = Array(length);
@@ -35380,6 +35476,26 @@ angular.module('ui.router.state')
       }
       return function(object) {
         return baseIsMatch(object, props, values, strictCompareFlags);
+      };
+    }
+
+    /**
+     * The base implementation of `_.matchesProperty` which does not coerce `key`
+     * to a string.
+     *
+     * @private
+     * @param {string} key The key of the property to get.
+     * @param {*} value The value to compare.
+     * @returns {Function} Returns the new function.
+     */
+    function baseMatchesProperty(key, value) {
+      if (isStrictComparable(value)) {
+        return function(object) {
+          return object != null && object[key] === value;
+        };
+      }
+      return function(object) {
+        return object != null && baseIsEqual(value, object[key], null, true);
       };
     }
 
@@ -35396,8 +35512,10 @@ angular.module('ui.router.state')
      * @returns {Object} Returns the destination object.
      */
     function baseMerge(object, source, customizer, stackA, stackB) {
+      if (!isObject(object)) {
+        return object;
+      }
       var isSrcArr = isLength(source.length) && (isArray(source) || isTypedArray(source));
-
       (isSrcArr ? arrayEach : baseForOwn)(source, function(srcValue, key, source) {
         if (isObjectLike(srcValue)) {
           stackA || (stackA = []);
@@ -35459,6 +35577,9 @@ angular.module('ui.router.state')
           result = isArguments(value)
             ? toPlainObject(value)
             : (isPlainObject(value) ? value : {});
+        }
+        else {
+          isCommon = false;
         }
       }
       // Add the source value to the stack of traversed objects and associate
@@ -35542,7 +35663,7 @@ angular.module('ui.router.state')
       eachFunc(collection, function(value, index, collection) {
         accumulator = initFromCollection
           ? (initFromCollection = false, value)
-          : iteratee(accumulator, value, index, collection)
+          : iteratee(accumulator, value, index, collection);
       });
       return accumulator;
     }
@@ -35581,7 +35702,8 @@ angular.module('ui.router.state')
       if (end < 0) {
         end += length;
       }
-      length = start > end ? 0 : (end - start);
+      length = start > end ? 0 : (end - start) >>> 0;
+      start >>>= 0;
 
       var result = Array(length);
       while (++index < length) {
@@ -35917,8 +36039,7 @@ angular.module('ui.router.state')
     /**
      * Creates a function that aggregates a collection, creating an accumulator
      * object composed from the results of running each element in the collection
-     * through an iteratee. The `setter` sets the keys and values of the accumulator
-     * object. If `initializer` is provided initializes the accumulator object.
+     * through an iteratee.
      *
      * @private
      * @param {Function} setter The function to set keys and values of the accumulator object.
@@ -36048,7 +36169,7 @@ angular.module('ui.router.state')
             result = Ctor.apply(thisBinding, arguments);
 
         // Mimic the constructor's `return` behavior.
-        // See http://es5.github.io/#x13.2.2.
+        // See https://es5.github.io/#x13.2.2 for more details.
         return isObject(result) ? result : thisBinding;
       };
     }
@@ -36188,7 +36309,7 @@ angular.module('ui.router.state')
         return '';
       }
       var padLength = length - strLength;
-      chars = chars == null ? ' ' : baseToString(chars);
+      chars = chars == null ? ' ' : (chars + '');
       return repeat(chars, ceil(padLength / chars.length)).slice(0, padLength);
     }
 
@@ -36255,7 +36376,7 @@ angular.module('ui.router.state')
      */
     function createWrapper(func, bitmask, thisArg, partials, holders, argPos, ary, arity) {
       var isBindKey = bitmask & BIND_KEY_FLAG;
-      if (!isBindKey && !isFunction(func)) {
+      if (!isBindKey && typeof func != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       var length = partials ? partials.length : 0;
@@ -36285,9 +36406,9 @@ angular.module('ui.router.state')
       if (bitmask == BIND_FLAG) {
         var result = createBindWrapper(newData[0], newData[2]);
       } else if ((bitmask == PARTIAL_FLAG || bitmask == (BIND_FLAG | PARTIAL_FLAG)) && !newData[4].length) {
-        result = createPartialWrapper.apply(null, newData);
+        result = createPartialWrapper.apply(undefined, newData);
       } else {
-        result = createHybridWrapper.apply(null, newData);
+        result = createHybridWrapper.apply(undefined, newData);
       }
       var setter = data ? baseSetData : setData;
       return setter(result, newData);
@@ -36379,9 +36500,9 @@ angular.module('ui.router.state')
 
         case regexpTag:
         case stringTag:
-          // Coerce regexes to strings (http://es5.github.io/#x15.10.6.4) and
-          // treat strings primitives and string objects as equal.
-          return object == baseToString(other);
+          // Coerce regexes to strings and treat strings primitives and string
+          // objects as equal. See https://es5.github.io/#x15.10.6.4 for more details.
+          return object == (other + '');
       }
       return false;
     }
@@ -36676,13 +36797,18 @@ angular.module('ui.router.state')
         var length = object.length,
             prereq = isLength(length) && isIndex(index, length);
       } else {
-        prereq = type == 'string' && index in value;
+        prereq = type == 'string' && index in object;
       }
-      return prereq && object[index] === value;
+      var other = object[index];
+      return prereq && (value === value ? value === other : other !== other);
     }
 
     /**
      * Checks if `value` is a valid array-like length.
+     *
+     * **Note:** This function is based on ES `ToLength`. See the
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-tolength)
+     * for more details.
      *
      * @private
      * @param {*} value The value to check.
@@ -36854,7 +36980,8 @@ angular.module('ui.router.state')
      *
      * **Note:** If this function becomes hot, i.e. is invoked a lot in a short
      * period of time, it will trip its breaker and transition to an identity function
-     * to avoid garbage collection pauses in V8. See https://code.google.com/p/v8/issues/detail?id=2070.
+     * to avoid garbage collection pauses in V8. See [V8 issue 2070](https://code.google.com/p/v8/issues/detail?id=2070)
+     * for more details.
      *
      * @private
      * @param {Function} func The function to associate metadata with.
@@ -36970,6 +37097,19 @@ angular.module('ui.router.state')
       return isObject(value) ? value : Object(value);
     }
 
+    /**
+     * Creates a clone of `wrapper`.
+     *
+     * @private
+     * @param {Object} wrapper The wrapper to clone.
+     * @returns {Object} Returns the cloned wrapper.
+     */
+    function wrapperClone(wrapper) {
+      return wrapper instanceof LazyWrapper
+        ? wrapper.clone()
+        : new LodashWrapper(wrapper.__wrapped__, wrapper.__chain__, arrayCopy(wrapper.__actions__));
+    }
+
     /*------------------------------------------------------------------------*/
 
     /**
@@ -36981,7 +37121,7 @@ angular.module('ui.router.state')
      * @memberOf _
      * @category Array
      * @param {Array} array The array to process.
-     * @param {numer} [size=1] The length of each chunk.
+     * @param {number} [size=1] The length of each chunk.
      * @param- {Object} [guard] Enables use as a callback for functions like `_.map`.
      * @returns {Array} Returns the new array containing chunks.
      * @example
@@ -37044,7 +37184,7 @@ angular.module('ui.router.state')
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -37055,7 +37195,7 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
-     * _.difference([1, 2, 3], [5, 2, 10]);
+     * _.difference([1, 2, 3], [4, 2]);
      * // => [1, 3]
      */
     function difference() {
@@ -37076,7 +37216,6 @@ angular.module('ui.router.state')
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {number} [n=1] The number of elements to drop.
@@ -37112,7 +37251,6 @@ angular.module('ui.router.state')
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {number} [n=1] The number of elements to drop.
@@ -37149,40 +37287,49 @@ angular.module('ui.router.state')
      * Elements are dropped until `predicate` returns falsey. The predicate is
      * bound to `thisArg` and invoked with three arguments; (value, index, array).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
-     * callback returns `true` for elements that have the properties of the given
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
+     * callback returns `true` for elements that match the properties of the given
      * object, else `false`.
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per element.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the slice of `array`.
      * @example
      *
-     * _.dropRightWhile([1, 2, 3], function(n) { return n > 1; });
+     * _.dropRightWhile([1, 2, 3], function(n) {
+     *   return n > 1;
+     * });
      * // => [1]
      *
      * var users = [
-     *   { 'user': 'barney',  'status': 'busy', 'active': false },
-     *   { 'user': 'fred',    'status': 'busy', 'active': true },
-     *   { 'user': 'pebbles', 'status': 'away', 'active': true }
+     *   { 'user': 'barney',  'active': true },
+     *   { 'user': 'fred',    'active': false },
+     *   { 'user': 'pebbles', 'active': false }
      * ];
      *
-     * // using the "_.property" callback shorthand
-     * _.pluck(_.dropRightWhile(users, 'active'), 'user');
+     * // using the `_.matches` callback shorthand
+     * _.pluck(_.dropRightWhile(users, { 'user': pebbles, 'active': false }), 'user');
+     * // => ['barney', 'fred']
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.pluck(_.dropRightWhile(users, 'active', false), 'user');
      * // => ['barney']
      *
-     * // using the "_.matches" callback shorthand
-     * _.pluck(_.dropRightWhile(users, { 'status': 'away' }), 'user');
-     * // => ['barney', 'fred']
+     * // using the `_.property` callback shorthand
+     * _.pluck(_.dropRightWhile(users, 'active'), 'user');
+     * // => ['barney', 'fred', 'pebbles']
      */
     function dropRightWhile(array, predicate, thisArg) {
       var length = array ? array.length : 0;
@@ -37199,40 +37346,49 @@ angular.module('ui.router.state')
      * Elements are dropped until `predicate` returns falsey. The predicate is
      * bound to `thisArg` and invoked with three arguments; (value, index, array).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per element.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the slice of `array`.
      * @example
      *
-     * _.dropWhile([1, 2, 3], function(n) { return n < 3; });
+     * _.dropWhile([1, 2, 3], function(n) {
+     *   return n < 3;
+     * });
      * // => [3]
      *
      * var users = [
-     *   { 'user': 'barney',  'status': 'busy', 'active': true },
-     *   { 'user': 'fred',    'status': 'busy', 'active': false },
-     *   { 'user': 'pebbles', 'status': 'away', 'active': true }
+     *   { 'user': 'barney',  'active': false },
+     *   { 'user': 'fred',    'active': false },
+     *   { 'user': 'pebbles', 'active': true }
      * ];
      *
-     * // using the "_.property" callback shorthand
-     * _.pluck(_.dropWhile(users, 'active'), 'user');
+     * // using the `_.matches` callback shorthand
+     * _.pluck(_.dropWhile(users, { 'user': 'barney', 'active': false }), 'user');
      * // => ['fred', 'pebbles']
      *
-     * // using the "_.matches" callback shorthand
-     * _.pluck(_.dropWhile(users, { 'status': 'busy' }), 'user');
+     * // using the `_.matchesProperty` callback shorthand
+     * _.pluck(_.dropWhile(users, 'active', false), 'user');
      * // => ['pebbles']
+     *
+     * // using the `_.property` callback shorthand
+     * _.pluck(_.dropWhile(users, 'active'), 'user');
+     * // => ['barney', 'fred', 'pebbles']
      */
     function dropWhile(array, predicate, thisArg) {
       var length = array ? array.length : 0;
@@ -37246,13 +37402,44 @@ angular.module('ui.router.state')
     }
 
     /**
+     * Fills elements of `array` with `value` from `start` up to, but not
+     * including, `end`.
+     *
+     * **Note:** This method mutates `array`.
+     *
+     * @static
+     * @memberOf _
+     * @category Array
+     * @param {Array} array The array to fill.
+     * @param {*} value The value to fill `array` with.
+     * @param {number} [start=0] The start position.
+     * @param {number} [end=array.length] The end position.
+     * @returns {Array} Returns `array`.
+     */
+    function fill(array, value, start, end) {
+      var length = array ? array.length : 0;
+      if (!length) {
+        return [];
+      }
+      if (start && typeof start != 'number' && isIterateeCall(array, value, start)) {
+        start = 0;
+        end = length;
+      }
+      return baseFill(array, value, start, end);
+    }
+
+    /**
      * This method is like `_.find` except that it returns the index of the first
      * element `predicate` returns truthy for, instead of the element itself.
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -37261,28 +37448,33 @@ angular.module('ui.router.state')
      * @category Array
      * @param {Array} array The array to search.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {number} Returns the index of the found element, else `-1`.
      * @example
      *
      * var users = [
-     *   { 'user': 'barney',  'age': 36, 'active': false },
-     *   { 'user': 'fred',    'age': 40, 'active': true },
-     *   { 'user': 'pebbles', 'age': 1,  'active': false }
+     *   { 'user': 'barney',  'active': false },
+     *   { 'user': 'fred',    'active': false },
+     *   { 'user': 'pebbles', 'active': true }
      * ];
      *
-     * _.findIndex(users, function(chr) { return chr.age < 40; });
+     * _.findIndex(users, function(chr) {
+     *   return chr.user == 'barney';
+     * });
      * // => 0
      *
-     * // using the "_.matches" callback shorthand
-     * _.findIndex(users, { 'age': 1 });
-     * // => 2
-     *
-     * // using the "_.property" callback shorthand
-     * _.findIndex(users, 'active');
+     * // using the `_.matches` callback shorthand
+     * _.findIndex(users, { 'user': 'fred', 'active': false });
      * // => 1
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.findIndex(users, 'active', false);
+     * // => 0
+     *
+     * // using the `_.property` callback shorthand
+     * _.findIndex(users, 'active');
+     * // => 2
      */
     function findIndex(array, predicate, thisArg) {
       var index = -1,
@@ -37301,10 +37493,14 @@ angular.module('ui.router.state')
      * This method is like `_.findIndex` except that it iterates over elements
      * of `collection` from right to left.
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -37313,26 +37509,31 @@ angular.module('ui.router.state')
      * @category Array
      * @param {Array} array The array to search.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {number} Returns the index of the found element, else `-1`.
      * @example
      *
      * var users = [
-     *   { 'user': 'barney',  'age': 36, 'active': true },
-     *   { 'user': 'fred',    'age': 40, 'active': false },
-     *   { 'user': 'pebbles', 'age': 1,  'active': false }
+     *   { 'user': 'barney',  'active': true },
+     *   { 'user': 'fred',    'active': false },
+     *   { 'user': 'pebbles', 'active': false }
      * ];
      *
-     * _.findLastIndex(users, function(chr) { return chr.age < 40; });
+     * _.findLastIndex(users, function(chr) {
+     *   return chr.user == 'pebbles';
+     * });
      * // => 2
      *
-     * // using the "_.matches" callback shorthand
-     * _.findLastIndex(users, { 'age': 40 });
+     * // using the `_.matches` callback shorthand
+     * _.findLastIndex(users, { user': 'barney', 'active': true });
+     * // => 0
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.findLastIndex(users, 'active', false);
      * // => 1
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.findLastIndex(users, 'active');
      * // => 0
      */
@@ -37381,11 +37582,11 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new flattened array.
      * @example
      *
-     * _.flatten([1, [2], [3, [[4]]]]);
-     * // => [1, 2, 3, [[4]]];
+     * _.flatten([1, [2, 3, [4]]]);
+     * // => [1, 2, 3, [4]];
      *
      * // using `isDeep`
-     * _.flatten([1, [2], [3, [[4]]]], true);
+     * _.flatten([1, [2, 3, [4]]], true);
      * // => [1, 2, 3, 4];
      */
     function flatten(array, isDeep, guard) {
@@ -37406,7 +37607,7 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new flattened array.
      * @example
      *
-     * _.flattenDeep([1, [2], [3, [[4]]]]);
+     * _.flattenDeep([1, [2, 3, [4]]]);
      * // => [1, 2, 3, 4];
      */
     function flattenDeep(array) {
@@ -37422,7 +37623,7 @@ angular.module('ui.router.state')
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -37435,15 +37636,15 @@ angular.module('ui.router.state')
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
      *
-     * _.indexOf([1, 2, 3, 1, 2, 3], 2);
-     * // => 1
+     * _.indexOf([1, 2, 1, 2], 2);
+     * // => 2
      *
      * // using `fromIndex`
-     * _.indexOf([1, 2, 3, 1, 2, 3], 2, 3);
-     * // => 4
+     * _.indexOf([1, 2, 1, 2], 2, 2);
+     * // => 3
      *
      * // performing a binary search
-     * _.indexOf([4, 4, 5, 5, 6, 6], 5, true);
+     * _.indexOf([1, 1, 2, 2], 2, true);
      * // => 2
      */
     function indexOf(array, value, fromIndex) {
@@ -37485,7 +37686,7 @@ angular.module('ui.router.state')
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -37494,9 +37695,8 @@ angular.module('ui.router.state')
      * @param {...Array} [arrays] The arrays to inspect.
      * @returns {Array} Returns the new array of shared values.
      * @example
-     *
-     * _.intersection([1, 2, 3], [5, 2, 1, 4], [2, 1]);
-     * // => [1, 2]
+     * _.intersection([1, 2], [4, 2], [2, 1]);
+     * // => [2]
      */
     function intersection() {
       var args = [],
@@ -37572,15 +37772,15 @@ angular.module('ui.router.state')
      * @returns {number} Returns the index of the matched value, else `-1`.
      * @example
      *
-     * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2);
-     * // => 4
+     * _.lastIndexOf([1, 2, 1, 2], 2);
+     * // => 3
      *
      * // using `fromIndex`
-     * _.lastIndexOf([1, 2, 3, 1, 2, 3], 2, 3);
+     * _.lastIndexOf([1, 2, 1, 2], 2, 2);
      * // => 1
      *
      * // performing a binary search
-     * _.lastIndexOf([4, 4, 5, 5, 6, 6], 5, true);
+     * _.lastIndexOf([1, 1, 2, 2], 2, true);
      * // => 3
      */
     function lastIndexOf(array, value, fromIndex) {
@@ -37614,7 +37814,7 @@ angular.module('ui.router.state')
      * **Notes:**
      *  - Unlike `_.without`, this method mutates `array`.
      *  - `SameValueZero` comparisons are like strict equality comparisons, e.g. `===`,
-     *    except that `NaN` matches `NaN`. See the [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     *    except that `NaN` matches `NaN`. See the [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      *    for more details.
      *
      * @static
@@ -37626,6 +37826,7 @@ angular.module('ui.router.state')
      * @example
      *
      * var array = [1, 2, 3, 1, 2, 3];
+     *
      * _.pull(array, 2, 3);
      * console.log(array);
      * // => [1, 1]
@@ -37667,7 +37868,7 @@ angular.module('ui.router.state')
      * @example
      *
      * var array = [5, 10, 15, 20];
-     * var evens = _.pullAt(array, [1, 3]);
+     * var evens = _.pullAt(array, 1, 3);
      *
      * console.log(array);
      * // => [5, 15]
@@ -37684,10 +37885,14 @@ angular.module('ui.router.state')
      * and returns an array of the removed elements. The predicate is bound to
      * `thisArg` and invoked with three arguments; (value, index, array).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -37698,14 +37903,15 @@ angular.module('ui.router.state')
      * @category Array
      * @param {Array} array The array to modify.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the new array of removed elements.
      * @example
      *
      * var array = [1, 2, 3, 4];
-     * var evens = _.remove(array, function(n) { return n % 2 == 0; });
+     * var evens = _.remove(array, function(n) {
+     *   return n % 2 == 0;
+     * });
      *
      * console.log(array);
      * // => [1, 3]
@@ -37781,10 +37987,14 @@ angular.module('ui.router.state')
      * to compute their sort ranking. The iteratee is bound to `thisArg` and
      * invoked with one argument; (value).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -37794,8 +38004,7 @@ angular.module('ui.router.state')
      * @param {Array} array The sorted array to inspect.
      * @param {*} value The value to evaluate.
      * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {number} Returns the index at which `value` should be inserted
      *  into `array`.
@@ -37804,7 +38013,7 @@ angular.module('ui.router.state')
      * _.sortedIndex([30, 50], 40);
      * // => 1
      *
-     * _.sortedIndex([4, 4, 5, 5, 6, 6], 5);
+     * _.sortedIndex([4, 4, 5, 5], 5);
      * // => 2
      *
      * var dict = { 'data': { 'thirty': 30, 'forty': 40, 'fifty': 50 } };
@@ -37815,7 +38024,7 @@ angular.module('ui.router.state')
      * }, dict);
      * // => 1
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.sortedIndex([{ 'x': 30 }, { 'x': 50 }], { 'x': 40 }, 'x');
      * // => 1
      */
@@ -37837,14 +38046,13 @@ angular.module('ui.router.state')
      * @param {Array} array The sorted array to inspect.
      * @param {*} value The value to evaluate.
      * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {number} Returns the index at which `value` should be inserted
      *  into `array`.
      * @example
      *
-     * _.sortedLastIndex([4, 4, 5, 5, 6, 6], 5);
+     * _.sortedLastIndex([4, 4, 5, 5], 5);
      * // => 4
      */
     function sortedLastIndex(array, value, iteratee, thisArg) {
@@ -37859,7 +38067,6 @@ angular.module('ui.router.state')
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {number} [n=1] The number of elements to take.
@@ -37895,7 +38102,6 @@ angular.module('ui.router.state')
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {number} [n=1] The number of elements to take.
@@ -37932,40 +38138,49 @@ angular.module('ui.router.state')
      * taken until `predicate` returns falsey. The predicate is bound to `thisArg`
      * and invoked with three arguments; (value, index, array).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per element.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the slice of `array`.
      * @example
      *
-     * _.takeRightWhile([1, 2, 3], function(n) { return n > 1; });
+     * _.takeRightWhile([1, 2, 3], function(n) {
+     *   return n > 1;
+     * });
      * // => [2, 3]
      *
      * var users = [
-     *   { 'user': 'barney',  'status': 'busy', 'active': false },
-     *   { 'user': 'fred',    'status': 'busy', 'active': true },
-     *   { 'user': 'pebbles', 'status': 'away', 'active': true }
+     *   { 'user': 'barney',  'active': true },
+     *   { 'user': 'fred',    'active': false },
+     *   { 'user': 'pebbles', 'active': false }
      * ];
      *
-     * // using the "_.property" callback shorthand
-     * _.pluck(_.takeRightWhile(users, 'active'), 'user');
+     * // using the `_.matches` callback shorthand
+     * _.pluck(_.takeRightWhile(users, { 'user': 'pebbles', 'active': false }), 'user');
+     * // => ['pebbles']
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.pluck(_.takeRightWhile(users, 'active', false), 'user');
      * // => ['fred', 'pebbles']
      *
-     * // using the "_.matches" callback shorthand
-     * _.pluck(_.takeRightWhile(users, { 'status': 'away' }), 'user');
-     * // => ['pebbles']
+     * // using the `_.property` callback shorthand
+     * _.pluck(_.takeRightWhile(users, 'active'), 'user');
+     * // => []
      */
     function takeRightWhile(array, predicate, thisArg) {
       var length = array ? array.length : 0;
@@ -37982,40 +38197,49 @@ angular.module('ui.router.state')
      * are taken until `predicate` returns falsey. The predicate is bound to
      * `thisArg` and invoked with three arguments; (value, index, array).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Array
      * @param {Array} array The array to query.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per element.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the slice of `array`.
      * @example
      *
-     * _.takeWhile([1, 2, 3], function(n) { return n < 3; });
+     * _.takeWhile([1, 2, 3], function(n) {
+     *   return n < 3;
+     * });
      * // => [1, 2]
      *
      * var users = [
-     *   { 'user': 'barney',  'status': 'busy', 'active': true },
-     *   { 'user': 'fred',    'status': 'busy', 'active': false },
-     *   { 'user': 'pebbles', 'status': 'away', 'active': true }
+     *   { 'user': 'barney',  'active': false },
+     *   { 'user': 'fred',    'active': false},
+     *   { 'user': 'pebbles', 'active': true }
      * ];
      *
-     * // using the "_.property" callback shorthand
-     * _.pluck(_.takeWhile(users, 'active'), 'user');
+     * // using the `_.matches` callback shorthand
+     * _.pluck(_.takeWhile(users, { 'user': 'barney', 'active': false }), 'user');
      * // => ['barney']
      *
-     * // using the "_.matches" callback shorthand
-     * _.pluck(_.takeWhile(users, { 'status': 'busy' }), 'user');
+     * // using the `_.matchesProperty` callback shorthand
+     * _.pluck(_.takeWhile(users, 'active', false), 'user');
      * // => ['barney', 'fred']
+     *
+     * // using the `_.property` callback shorthand
+     * _.pluck(_.takeWhile(users, 'active'), 'user');
+     * // => []
      */
     function takeWhile(array, predicate, thisArg) {
       var length = array ? array.length : 0;
@@ -38034,7 +38258,7 @@ angular.module('ui.router.state')
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -38044,8 +38268,8 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new array of combined values.
      * @example
      *
-     * _.union([1, 2, 3], [5, 2, 1, 4], [2, 1]);
-     * // => [1, 2, 3, 5, 4]
+     * _.union([1, 2], [4, 2], [2, 1]);
+     * // => [1, 2, 4]
      */
     function union() {
       return baseUniq(baseFlatten(arguments, false, true));
@@ -38059,16 +38283,20 @@ angular.module('ui.router.state')
      * uniqueness is computed. The `iteratee` is bound to `thisArg` and invoked
      * with three arguments; (value, index, array).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -38078,8 +38306,6 @@ angular.module('ui.router.state')
      * @param {Array} array The array to inspect.
      * @param {boolean} [isSorted] Specify the array is sorted.
      * @param {Function|Object|string} [iteratee] The function invoked per iteration.
-     *  If a property name or object is provided it is used to create a "_.property"
-     *  or "_.matches" style callback respectively.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {Array} Returns the new duplicate-value-free array.
      * @example
@@ -38092,10 +38318,12 @@ angular.module('ui.router.state')
      * // => [1, 2]
      *
      * // using an iteratee function
-     * _.uniq([1, 2.5, 1.5, 2], function(n) { return this.floor(n); }, Math);
+     * _.uniq([1, 2.5, 1.5, 2], function(n) {
+     *   return this.floor(n);
+     * }, Math);
      * // => [1, 2.5]
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.uniq([{ 'x': 1 }, { 'x': 2 }, { 'x': 1 }], 'x');
      * // => [{ 'x': 1 }, { 'x': 2 }]
      */
@@ -38104,8 +38332,7 @@ angular.module('ui.router.state')
       if (!length) {
         return [];
       }
-      // Juggle arguments.
-      if (typeof isSorted != 'boolean' && isSorted != null) {
+      if (isSorted != null && typeof isSorted != 'boolean') {
         thisArg = iteratee;
         iteratee = isIterateeCall(array, isSorted, thisArg) ? null : isSorted;
         isSorted = false;
@@ -38121,7 +38348,7 @@ angular.module('ui.router.state')
 
     /**
      * This method is like `_.zip` except that it accepts an array of grouped
-     * elements and creates an array regrouping the elements to their pre `_.zip`
+     * elements and creates an array regrouping the elements to their pre-`_.zip`
      * configuration.
      *
      * @static
@@ -38154,7 +38381,7 @@ angular.module('ui.router.state')
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -38165,8 +38392,8 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new array of filtered values.
      * @example
      *
-     * _.without([1, 2, 1, 0, 3, 1, 4], 0, 1);
-     * // => [2, 3, 4]
+     * _.without([1, 2, 1, 3], 1, 2);
+     * // => [3]
      */
     function without(array) {
       return baseDifference(array, baseSlice(arguments, 1));
@@ -38174,7 +38401,7 @@ angular.module('ui.router.state')
 
     /**
      * Creates an array that is the symmetric difference of the provided arrays.
-     * See [Wikipedia](http://en.wikipedia.org/wiki/Symmetric_difference) for
+     * See [Wikipedia](https://en.wikipedia.org/wiki/Symmetric_difference) for
      * more details.
      *
      * @static
@@ -38184,11 +38411,8 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new array of values.
      * @example
      *
-     * _.xor([1, 2, 3], [5, 2, 1, 4]);
-     * // => [3, 5, 4]
-     *
-     * _.xor([1, 2, 5], [2, 3, 5], [3, 4, 5]);
-     * // => [1, 4, 5]
+     * _.xor([1, 2], [4, 2]);
+     * // => [1, 4]
      */
     function xor() {
       var index = -1,
@@ -38276,7 +38500,7 @@ angular.module('ui.router.state')
      * @memberOf _
      * @category Chain
      * @param {*} value The value to wrap.
-     * @returns {Object} Returns the new `lodash` object.
+     * @returns {Object} Returns the new `lodash` wrapper instance.
      * @example
      *
      * var users = [
@@ -38287,7 +38511,9 @@ angular.module('ui.router.state')
      *
      * var youngest = _.chain(users)
      *   .sortBy('age')
-     *   .map(function(chr) { return chr.user + ' is ' + chr.age; })
+     *   .map(function(chr) {
+     *     return chr.user + ' is ' + chr.age;
+     *   })
      *   .first()
      *   .value();
      * // => 'pebbles is 1'
@@ -38314,7 +38540,9 @@ angular.module('ui.router.state')
      * @example
      *
      * _([1, 2, 3])
-     *  .tap(function(array) { array.pop(); })
+     *  .tap(function(array) {
+     *    array.pop();
+     *  })
      *  .reverse()
      *  .value();
      * // => [2, 1]
@@ -38338,7 +38566,9 @@ angular.module('ui.router.state')
      *
      * _([1, 2, 3])
      *  .last()
-     *  .thru(function(value) { return [value]; })
+     *  .thru(function(value) {
+     *    return [value];
+     *  })
      *  .value();
      * // => [3]
      */
@@ -38352,7 +38582,7 @@ angular.module('ui.router.state')
      * @name chain
      * @memberOf _
      * @category Chain
-     * @returns {*} Returns the `lodash` object.
+     * @returns {Object} Returns the new `lodash` wrapper instance.
      * @example
      *
      * var users = [
@@ -38376,6 +38606,76 @@ angular.module('ui.router.state')
     }
 
     /**
+     * Executes the chained sequence and returns the wrapped result.
+     *
+     * @name commit
+     * @memberOf _
+     * @category Chain
+     * @returns {Object} Returns the new `lodash` wrapper instance.
+     * @example
+     *
+     * var array = [1, 2];
+     * var wrapper = _(array).push(3);
+     *
+     * console.log(array);
+     * // => [1, 2]
+     *
+     * wrapper = wrapper.commit();
+     * console.log(array);
+     * // => [1, 2, 3]
+     *
+     * wrapper.last();
+     * // => 3
+     *
+     * console.log(array);
+     * // => [1, 2, 3]
+     */
+    function wrapperCommit() {
+      return new LodashWrapper(this.value(), this.__chain__);
+    }
+
+    /**
+     * Creates a clone of the chained sequence planting `value` as the wrapped value.
+     *
+     * @name plant
+     * @memberOf _
+     * @category Chain
+     * @returns {Object} Returns the new `lodash` wrapper instance.
+     * @example
+     *
+     * var array = [1, 2];
+     * var wrapper = _(array).map(function(value) {
+     *   return Math.pow(value, 2);
+     * });
+     *
+     * var other = [3, 4];
+     * var otherWrapper = wrapper.plant(other);
+     *
+     * otherWrapper.value();
+     * // => [9, 16]
+     *
+     * wrapper.value();
+     * // => [1, 4]
+     */
+    function wrapperPlant(value) {
+      var result,
+          parent = this;
+
+      while (parent instanceof baseLodash) {
+        var clone = wrapperClone(parent);
+        if (result) {
+          previous.__wrapped__ = clone;
+        } else {
+          result = clone;
+        }
+        var previous = clone;
+        parent = parent.__wrapped__;
+      }
+      previous.__wrapped__ = value;
+      return result;
+    }
+
+    /**
      * Reverses the wrapped array so the first element becomes the last, the
      * second element becomes the second to last, and so on.
      *
@@ -38384,7 +38684,7 @@ angular.module('ui.router.state')
      * @name reverse
      * @memberOf _
      * @category Chain
-     * @returns {Object} Returns the new reversed `lodash` object.
+     * @returns {Object} Returns the new reversed `lodash` wrapper instance.
      * @example
      *
      * var array = [1, 2, 3];
@@ -38398,7 +38698,10 @@ angular.module('ui.router.state')
     function wrapperReverse() {
       var value = this.__wrapped__;
       if (value instanceof LazyWrapper) {
-        return new LodashWrapper(value.reverse());
+        if (this.__actions__.length) {
+          value = new LazyWrapper(this);
+        }
+        return new LodashWrapper(value.reverse(), this.__chain__);
       }
       return this.thru(function(value) {
         return value.reverse();
@@ -38426,7 +38729,7 @@ angular.module('ui.router.state')
      *
      * @name value
      * @memberOf _
-     * @alias toJSON, valueOf
+     * @alias run, toJSON, valueOf
      * @category Chain
      * @returns {*} Returns the resolved unwrapped value.
      * @example
@@ -38454,8 +38757,8 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the new array of picked elements.
      * @example
      *
-     * _.at(['a', 'b', 'c', 'd', 'e'], [0, 2, 4]);
-     * // => ['a', 'c', 'e']
+     * _.at(['a', 'b', 'c'], [0, 2]);
+     * // => ['a', 'c']
      *
      * _.at(['fred', 'barney', 'pebbles'], 0, 2);
      * // => ['fred', 'pebbles']
@@ -38469,13 +38772,396 @@ angular.module('ui.router.state')
     }
 
     /**
+     * Creates an object composed of keys generated from the results of running
+     * each element of `collection` through `iteratee`. The corresponding value
+     * of each key is the number of times the key was returned by `iteratee`.
+     * The `iteratee` is bound to `thisArg` and invoked with three arguments;
+     * (value, index|key, collection).
+     *
+     * If a property name is provided for `predicate` the created `_.property`
+     * style callback returns the property value of the given element.
+     *
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
+     * callback returns `true` for elements that have the properties of the given
+     * object, else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function|Object|string} [iteratee=_.identity] The function invoked
+     *  per iteration.
+     * @param {*} [thisArg] The `this` binding of `iteratee`.
+     * @returns {Object} Returns the composed aggregate object.
+     * @example
+     *
+     * _.countBy([4.3, 6.1, 6.4], function(n) {
+     *   return Math.floor(n);
+     * });
+     * // => { '4': 1, '6': 2 }
+     *
+     * _.countBy([4.3, 6.1, 6.4], function(n) {
+     *   return this.floor(n);
+     * }, Math);
+     * // => { '4': 1, '6': 2 }
+     *
+     * _.countBy(['one', 'two', 'three'], 'length');
+     * // => { '3': 2, '5': 1 }
+     */
+    var countBy = createAggregator(function(result, value, key) {
+      hasOwnProperty.call(result, key) ? ++result[key] : (result[key] = 1);
+    });
+
+    /**
+     * Checks if `predicate` returns truthy for **all** elements of `collection`.
+     * The predicate is bound to `thisArg` and invoked with three arguments;
+     * (value, index|key, collection).
+     *
+     * If a property name is provided for `predicate` the created `_.property`
+     * style callback returns the property value of the given element.
+     *
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
+     * callback returns `true` for elements that have the properties of the given
+     * object, else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias all
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function|Object|string} [predicate=_.identity] The function invoked
+     *  per iteration.
+     * @param {*} [thisArg] The `this` binding of `predicate`.
+     * @returns {boolean} Returns `true` if all elements pass the predicate check,
+     *  else `false`.
+     * @example
+     *
+     * _.every([true, 1, null, 'yes'], Boolean);
+     * // => false
+     *
+     * var users = [
+     *   { 'user': 'barney', 'active': false },
+     *   { 'user': 'fred',   'active': false }
+     * ];
+     *
+     * // using the `_.matches` callback shorthand
+     * _.every(users, { 'user': 'barney', 'active': false });
+     * // => false
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.every(users, 'active', false);
+     * // => true
+     *
+     * // using the `_.property` callback shorthand
+     * _.every(users, 'active');
+     * // => false
+     */
+    function every(collection, predicate, thisArg) {
+      var func = isArray(collection) ? arrayEvery : baseEvery;
+      if (typeof predicate != 'function' || typeof thisArg != 'undefined') {
+        predicate = getCallback(predicate, thisArg, 3);
+      }
+      return func(collection, predicate);
+    }
+
+    /**
+     * Iterates over elements of `collection`, returning an array of all elements
+     * `predicate` returns truthy for. The predicate is bound to `thisArg` and
+     * invoked with three arguments; (value, index|key, collection).
+     *
+     * If a property name is provided for `predicate` the created `_.property`
+     * style callback returns the property value of the given element.
+     *
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
+     * callback returns `true` for elements that have the properties of the given
+     * object, else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias select
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function|Object|string} [predicate=_.identity] The function invoked
+     *  per iteration.
+     * @param {*} [thisArg] The `this` binding of `predicate`.
+     * @returns {Array} Returns the new filtered array.
+     * @example
+     *
+     * _.filter([4, 5, 6], function(n) {
+     *   return n % 2 == 0;
+     * });
+     * // => [4, 6]
+     *
+     * var users = [
+     *   { 'user': 'barney', 'age': 36, 'active': true },
+     *   { 'user': 'fred',   'age': 40, 'active': false }
+     * ];
+     *
+     * // using the `_.matches` callback shorthand
+     * _.pluck(_.filter(users, { 'age': 36, 'active': true }), 'user');
+     * // => ['barney']
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.pluck(_.filter(users, 'active', false), 'user');
+     * // => ['fred']
+     *
+     * // using the `_.property` callback shorthand
+     * _.pluck(_.filter(users, 'active'), 'user');
+     * // => ['barney']
+     */
+    function filter(collection, predicate, thisArg) {
+      var func = isArray(collection) ? arrayFilter : baseFilter;
+      predicate = getCallback(predicate, thisArg, 3);
+      return func(collection, predicate);
+    }
+
+    /**
+     * Iterates over elements of `collection`, returning the first element
+     * `predicate` returns truthy for. The predicate is bound to `thisArg` and
+     * invoked with three arguments; (value, index|key, collection).
+     *
+     * If a property name is provided for `predicate` the created `_.property`
+     * style callback returns the property value of the given element.
+     *
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
+     * callback returns `true` for elements that have the properties of the given
+     * object, else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @alias detect
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to search.
+     * @param {Function|Object|string} [predicate=_.identity] The function invoked
+     *  per iteration.
+     * @param {*} [thisArg] The `this` binding of `predicate`.
+     * @returns {*} Returns the matched element, else `undefined`.
+     * @example
+     *
+     * var users = [
+     *   { 'user': 'barney',  'age': 36, 'active': true },
+     *   { 'user': 'fred',    'age': 40, 'active': false },
+     *   { 'user': 'pebbles', 'age': 1,  'active': true }
+     * ];
+     *
+     * _.result(_.find(users, function(chr) {
+     *   return chr.age < 40;
+     * }), 'user');
+     * // => 'barney'
+     *
+     * // using the `_.matches` callback shorthand
+     * _.result(_.find(users, { 'age': 1, 'active': true }), 'user');
+     * // => 'pebbles'
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.result(_.find(users, 'active', false), 'user');
+     * // => 'fred'
+     *
+     * // using the `_.property` callback shorthand
+     * _.result(_.find(users, 'active'), 'user');
+     * // => 'barney'
+     */
+    function find(collection, predicate, thisArg) {
+      if (isArray(collection)) {
+        var index = findIndex(collection, predicate, thisArg);
+        return index > -1 ? collection[index] : undefined;
+      }
+      predicate = getCallback(predicate, thisArg, 3);
+      return baseFind(collection, predicate, baseEach);
+    }
+
+    /**
+     * This method is like `_.find` except that it iterates over elements of
+     * `collection` from right to left.
+     *
+     * @static
+     * @memberOf _
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to search.
+     * @param {Function|Object|string} [predicate=_.identity] The function invoked
+     *  per iteration.
+     * @param {*} [thisArg] The `this` binding of `predicate`.
+     * @returns {*} Returns the matched element, else `undefined`.
+     * @example
+     *
+     * _.findLast([1, 2, 3, 4], function(n) {
+     *   return n % 2 == 1;
+     * });
+     * // => 3
+     */
+    function findLast(collection, predicate, thisArg) {
+      predicate = getCallback(predicate, thisArg, 3);
+      return baseFind(collection, predicate, baseEachRight);
+    }
+
+    /**
+     * Performs a deep comparison between each element in `collection` and the
+     * source object, returning the first element that has equivalent property
+     * values.
+     *
+     * **Note:** This method supports comparing arrays, booleans, `Date` objects,
+     * numbers, `Object` objects, regexes, and strings. Objects are compared by
+     * their own, not inherited, enumerable properties. For comparing a single
+     * own or inherited property value see `_.matchesProperty`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to search.
+     * @param {Object} source The object of property values to match.
+     * @returns {*} Returns the matched element, else `undefined`.
+     * @example
+     *
+     * var users = [
+     *   { 'user': 'barney', 'age': 36, 'active': true },
+     *   { 'user': 'fred',   'age': 40, 'active': false }
+     * ];
+     *
+     * _.result(_.findWhere(users, { 'age': 36, 'active': true }), 'user');
+     * // => 'barney'
+     *
+     * _.result(_.findWhere(users, { 'age': 40, 'active': false }), 'user');
+     * // => 'fred'
+     */
+    function findWhere(collection, source) {
+      return find(collection, baseMatches(source));
+    }
+
+    /**
+     * Iterates over elements of `collection` invoking `iteratee` for each element.
+     * The `iteratee` is bound to `thisArg` and invoked with three arguments;
+     * (value, index|key, collection). Iterator functions may exit iteration early
+     * by explicitly returning `false`.
+     *
+     * **Note:** As with other "Collections" methods, objects with a `length` property
+     * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
+     * may be used for object iteration.
+     *
+     * @static
+     * @memberOf _
+     * @alias each
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+     * @param {*} [thisArg] The `this` binding of `iteratee`.
+     * @returns {Array|Object|string} Returns `collection`.
+     * @example
+     *
+     * _([1, 2]).forEach(function(n) {
+     *   console.log(n);
+     * }).value();
+     * // => logs each value from left to right and returns the array
+     *
+     * _.forEach({ 'a': 1, 'b': 2 }, function(n, key) {
+     *   console.log(n, key);
+     * });
+     * // => logs each value-key pair and returns the object (iteration order is not guaranteed)
+     */
+    function forEach(collection, iteratee, thisArg) {
+      return (typeof iteratee == 'function' && typeof thisArg == 'undefined' && isArray(collection))
+        ? arrayEach(collection, iteratee)
+        : baseEach(collection, bindCallback(iteratee, thisArg, 3));
+    }
+
+    /**
+     * This method is like `_.forEach` except that it iterates over elements of
+     * `collection` from right to left.
+     *
+     * @static
+     * @memberOf _
+     * @alias eachRight
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
+     * @param {*} [thisArg] The `this` binding of `iteratee`.
+     * @returns {Array|Object|string} Returns `collection`.
+     * @example
+     *
+     * _([1, 2]).forEachRight(function(n) {
+     *   console.log(n);
+     * }).join(',');
+     * // => logs each value from right to left and returns the array
+     */
+    function forEachRight(collection, iteratee, thisArg) {
+      return (typeof iteratee == 'function' && typeof thisArg == 'undefined' && isArray(collection))
+        ? arrayEachRight(collection, iteratee)
+        : baseEachRight(collection, bindCallback(iteratee, thisArg, 3));
+    }
+
+    /**
+     * Creates an object composed of keys generated from the results of running
+     * each element of `collection` through `iteratee`. The corresponding value
+     * of each key is an array of the elements responsible for generating the key.
+     * The `iteratee` is bound to `thisArg` and invoked with three arguments;
+     * (value, index|key, collection).
+     *
+     * If a property name is provided for `predicate` the created `_.property`
+     * style callback returns the property value of the given element.
+     *
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
+     * callback returns `true` for elements that have the properties of the given
+     * object, else `false`.
+     *
+     * @static
+     * @memberOf _
+     * @category Collection
+     * @param {Array|Object|string} collection The collection to iterate over.
+     * @param {Function|Object|string} [iteratee=_.identity] The function invoked
+     *  per iteration.
+     * @param {*} [thisArg] The `this` binding of `iteratee`.
+     * @returns {Object} Returns the composed aggregate object.
+     * @example
+     *
+     * _.groupBy([4.2, 6.1, 6.4], function(n) {
+     *   return Math.floor(n);
+     * });
+     * // => { '4': [4.2], '6': [6.1, 6.4] }
+     *
+     * _.groupBy([4.2, 6.1, 6.4], function(n) {
+     *   return this.floor(n);
+     * }, Math);
+     * // => { '4': [4.2], '6': [6.1, 6.4] }
+     *
+     * // using the `_.property` callback shorthand
+     * _.groupBy(['one', 'two', 'three'], 'length');
+     * // => { '3': ['one', 'two'], '5': ['three'] }
+     */
+    var groupBy = createAggregator(function(result, value, key) {
+      if (hasOwnProperty.call(result, key)) {
+        result[key].push(value);
+      } else {
+        result[key] = [value];
+      }
+    });
+
+    /**
      * Checks if `value` is in `collection` using `SameValueZero` for equality
      * comparisons. If `fromIndex` is negative, it is used as the offset from
      * the end of `collection`.
      *
      * **Note:** `SameValueZero` comparisons are like strict equality comparisons,
      * e.g. `===`, except that `NaN` matches `NaN`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-samevaluezero)
      * for more details.
      *
      * @static
@@ -38522,346 +39208,18 @@ angular.module('ui.router.state')
     /**
      * Creates an object composed of keys generated from the results of running
      * each element of `collection` through `iteratee`. The corresponding value
-     * of each key is the number of times the key was returned by `iteratee`.
-     * The `iteratee` is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection).
-     *
-     * If a property name is provided for `predicate` the created "_.property"
-     * style callback returns the property value of the given element.
-     *
-     * If an object is provided for `predicate` the created "_.matches" style
-     * callback returns `true` for elements that have the properties of the given
-     * object, else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
-     * @param {*} [thisArg] The `this` binding of `iteratee`.
-     * @returns {Object} Returns the composed aggregate object.
-     * @example
-     *
-     * _.countBy([4.3, 6.1, 6.4], function(n) { return Math.floor(n); });
-     * // => { '4': 1, '6': 2 }
-     *
-     * _.countBy([4.3, 6.1, 6.4], function(n) { return this.floor(n); }, Math);
-     * // => { '4': 1, '6': 2 }
-     *
-     * _.countBy(['one', 'two', 'three'], 'length');
-     * // => { '3': 2, '5': 1 }
-     */
-    var countBy = createAggregator(function(result, value, key) {
-      hasOwnProperty.call(result, key) ? ++result[key] : (result[key] = 1);
-    });
-
-    /**
-     * Checks if `predicate` returns truthy for **all** elements of `collection`.
-     * The predicate is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection).
-     *
-     * If a property name is provided for `predicate` the created "_.property"
-     * style callback returns the property value of the given element.
-     *
-     * If an object is provided for `predicate` the created "_.matches" style
-     * callback returns `true` for elements that have the properties of the given
-     * object, else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias all
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
-     * @param {*} [thisArg] The `this` binding of `predicate`.
-     * @returns {boolean} Returns `true` if all elements pass the predicate check,
-     *  else `false`.
-     * @example
-     *
-     * _.every([true, 1, null, 'yes']);
-     * // => false
-     *
-     * var users = [
-     *   { 'user': 'barney', 'age': 36 },
-     *   { 'user': 'fred',   'age': 40 }
-     * ];
-     *
-     * // using the "_.property" callback shorthand
-     * _.every(users, 'age');
-     * // => true
-     *
-     * // using the "_.matches" callback shorthand
-     * _.every(users, { 'age': 36 });
-     * // => false
-     */
-    function every(collection, predicate, thisArg) {
-      var func = isArray(collection) ? arrayEvery : baseEvery;
-      if (typeof predicate != 'function' || typeof thisArg != 'undefined') {
-        predicate = getCallback(predicate, thisArg, 3);
-      }
-      return func(collection, predicate);
-    }
-
-    /**
-     * Iterates over elements of `collection`, returning an array of all elements
-     * `predicate` returns truthy for. The predicate is bound to `thisArg` and
-     * invoked with three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `predicate` the created "_.property"
-     * style callback returns the property value of the given element.
-     *
-     * If an object is provided for `predicate` the created "_.matches" style
-     * callback returns `true` for elements that have the properties of the given
-     * object, else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias select
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
-     * @param {*} [thisArg] The `this` binding of `predicate`.
-     * @returns {Array} Returns the new filtered array.
-     * @example
-     *
-     * var evens = _.filter([1, 2, 3, 4], function(n) { return n % 2 == 0; });
-     * // => [2, 4]
-     *
-     * var users = [
-     *   { 'user': 'barney', 'age': 36, 'active': false },
-     *   { 'user': 'fred',   'age': 40, 'active': true }
-     * ];
-     *
-     * // using the "_.property" callback shorthand
-     * _.pluck(_.filter(users, 'active'), 'user');
-     * // => ['fred']
-     *
-     * // using the "_.matches" callback shorthand
-     * _.pluck(_.filter(users, { 'age': 36 }), 'user');
-     * // => ['barney']
-     */
-    function filter(collection, predicate, thisArg) {
-      var func = isArray(collection) ? arrayFilter : baseFilter;
-      predicate = getCallback(predicate, thisArg, 3);
-      return func(collection, predicate);
-    }
-
-    /**
-     * Iterates over elements of `collection`, returning the first element
-     * `predicate` returns truthy for. The predicate is bound to `thisArg` and
-     * invoked with three arguments; (value, index|key, collection).
-     *
-     * If a property name is provided for `predicate` the created "_.property"
-     * style callback returns the property value of the given element.
-     *
-     * If an object is provided for `predicate` the created "_.matches" style
-     * callback returns `true` for elements that have the properties of the given
-     * object, else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @alias detect
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to search.
-     * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
-     * @param {*} [thisArg] The `this` binding of `predicate`.
-     * @returns {*} Returns the matched element, else `undefined`.
-     * @example
-     *
-     * var users = [
-     *   { 'user': 'barney',  'age': 36, 'active': false },
-     *   { 'user': 'fred',    'age': 40, 'active': true },
-     *   { 'user': 'pebbles', 'age': 1,  'active': false }
-     * ];
-     *
-     * _.result(_.find(users, function(chr) { return chr.age < 40; }), 'user');
-     * // => 'barney'
-     *
-     * // using the "_.matches" callback shorthand
-     * _.result(_.find(users, { 'age': 1 }), 'user');
-     * // => 'pebbles'
-     *
-     * // using the "_.property" callback shorthand
-     * _.result(_.find(users, 'active'), 'user');
-     * // => 'fred'
-     */
-    function find(collection, predicate, thisArg) {
-      if (isArray(collection)) {
-        var index = findIndex(collection, predicate, thisArg);
-        return index > -1 ? collection[index] : undefined;
-      }
-      predicate = getCallback(predicate, thisArg, 3);
-      return baseFind(collection, predicate, baseEach);
-    }
-
-    /**
-     * This method is like `_.find` except that it iterates over elements of
-     * `collection` from right to left.
-     *
-     * @static
-     * @memberOf _
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to search.
-     * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
-     * @param {*} [thisArg] The `this` binding of `predicate`.
-     * @returns {*} Returns the matched element, else `undefined`.
-     * @example
-     *
-     * _.findLast([1, 2, 3, 4], function(n) { return n % 2 == 1; });
-     * // => 3
-     */
-    function findLast(collection, predicate, thisArg) {
-      predicate = getCallback(predicate, thisArg, 3);
-      return baseFind(collection, predicate, baseEachRight);
-    }
-
-    /**
-     * Performs a deep comparison between each element in `collection` and the
-     * source object, returning the first element that has equivalent property
-     * values.
-     *
-     * @static
-     * @memberOf _
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to search.
-     * @param {Object} source The object of property values to match.
-     * @returns {*} Returns the matched element, else `undefined`.
-     * @example
-     *
-     * var users = [
-     *   { 'user': 'barney', 'age': 36, 'status': 'busy' },
-     *   { 'user': 'fred',   'age': 40, 'status': 'busy' }
-     * ];
-     *
-     * _.result(_.findWhere(users, { 'status': 'busy' }), 'user');
-     * // => 'barney'
-     *
-     * _.result(_.findWhere(users, { 'age': 40 }), 'user');
-     * // => 'fred'
-     */
-    function findWhere(collection, source) {
-      return find(collection, matches(source));
-    }
-
-    /**
-     * Iterates over elements of `collection` invoking `iteratee` for each element.
-     * The `iteratee` is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection). Iterator functions may exit iteration early
-     * by explicitly returning `false`.
-     *
-     * **Note:** As with other "Collections" methods, objects with a `length` property
-     * are iterated like arrays. To avoid this behavior `_.forIn` or `_.forOwn`
-     * may be used for object iteration.
-     *
-     * @static
-     * @memberOf _
-     * @alias each
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
-     * @param {*} [thisArg] The `this` binding of `iteratee`.
-     * @returns {Array|Object|string} Returns `collection`.
-     * @example
-     *
-     * _([1, 2, 3]).forEach(function(n) { console.log(n); });
-     * // => logs each value from left to right and returns the array
-     *
-     * _.forEach({ 'one': 1, 'two': 2, 'three': 3 }, function(n, key) { console.log(n, key); });
-     * // => logs each value-key pair and returns the object (iteration order is not guaranteed)
-     */
-    function forEach(collection, iteratee, thisArg) {
-      return (typeof iteratee == 'function' && typeof thisArg == 'undefined' && isArray(collection))
-        ? arrayEach(collection, iteratee)
-        : baseEach(collection, bindCallback(iteratee, thisArg, 3));
-    }
-
-    /**
-     * This method is like `_.forEach` except that it iterates over elements of
-     * `collection` from right to left.
-     *
-     * @static
-     * @memberOf _
-     * @alias eachRight
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function} [iteratee=_.identity] The function invoked per iteration.
-     * @param {*} [thisArg] The `this` binding of `iteratee`.
-     * @returns {Array|Object|string} Returns `collection`.
-     * @example
-     *
-     * _([1, 2, 3]).forEachRight(function(n) { console.log(n); }).join(',');
-     * // => logs each value from right to left and returns the array
-     */
-    function forEachRight(collection, iteratee, thisArg) {
-      return (typeof iteratee == 'function' && typeof thisArg == 'undefined' && isArray(collection))
-        ? arrayEachRight(collection, iteratee)
-        : baseEachRight(collection, bindCallback(iteratee, thisArg, 3));
-    }
-
-    /**
-     * Creates an object composed of keys generated from the results of running
-     * each element of `collection` through `iteratee`. The corresponding value
-     * of each key is an array of the elements responsible for generating the key.
-     * The `iteratee` is bound to `thisArg` and invoked with three arguments;
-     * (value, index|key, collection).
-     *
-     * If a property name is provided for `predicate` the created "_.property"
-     * style callback returns the property value of the given element.
-     *
-     * If an object is provided for `predicate` the created "_.matches" style
-     * callback returns `true` for elements that have the properties of the given
-     * object, else `false`.
-     *
-     * @static
-     * @memberOf _
-     * @category Collection
-     * @param {Array|Object|string} collection The collection to iterate over.
-     * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
-     * @param {*} [thisArg] The `this` binding of `iteratee`.
-     * @returns {Object} Returns the composed aggregate object.
-     * @example
-     *
-     * _.groupBy([4.2, 6.1, 6.4], function(n) { return Math.floor(n); });
-     * // => { '4': [4.2], '6': [6.1, 6.4] }
-     *
-     * _.groupBy([4.2, 6.1, 6.4], function(n) { return this.floor(n); }, Math);
-     * // => { '4': [4.2], '6': [6.1, 6.4] }
-     *
-     * // using the "_.property" callback shorthand
-     * _.groupBy(['one', 'two', 'three'], 'length');
-     * // => { '3': ['one', 'two'], '5': ['three'] }
-     */
-    var groupBy = createAggregator(function(result, value, key) {
-      if (hasOwnProperty.call(result, key)) {
-        result[key].push(value);
-      } else {
-        result[key] = [value];
-      }
-    });
-
-    /**
-     * Creates an object composed of keys generated from the results of running
-     * each element of `collection` through `iteratee`. The corresponding value
      * of each key is the last element responsible for generating the key. The
      * iteratee function is bound to `thisArg` and invoked with three arguments;
      * (value, index|key, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -38870,8 +39228,7 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {Object} Returns the composed aggregate object.
      * @example
@@ -38884,10 +39241,14 @@ angular.module('ui.router.state')
      * _.indexBy(keyData, 'dir');
      * // => { 'left': { 'dir': 'left', 'code': 97 }, 'right': { 'dir': 'right', 'code': 100 } }
      *
-     * _.indexBy(keyData, function(object) { return String.fromCharCode(object.code); });
+     * _.indexBy(keyData, function(object) {
+     *   return String.fromCharCode(object.code);
+     * });
      * // => { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
      *
-     * _.indexBy(keyData, function(object) { return this.fromCharCode(object.code); }, String);
+     * _.indexBy(keyData, function(object) {
+     *   return this.fromCharCode(object.code);
+     * }, String);
      * // => { 'a': { 'dir': 'left', 'code': 97 }, 'd': { 'dir': 'right', 'code': 100 } }
      */
     var indexBy = createAggregator(function(result, value, key) {
@@ -38925,12 +39286,25 @@ angular.module('ui.router.state')
      * `iteratee`. The `iteratee` is bound to `thisArg` and invoked with three
      * arguments; (value, index|key, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
+     *
+     * Many lodash methods are guarded to work as interatees for methods like
+     * `_.every`, `_.filter`, `_.map`, `_.mapValues`, `_.reject`, and `_.some`.
+     *
+     * The guarded methods are:
+     * `ary`, `callback`, `chunk`, `clone`, `create`, `curry`, `curryRight`, `drop`,
+     * `dropRight`, `fill`, `flatten`, `invert`, `max`, `min`, `parseInt`, `slice`,
+     * `sortBy`, `take`, `takeRight`, `template`, `trim`, `trimLeft`, `trimRight`,
+     * `trunc`, `random`, `range`, `sample`, `uniq`, and `words`
      *
      * @static
      * @memberOf _
@@ -38938,24 +39312,28 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
+     *  create a `_.property` or `_.matches` style callback respectively.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {Array} Returns the new mapped array.
      * @example
      *
-     * _.map([1, 2, 3], function(n) { return n * 3; });
-     * // => [3, 6, 9]
+     * function timesThree(n) {
+     *   return n * 3;
+     * }
      *
-     * _.map({ 'one': 1, 'two': 2, 'three': 3 }, function(n) { return n * 3; });
-     * // => [3, 6, 9] (iteration order is not guaranteed)
+     * _.map([1, 2], timesThree);
+     * // => [3, 6]
+     *
+     * _.map({ 'a': 1, 'b': 2 }, timesThree);
+     * // => [3, 6] (iteration order is not guaranteed)
      *
      * var users = [
      *   { 'user': 'barney' },
      *   { 'user': 'fred' }
      * ];
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.map(users, 'user');
      * // => ['barney', 'fred']
      */
@@ -38972,10 +39350,14 @@ angular.module('ui.router.state')
      * is ranked. The `iteratee` is bound to `thisArg` and invoked with three
      * arguments; (value, index, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -38984,8 +39366,6 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [iteratee] The function invoked per iteration.
-     *  If a property name or object is provided it is used to create a "_.property"
-     *  or "_.matches" style callback respectively.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {*} Returns the maximum value.
      * @example
@@ -39001,10 +39381,12 @@ angular.module('ui.router.state')
      *   { 'user': 'fred',   'age': 40 }
      * ];
      *
-     * _.max(users, function(chr) { return chr.age; });
+     * _.max(users, function(chr) {
+     *   return chr.age;
+     * });
      * // => { 'user': 'fred', 'age': 40 };
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.max(users, 'age');
      * // => { 'user': 'fred', 'age': 40 };
      */
@@ -39017,10 +39399,14 @@ angular.module('ui.router.state')
      * is ranked. The `iteratee` is bound to `thisArg` and invoked with three
      * arguments; (value, index, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -39029,8 +39415,6 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [iteratee] The function invoked per iteration.
-     *  If a property name or object is provided it is used to create a "_.property"
-     *  or "_.matches" style callback respectively.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {*} Returns the minimum value.
      * @example
@@ -39046,10 +39430,12 @@ angular.module('ui.router.state')
      *   { 'user': 'fred',   'age': 40 }
      * ];
      *
-     * _.min(users, function(chr) { return chr.age; });
+     * _.min(users, function(chr) {
+     *   return chr.age;
+     * });
      * // => { 'user': 'barney', 'age': 36 };
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.min(users, 'age');
      * // => { 'user': 'barney', 'age': 36 };
      */
@@ -39061,10 +39447,14 @@ angular.module('ui.router.state')
      * contains elements `predicate` returns falsey for. The predicate is bound
      * to `thisArg` and invoked with three arguments; (value, index|key, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -39073,16 +39463,19 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the array of grouped elements.
      * @example
      *
-     * _.partition([1, 2, 3], function(n) { return n % 2; });
+     * _.partition([1, 2, 3], function(n) {
+     *   return n % 2;
+     * });
      * // => [[1, 3], [2]]
      *
-     * _.partition([1.2, 2.3, 3.4], function(n) { return this.floor(n) % 2; }, Math);
+     * _.partition([1.2, 2.3, 3.4], function(n) {
+     *   return this.floor(n) % 2;
+     * }, Math);
      * // => [[1, 3], [2]]
      *
      * var users = [
@@ -39091,12 +39484,20 @@ angular.module('ui.router.state')
      *   { 'user': 'pebbles', 'age': 1,  'active': false }
      * ];
      *
-     * // using the "_.matches" callback shorthand
-     * _.map(_.partition(users, { 'age': 1 }), function(array) { return _.pluck(array, 'user'); });
+     * var mapper = function(array) {
+     *   return _.pluck(array, 'user');
+     * };
+     *
+     * // using the `_.matches` callback shorthand
+     * _.map(_.partition(users, { 'age': 1, 'active': false }), mapper);
      * // => [['pebbles'], ['barney', 'fred']]
      *
-     * // using the "_.property" callback shorthand
-     * _.map(_.partition(users, 'active'), function(array) { return _.pluck(array, 'user'); });
+     * // using the `_.matchesProperty` callback shorthand
+     * _.map(_.partition(users, 'active', false), mapper);
+     * // => [['barney', 'pebbles'], ['fred']]
+     *
+     * // using the `_.property` callback shorthand
+     * _.map(_.partition(users, 'active'), mapper);
      * // => [['fred'], ['barney', 'pebbles']]
      */
     var partition = createAggregator(function(result, value, key) {
@@ -39127,7 +39528,7 @@ angular.module('ui.router.state')
      * // => [36, 40] (iteration order is not guaranteed)
      */
     function pluck(collection, key) {
-      return map(collection, property(key));
+      return map(collection, baseProperty(key));
     }
 
     /**
@@ -39137,6 +39538,12 @@ angular.module('ui.router.state')
      * is not provided the first element of `collection` is used as the initial
      * value. The `iteratee` is bound to `thisArg`and invoked with four arguments;
      * (accumulator, value, index|key, collection).
+     *
+     * Many lodash methods are guarded to work as interatees for methods like
+     * `_.reduce`, `_.reduceRight`, and `_.transform`.
+     *
+     * The guarded methods are:
+     * `assign`, `defaults`, `merge`, and `sortAllBy`
      *
      * @static
      * @memberOf _
@@ -39149,14 +39556,16 @@ angular.module('ui.router.state')
      * @returns {*} Returns the accumulated value.
      * @example
      *
-     * var sum = _.reduce([1, 2, 3], function(sum, n) { return sum + n; });
-     * // => 6
+     * _.reduce([1, 2], function(sum, n) {
+     *   return sum + n;
+     * });
+     * // => 3
      *
-     * var mapped = _.reduce({ 'a': 1, 'b': 2, 'c': 3 }, function(result, n, key) {
+     * _.reduce({ 'a': 1, 'b': 2 }, function(result, n, key) {
      *   result[key] = n * 3;
      *   return result;
      * }, {});
-     * // => { 'a': 3, 'b': 6, 'c': 9 } (iteration order is not guaranteed)
+     * // => { 'a': 3, 'b': 6 } (iteration order is not guaranteed)
      */
     function reduce(collection, iteratee, accumulator, thisArg) {
       var func = isArray(collection) ? arrayReduce : baseReduce;
@@ -39179,7 +39588,10 @@ angular.module('ui.router.state')
      * @example
      *
      * var array = [[0, 1], [2, 3], [4, 5]];
-     * _.reduceRight(array, function(flattened, other) { return flattened.concat(other); }, []);
+     *
+     * _.reduceRight(array, function(flattened, other) {
+     *   return flattened.concat(other);
+     * }, []);
      * // => [4, 5, 2, 3, 0, 1]
      */
     function reduceRight(collection, iteratee, accumulator, thisArg) {
@@ -39191,10 +39603,14 @@ angular.module('ui.router.state')
      * The opposite of `_.filter`; this method returns the elements of `collection`
      * that `predicate` does **not** return truthy for.
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -39203,13 +39619,14 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {Array} Returns the new filtered array.
      * @example
      *
-     * var odds = _.reject([1, 2, 3, 4], function(n) { return n % 2 == 0; });
+     * _.reject([1, 2, 3, 4], function(n) {
+     *   return n % 2 == 0;
+     * });
      * // => [1, 3]
      *
      * var users = [
@@ -39217,13 +39634,17 @@ angular.module('ui.router.state')
      *   { 'user': 'fred',   'age': 40, 'active': true }
      * ];
      *
-     * // using the "_.property" callback shorthand
-     * _.pluck(_.reject(users, 'active'), 'user');
+     * // using the `_.matches` callback shorthand
+     * _.pluck(_.reject(users, { 'age': 40, 'active': true }), 'user');
      * // => ['barney']
      *
-     * // using the "_.matches" callback shorthand
-     * _.pluck(_.reject(users, { 'age': 36 }), 'user');
+     * // using the `_.matchesProperty` callback shorthand
+     * _.pluck(_.reject(users, 'active', false), 'user');
      * // => ['fred']
+     *
+     * // using the `_.property` callback shorthand
+     * _.pluck(_.reject(users, 'active'), 'user');
+     * // => ['barney']
      */
     function reject(collection, predicate, thisArg) {
       var func = isArray(collection) ? arrayFilter : baseFilter;
@@ -39264,7 +39685,7 @@ angular.module('ui.router.state')
 
     /**
      * Creates an array of shuffled values, using a version of the Fisher-Yates
-     * shuffle. See [Wikipedia](http://en.wikipedia.org/wiki/Fisher-Yates_shuffle)
+     * shuffle. See [Wikipedia](https://en.wikipedia.org/wiki/Fisher-Yates_shuffle)
      * for more details.
      *
      * @static
@@ -39305,11 +39726,11 @@ angular.module('ui.router.state')
      * @returns {number} Returns the size of `collection`.
      * @example
      *
-     * _.size([1, 2]);
-     * // => 2
-     *
-     * _.size({ 'one': 1, 'two': 2, 'three': 3 });
+     * _.size([1, 2, 3]);
      * // => 3
+     *
+     * _.size({ 'a': 1, 'b': 2 });
+     * // => 2
      *
      * _.size('pebbles');
      * // => 7
@@ -39325,10 +39746,14 @@ angular.module('ui.router.state')
      * over the entire collection. The predicate is bound to `thisArg` and invoked
      * with three arguments; (value, index|key, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -39338,8 +39763,7 @@ angular.module('ui.router.state')
      * @category Collection
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {boolean} Returns `true` if any element passes the predicate check,
      *  else `false`.
@@ -39349,17 +39773,21 @@ angular.module('ui.router.state')
      * // => true
      *
      * var users = [
-     *   { 'user': 'barney', 'age': 36, 'active': false },
-     *   { 'user': 'fred',   'age': 40, 'active': true }
+     *   { 'user': 'barney', 'active': true },
+     *   { 'user': 'fred',   'active': false }
      * ];
      *
-     * // using the "_.property" callback shorthand
-     * _.some(users, 'active');
+     * // using the `_.matches` callback shorthand
+     * _.some(users, { user': 'barney', 'active': false });
+     * // => false
+     *
+     * // using the `_.matchesProperty` callback shorthand
+     * _.some(users, 'active', false);
      * // => true
      *
-     * // using the "_.matches" callback shorthand
-     * _.some(users, { 'age': 1 });
-     * // => false
+     * // using the `_.property` callback shorthand
+     * _.some(users, 'active');
+     * // => true
      */
     function some(collection, predicate, thisArg) {
       var func = isArray(collection) ? arraySome : baseSome;
@@ -39376,10 +39804,14 @@ angular.module('ui.router.state')
      * The `iteratee` is bound to `thisArg` and invoked with three arguments;
      * (value, index|key, collection).
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -39389,15 +39821,19 @@ angular.module('ui.router.state')
      * @param {Array|Object|string} collection The collection to iterate over.
      * @param {Array|Function|Object|string} [iteratee=_.identity] The function
      *  invoked per iteration. If a property name or an object is provided it is
-     *  used to create a "_.property" or "_.matches" style callback respectively.
+     *  used to create a `_.property` or `_.matches` style callback respectively.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {Array} Returns the new sorted array.
      * @example
      *
-     * _.sortBy([1, 2, 3], function(n) { return Math.sin(n); });
+     * _.sortBy([1, 2, 3], function(n) {
+     *   return Math.sin(n);
+     * });
      * // => [3, 1, 2]
      *
-     * _.sortBy([1, 2, 3], function(n) { return this.sin(n); }, Math);
+     * _.sortBy([1, 2, 3], function(n) {
+     *   return this.sin(n);
+     * }, Math);
      * // => [3, 1, 2]
      *
      * var users = [
@@ -39406,7 +39842,7 @@ angular.module('ui.router.state')
      *   { 'user': 'barney' }
      * ];
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.pluck(_.sortBy(users, 'user'), 'user');
      * // => ['barney', 'fred', 'pebbles']
      */
@@ -39458,7 +39894,7 @@ angular.module('ui.router.state')
           props = baseFlatten(args, false, false, 1),
           result = isLength(length) ? Array(length) : [];
 
-      baseEach(collection, function(value, key, collection) {
+      baseEach(collection, function(value) {
         var length = props.length,
             criteria = Array(length);
 
@@ -39475,6 +39911,11 @@ angular.module('ui.router.state')
      * source object, returning an array of all elements that have equivalent
      * property values.
      *
+     * **Note:** This method supports comparing arrays, booleans, `Date` objects,
+     * numbers, `Object` objects, regexes, and strings. Objects are compared by
+     * their own, not inherited, enumerable properties. For comparing a single
+     * own or inherited property value see `_.matchesProperty`.
+     *
      * @static
      * @memberOf _
      * @category Collection
@@ -39484,21 +39925,18 @@ angular.module('ui.router.state')
      * @example
      *
      * var users = [
-     *   { 'user': 'barney', 'age': 36, 'status': 'busy', 'pets': ['hoppy'] },
-     *   { 'user': 'fred',   'age': 40, 'status': 'busy', 'pets': ['baby puss', 'dino'] }
+     *   { 'user': 'barney', 'age': 36, 'active': false, 'pets': ['hoppy'] },
+     *   { 'user': 'fred',   'age': 40, 'active': true, 'pets': ['baby puss', 'dino'] }
      * ];
      *
-     * _.pluck(_.where(users, { 'age': 36 }), 'user');
+     * _.pluck(_.where(users, { 'age': 36, 'active': false }), 'user');
      * // => ['barney']
      *
      * _.pluck(_.where(users, { 'pets': ['dino'] }), 'user');
      * // => ['fred']
-     *
-     * _.pluck(_.where(users, { 'status': 'busy' }), 'user');
-     * // => ['barney', 'fred']
      */
     function where(collection, source) {
-      return filter(collection, matches(source));
+      return filter(collection, baseMatches(source));
     }
 
     /*------------------------------------------------------------------------*/
@@ -39512,7 +39950,9 @@ angular.module('ui.router.state')
      * @category Date
      * @example
      *
-     * _.defer(function(stamp) { console.log(_.now() - stamp); }, _.now());
+     * _.defer(function(stamp) {
+     *   console.log(_.now() - stamp);
+     * }, _.now());
      * // => logs the number of milliseconds it took for the deferred function to be invoked
      */
     var now = nativeNow || function() {
@@ -39545,8 +39985,8 @@ angular.module('ui.router.state')
      * // => logs 'done saving!' after the two async saves have completed
      */
     function after(n, func) {
-      if (!isFunction(func)) {
-        if (isFunction(n)) {
+      if (typeof func != 'function') {
+        if (typeof n == 'function') {
           var temp = n;
           n = func;
           func = temp;
@@ -39582,7 +40022,7 @@ angular.module('ui.router.state')
       if (guard && isIterateeCall(func, n, guard)) {
         n = null;
       }
-      n = n == null ? func.length : (+n || 0);
+      n = (func && n == null) ? func.length : nativeMax(+n || 0, 0);
       return createWrapper(func, ARY_FLAG, null, null, null, null, n);
     }
 
@@ -39604,8 +40044,8 @@ angular.module('ui.router.state')
      */
     function before(n, func) {
       var result;
-      if (!isFunction(func)) {
-        if (isFunction(n)) {
+      if (typeof func != 'function') {
+        if (typeof n == 'function') {
           var temp = n;
           n = func;
           func = temp;
@@ -39688,7 +40128,9 @@ angular.module('ui.router.state')
      *
      * var view = {
      *   'label': 'docs',
-     *   'onClick': function() { console.log('clicked ' + this.label); }
+     *   'onClick': function() {
+     *     console.log('clicked ' + this.label);
+     *   }
      * };
      *
      * _.bindAll(view);
@@ -39927,7 +40369,7 @@ angular.module('ui.router.state')
           maxWait = false,
           trailing = true;
 
-      if (!isFunction(func)) {
+      if (typeof func != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       wait = wait < 0 ? 0 : wait;
@@ -40041,7 +40483,9 @@ angular.module('ui.router.state')
      * @returns {number} Returns the timer id.
      * @example
      *
-     * _.defer(function(text) { console.log(text); }, 'deferred');
+     * _.defer(function(text) {
+     *   console.log(text);
+     * }, 'deferred');
      * // logs 'deferred' after one or more milliseconds
      */
     function defer(func) {
@@ -40061,7 +40505,9 @@ angular.module('ui.router.state')
      * @returns {number} Returns the timer id.
      * @example
      *
-     * _.delay(function(text) { console.log(text); }, 1000, 'later');
+     * _.delay(function(text) {
+     *   console.log(text);
+     * }, 1000, 'later');
      * // => logs 'later' after one second
      */
     function delay(func, wait) {
@@ -40097,9 +40543,9 @@ angular.module('ui.router.state')
           length = funcs.length;
 
       if (!length) {
-        return function() {};
+        return function() { return arguments[0]; };
       }
-      if (!arrayEvery(funcs, isFunction)) {
+      if (!arrayEvery(funcs, baseIsFunction)) {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       return function() {
@@ -40142,9 +40588,9 @@ angular.module('ui.router.state')
           fromIndex = funcs.length - 1;
 
       if (fromIndex < 0) {
-        return function() {};
+        return function() { return arguments[0]; };
       }
-      if (!arrayEvery(funcs, isFunction)) {
+      if (!arrayEvery(funcs, baseIsFunction)) {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       return function() {
@@ -40168,9 +40614,9 @@ angular.module('ui.router.state')
      *
      * **Note:** The cache is exposed as the `cache` property on the memoized
      * function. Its creation may be customized by replacing the `_.memoize.Cache`
-     * constructor with one whose instances implement the ES6 `Map` method interface
+     * constructor with one whose instances implement the ES `Map` method interface
      * of `get`, `has`, and `set`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-map-prototype-object)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-properties-of-the-map-prototype-object)
      * for more details.
      *
      * @static
@@ -40189,7 +40635,7 @@ angular.module('ui.router.state')
      * // => 'FRED'
      *
      * // modifying the result cache
-     * upperCase.cache.set('fred, 'BARNEY');
+     * upperCase.cache.set('fred', 'BARNEY');
      * upperCase('fred');
      * // => 'BARNEY'
      *
@@ -40212,7 +40658,7 @@ angular.module('ui.router.state')
      * // => { 'user': 'barney' }
      */
     function memoize(func, resolver) {
-      if (!isFunction(func) || (resolver && !isFunction(resolver))) {
+      if (typeof func != 'function' || (resolver && typeof resolver != 'function')) {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       var memoized = function() {
@@ -40250,7 +40696,7 @@ angular.module('ui.router.state')
      * // => [1, 3, 5]
      */
     function negate(predicate) {
-      if (!isFunction(predicate)) {
+      if (typeof predicate != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       return function() {
@@ -40265,7 +40711,6 @@ angular.module('ui.router.state')
      *
      * @static
      * @memberOf _
-     * @type Function
      * @category Function
      * @param {Function} func The function to restrict.
      * @returns {Function} Returns the new restricted function.
@@ -40380,12 +40825,53 @@ angular.module('ui.router.state')
      * // => ['a', 'b', 'c']
      *
      * var map = _.rearg(_.map, [1, 0]);
-     * map(function(n) { return n * 3; }, [1, 2, 3]);
+     * map(function(n) {
+     *   return n * 3;
+     * }, [1, 2, 3]);
      * // => [3, 6, 9]
      */
     function rearg(func) {
       var indexes = baseFlatten(arguments, false, false, 1);
       return createWrapper(func, REARG_FLAG, null, null, null, indexes);
+    }
+
+    /**
+     * Creates a function that invokes `func` with the `this` binding of the
+     * created function and the array of arguments provided to the created
+     * function much like [Function#apply](http://es5.github.io/#x15.3.4.3).
+     *
+     * @static
+     * @memberOf _
+     * @category Function
+     * @param {Function} func The function to spread arguments over.
+     * @returns {*} Returns the new function.
+     * @example
+     *
+     * var spread = _.spread(function(who, what) {
+     *   return who + ' says ' + what;
+     * });
+     *
+     * spread(['Fred', 'hello']);
+     * // => 'Fred says hello'
+     *
+     * // with a Promise
+     * var numbers = Promise.all([
+     *   Promise.resolve(40),
+     *   Promise.resolve(36)
+     * ]);
+     *
+     * numbers.then(_.spread(function(x, y) {
+     *   return x + y;
+     * }));
+     * // => a Promise of 76
+     */
+    function spread(func) {
+      if (typeof func != 'function') {
+        throw new TypeError(FUNC_ERROR_TEXT);
+      }
+      return function(array) {
+        return func.apply(this, array);
+      };
     }
 
     /**
@@ -40420,8 +40906,9 @@ angular.module('ui.router.state')
      * jQuery(window).on('scroll', _.throttle(updatePosition, 100));
      *
      * // invoke `renewToken` when the click event is fired, but not more than once every 5 minutes
-     * var throttled =  _.throttle(renewToken, 300000, { 'trailing': false })
-     * jQuery('.interactive').on('click', throttled);
+     * jQuery('.interactive').on('click', _.throttle(renewToken, 300000, {
+     *   'trailing': false
+     * }));
      *
      * // cancel a trailing throttled call
      * jQuery(window).on('popstate', throttled.cancel);
@@ -40430,7 +40917,7 @@ angular.module('ui.router.state')
       var leading = true,
           trailing = true;
 
-      if (!isFunction(func)) {
+      if (typeof func != 'function') {
         throw new TypeError(FUNC_ERROR_TEXT);
       }
       if (options === false) {
@@ -40511,22 +40998,26 @@ angular.module('ui.router.state')
      * // => false
      *
      * // using a customizer callback
-     * var body = _.clone(document.body, function(value) {
-     *   return _.isElement(value) ? value.cloneNode(false) : undefined;
+     * var el = _.clone(document.body, function(value) {
+     *   if (_.isElement(value)) {
+     *     return value.cloneNode(false);
+     *   }
      * });
      *
-     * body === document.body
+     * el === document.body
      * // => false
-     * body.nodeName
+     * el.nodeName
      * // => BODY
-     * body.childNodes.length;
+     * el.childNodes.length;
      * // => 0
      */
     function clone(value, isDeep, customizer, thisArg) {
-      // Juggle arguments.
-      if (typeof isDeep != 'boolean' && isDeep != null) {
+      if (isDeep && typeof isDeep != 'boolean' && isIterateeCall(value, isDeep, customizer)) {
+        isDeep = false;
+      }
+      else if (typeof isDeep == 'function') {
         thisArg = customizer;
-        customizer = isIterateeCall(value, isDeep, thisArg) ? null : isDeep;
+        customizer = isDeep;
         isDeep = false;
       }
       customizer = typeof customizer == 'function' && bindCallback(customizer, thisArg, 1);
@@ -40566,14 +41057,16 @@ angular.module('ui.router.state')
      *
      * // using a customizer callback
      * var el = _.cloneDeep(document.body, function(value) {
-     *   return _.isElement(value) ? value.cloneNode(true) : undefined;
+     *   if (_.isElement(value)) {
+     *     return value.cloneNode(true);
+     *   }
      * });
      *
-     * body === document.body
+     * el === document.body
      * // => false
-     * body.nodeName
+     * el.nodeName
      * // => BODY
-     * body.childNodes.length;
+     * el.childNodes.length;
      * // => 20
      */
     function cloneDeep(value, customizer, thisArg) {
@@ -40591,7 +41084,7 @@ angular.module('ui.router.state')
      * @returns {boolean} Returns `true` if `value` is correctly classified, else `false`.
      * @example
      *
-     * (function() { return _.isArguments(arguments); })();
+     * _.isArguments(function() { return arguments; }());
      * // => true
      *
      * _.isArguments([1, 2, 3]);
@@ -40615,7 +41108,7 @@ angular.module('ui.router.state')
      * _.isArray([1, 2, 3]);
      * // => true
      *
-     * (function() { return _.isArray(arguments); })();
+     * _.isArray(function() { return arguments; }());
      * // => false
      */
     var isArray = nativeIsArray || function(value) {
@@ -40736,7 +41229,8 @@ angular.module('ui.router.state')
      * arguments; (value, other [, index|key]).
      *
      * **Note:** This method supports comparing arrays, booleans, `Date` objects,
-     * numbers, `Object` objects, regexes, and strings. Functions and DOM nodes
+     * numbers, `Object` objects, regexes, and strings. Objects are compared by
+     * their own, not inherited, enumerable properties. Functions and DOM nodes
      * are **not** supported. Provide a customizer function to extend support
      * for comparing other values.
      *
@@ -40764,7 +41258,9 @@ angular.module('ui.router.state')
      * var other = ['hi', 'goodbye'];
      *
      * _.isEqual(array, other, function(value, other) {
-     *   return _.every([value, other], RegExp.prototype.test, /^h(?:i|ello)$/) || undefined;
+     *   if (_.every([value, other], RegExp.prototype.test, /^h(?:i|ello)$/)) {
+     *     return true;
+     *   }
      * });
      * // => true
      */
@@ -40801,8 +41297,8 @@ angular.module('ui.router.state')
     /**
      * Checks if `value` is a finite primitive number.
      *
-     * **Note:** This method is based on ES6 `Number.isFinite`. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite)
+     * **Note:** This method is based on ES `Number.isFinite`. See the
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-number.isfinite)
      * for more details.
      *
      * @static
@@ -40847,26 +41343,18 @@ angular.module('ui.router.state')
      * _.isFunction(/abc/);
      * // => false
      */
-    function isFunction(value) {
-      // Avoid a Chakra JIT bug in compatibility modes of IE 11.
-      // See https://github.com/jashkenas/underscore/issues/1621.
-      return typeof value == 'function' || false;
-    }
-    // Fallback for environments that return incorrect `typeof` operator results.
-    if (isFunction(/x/) || (Uint8Array && !isFunction(Uint8Array))) {
-      isFunction = function(value) {
-        // The use of `Object#toString` avoids issues with the `typeof` operator
-        // in older versions of Chrome and Safari which return 'function' for regexes
-        // and Safari 8 equivalents which return 'object' for typed array constructors.
-        return objToString.call(value) == funcTag;
-      };
-    }
+    var isFunction = !(baseIsFunction(/x/) || (Uint8Array && !baseIsFunction(Uint8Array))) ? baseIsFunction : function(value) {
+      // The use of `Object#toString` avoids issues with the `typeof` operator
+      // in older versions of Chrome and Safari which return 'function' for regexes
+      // and Safari 8 equivalents which return 'object' for typed array constructors.
+      return objToString.call(value) == funcTag;
+    };
 
     /**
      * Checks if `value` is the language type of `Object`.
      * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
      *
-     * **Note:** See the [ES5 spec](http://es5.github.io/#x8) for more details.
+     * **Note:** See the [ES5 spec](https://es5.github.io/#x8) for more details.
      *
      * @static
      * @memberOf _
@@ -40886,7 +41374,7 @@ angular.module('ui.router.state')
      */
     function isObject(value) {
       // Avoid a V8 JIT bug in Chrome 19-20.
-      // See https://code.google.com/p/v8/issues/detail?id=2291.
+      // See https://code.google.com/p/v8/issues/detail?id=2291 for more details.
       var type = typeof value;
       return type == 'function' || (value && type == 'object') || false;
     }
@@ -40906,7 +41394,7 @@ angular.module('ui.router.state')
      * @static
      * @memberOf _
      * @category Lang
-     * @param {Object} source The object to inspect.
+     * @param {Object} object The object to inspect.
      * @param {Object} source The object of property values to match.
      * @param {Function} [customizer] The function to customize comparing values.
      * @param {*} [thisArg] The `this` binding of `customizer`.
@@ -40957,7 +41445,7 @@ angular.module('ui.router.state')
      * Checks if `value` is `NaN`.
      *
      * **Note:** This method is not the same as native `isNaN` which returns `true`
-     * for `undefined` and other non-numeric values. See the [ES5 spec](http://es5.github.io/#x15.1.2.4)
+     * for `undefined` and other non-numeric values. See the [ES5 spec](https://es5.github.io/#x15.1.2.4)
      * for more details.
      *
      * @static
@@ -41189,7 +41677,9 @@ angular.module('ui.router.state')
      * @returns {Array} Returns the converted array.
      * @example
      *
-     * (function() { return _.toArray(arguments).slice(1); })(1, 2, 3);
+     * (function() {
+     *   return _.toArray(arguments).slice(1);
+     * }(1, 2, 3));
      * // => [2, 3]
      */
     function toArray(value) {
@@ -41286,7 +41776,9 @@ angular.module('ui.router.state')
      *   Shape.call(this);
      * }
      *
-     * Circle.prototype = _.create(Shape.prototype, { 'constructor': Circle });
+     * Circle.prototype = _.create(Shape.prototype, {
+     *   'constructor': Circle
+     * });
      *
      * var circle = new Circle;
      * circle instanceof Circle;
@@ -41332,10 +41824,14 @@ angular.module('ui.router.state')
      * This method is like `_.findIndex` except that it returns the key of the
      * first element `predicate` returns truthy for, instead of the element itself.
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -41344,8 +41840,7 @@ angular.module('ui.router.state')
      * @category Object
      * @param {Object} object The object to search.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {string|undefined} Returns the key of the matched element, else `undefined`.
      * @example
@@ -41356,14 +41851,20 @@ angular.module('ui.router.state')
      *   'pebbles': { 'age': 1,  'active': true }
      * };
      *
-     * _.findKey(users, function(chr) { return chr.age < 40; });
+     * _.findKey(users, function(chr) {
+     *   return chr.age < 40;
+     * });
      * // => 'barney' (iteration order is not guaranteed)
      *
-     * // using the "_.matches" callback shorthand
-     * _.findKey(users, { 'age': 1 });
+     * // using the `_.matches` callback shorthand
+     * _.findKey(users, { 'age': 1, 'active': true });
      * // => 'pebbles'
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.matchesProperty` callback shorthand
+     * _.findKey(users, 'active', false);
+     * // => 'fred'
+     *
+     * // using the `_.property` callback shorthand
      * _.findKey(users, 'active');
      * // => 'barney'
      */
@@ -41376,10 +41877,14 @@ angular.module('ui.router.state')
      * This method is like `_.findKey` except that it iterates over elements of
      * a collection in the opposite order.
      *
-     * If a property name is provided for `predicate` the created "_.property"
+     * If a property name is provided for `predicate` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `predicate` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `predicate` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -41388,8 +41893,7 @@ angular.module('ui.router.state')
      * @category Object
      * @param {Object} object The object to search.
      * @param {Function|Object|string} [predicate=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `predicate`.
      * @returns {string|undefined} Returns the key of the matched element, else `undefined`.
      * @example
@@ -41400,14 +41904,20 @@ angular.module('ui.router.state')
      *   'pebbles': { 'age': 1,  'active': true }
      * };
      *
-     * _.findLastKey(users, function(chr) { return chr.age < 40; });
+     * _.findLastKey(users, function(chr) {
+     *   return chr.age < 40;
+     * });
      * // => returns `pebbles` assuming `_.findKey` returns `barney`
      *
-     * // using the "_.matches" callback shorthand
-     * _.findLastKey(users, { 'age': 36 });
+     * // using the `_.matches` callback shorthand
+     * _.findLastKey(users, { 'age': 36, 'active': true });
      * // => 'barney'
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.matchesProperty` callback shorthand
+     * _.findLastKey(users, 'active', false);
+     * // => 'fred'
+     *
+     * // using the `_.property` callback shorthand
      * _.findLastKey(users, 'active');
      * // => 'pebbles'
      */
@@ -41495,10 +42005,17 @@ angular.module('ui.router.state')
      * @returns {Object} Returns `object`.
      * @example
      *
-     * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(n, key) {
+     * function Foo() {
+     *   this.a = 1;
+     *   this.b = 2;
+     * }
+     *
+     * Foo.prototype.c = 3;
+     *
+     * _.forOwn(new Foo, function(value, key) {
      *   console.log(key);
      * });
-     * // => logs '0', '1', and 'length' (iteration order is not guaranteed)
+     * // => logs 'a' and 'b' (iteration order is not guaranteed)
      */
     function forOwn(object, iteratee, thisArg) {
       if (typeof iteratee != 'function' || typeof thisArg != 'undefined') {
@@ -41520,10 +42037,17 @@ angular.module('ui.router.state')
      * @returns {Object} Returns `object`.
      * @example
      *
-     * _.forOwnRight({ '0': 'zero', '1': 'one', 'length': 2 }, function(n, key) {
+     * function Foo() {
+     *   this.a = 1;
+     *   this.b = 2;
+     * }
+     *
+     * Foo.prototype.c = 3;
+     *
+     * _.forOwnRight(new Foo, function(value, key) {
      *   console.log(key);
      * });
-     * // => logs 'length', '1', and '0' assuming `_.forOwn` logs '0', '1', and 'length'
+     * // => logs 'b' and 'a' assuming `_.forOwn` logs 'a' and 'b'
      */
     function forOwnRight(object, iteratee, thisArg) {
       iteratee = bindCallback(iteratee, thisArg, 3);
@@ -41543,7 +42067,7 @@ angular.module('ui.router.state')
      * @example
      *
      * _.functions(_);
-     * // => ['all', 'any', 'bind', ...]
+     * // => ['after', 'ary', 'assign', ...]
      */
     function functions(object) {
       return baseFunctions(object, keysIn(object));
@@ -41561,7 +42085,9 @@ angular.module('ui.router.state')
      * @returns {boolean} Returns `true` if `key` is a direct property, else `false`.
      * @example
      *
-     * _.has({ 'a': 1, 'b': 2, 'c': 3 }, 'b');
+     * var object = { 'a': 1, 'b': 2, 'c': 3 };
+     *
+     * _.has(object, 'b');
      * // => true
      */
     function has(object, key) {
@@ -41582,16 +42108,14 @@ angular.module('ui.router.state')
      * @returns {Object} Returns the new inverted object.
      * @example
      *
-     * _.invert({ 'first': 'fred', 'second': 'barney' });
-     * // => { 'fred': 'first', 'barney': 'second' }
+     * var object = { 'a': 1, 'b': 2, 'c': 1 };
      *
-     * // without `multiValue`
-     * _.invert({ 'first': 'fred', 'second': 'barney', 'third': 'fred' });
-     * // => { 'fred': 'third', 'barney': 'second' }
+     * _.invert(object);
+     * // => { '1': 'c', '2': 'b' }
      *
      * // with `multiValue`
-     * _.invert({ 'first': 'fred', 'second': 'barney', 'third': 'fred' }, true);
-     * // => { 'fred': ['first', 'third'], 'barney': ['second'] }
+     * _.invert(object, true);
+     * // => { '1': ['a', 'c'], '2': ['b'] }
      */
     function invert(object, multiValue, guard) {
       if (guard && isIterateeCall(object, multiValue, guard)) {
@@ -41624,7 +42148,7 @@ angular.module('ui.router.state')
      * Creates an array of the own enumerable property names of `object`.
      *
      * **Note:** Non-object values are coerced to objects. See the
-     * [ES6 spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.keys)
+     * [ES spec](https://people.mozilla.org/~jorendorff/es6-draft.html#sec-object.keys)
      * for more details.
      *
      * @static
@@ -41694,7 +42218,7 @@ angular.module('ui.router.state')
 
       var Ctor = object.constructor,
           index = -1,
-          isProto = typeof Ctor == 'function' && Ctor.prototype == object,
+          isProto = typeof Ctor == 'function' && Ctor.prototype === object,
           result = Array(length),
           skipIndexes = length > 0;
 
@@ -41716,10 +42240,14 @@ angular.module('ui.router.state')
      * iteratee function is bound to `thisArg` and invoked with three arguments;
      * (value, key, object).
      *
-     * If a property name is provided for `iteratee` the created "_.property"
+     * If a property name is provided for `iteratee` the created `_.property`
      * style callback returns the property value of the given element.
      *
-     * If an object is provided for `iteratee` the created "_.matches" style
+     * If a value is also provided for `thisArg` the created `_.matchesProperty`
+     * style callback returns `true` for elements that have a matching property
+     * value, else `false`.
+     *
+     * If an object is provided for `iteratee` the created `_.matches` style
      * callback returns `true` for elements that have the properties of the given
      * object, else `false`.
      *
@@ -41728,21 +42256,22 @@ angular.module('ui.router.state')
      * @category Object
      * @param {Object} object The object to iterate over.
      * @param {Function|Object|string} [iteratee=_.identity] The function invoked
-     *  per iteration. If a property name or object is provided it is used to
-     *  create a "_.property" or "_.matches" style callback respectively.
+     *  per iteration.
      * @param {*} [thisArg] The `this` binding of `iteratee`.
      * @returns {Object} Returns the new mapped object.
      * @example
      *
-     * _.mapValues({ 'a': 1, 'b': 2, 'c': 3} , function(n) { return n * 3; });
-     * // => { 'a': 3, 'b': 6, 'c': 9 }
+     * _.mapValues({ 'a': 1, 'b': 2 }, function(n) {
+     *   return n * 3;
+     * });
+     * // => { 'a': 3, 'b': 6 }
      *
      * var users = {
      *   'fred':    { 'user': 'fred',    'age': 40 },
      *   'pebbles': { 'user': 'pebbles', 'age': 1 }
      * };
      *
-     * // using the "_.property" callback shorthand
+     * // using the `_.property` callback shorthand
      * _.mapValues(users, 'age');
      * // => { 'fred': 40, 'pebbles': 1 } (iteration order is not guaranteed)
      */
@@ -41798,7 +42327,9 @@ angular.module('ui.router.state')
      * };
      *
      * _.merge(object, other, function(a, b) {
-     *   return _.isArray(a) ? a.concat(b) : undefined;
+     *   if (_.isArray(a)) {
+     *     return a.concat(b);
+     *   }
      * });
      * // => { 'fruits': ['apple', 'banana'], 'vegetables': ['beet', 'carrot'] }
      */
@@ -41964,18 +42495,16 @@ angular.module('ui.router.state')
      * @returns {*} Returns the accumulated value.
      * @example
      *
-     * var squares = _.transform([1, 2, 3, 4, 5, 6], function(result, n) {
-     *   n *= n;
-     *   if (n % 2) {
-     *     return result.push(n) < 3;
-     *   }
+     * _.transform([2, 3, 4], function(result, n) {
+     *   result.push(n *= n);
+     *   return n % 2 == 0;
      * });
-     * // => [1, 9, 25]
+     * // => [4, 9]
      *
-     * var mapped = _.transform({ 'a': 1, 'b': 2, 'c': 3 }, function(result, n, key) {
+     * _.transform({ 'a': 1, 'b': 2 }, function(result, n, key) {
      *   result[key] = n * 3;
      * });
-     * // => { 'a': 3, 'b': 6, 'c': 9 }
+     * // => { 'a': 3, 'b': 6 }
      */
     function transform(object, iteratee, accumulator, thisArg) {
       var isArr = isArray(object) || isTypedArray(object);
@@ -41987,7 +42516,7 @@ angular.module('ui.router.state')
           if (isArr) {
             accumulator = isArray(object) ? new Ctor : [];
           } else {
-            accumulator = baseCreate(typeof Ctor == 'function' && Ctor.prototype);
+            accumulator = baseCreate(isFunction(Ctor) && Ctor.prototype);
           }
         } else {
           accumulator = {};
@@ -42058,6 +42587,48 @@ angular.module('ui.router.state')
     /*------------------------------------------------------------------------*/
 
     /**
+     * Checks if `n` is between `start` and up to but not including, `end`. If
+     * `end` is not specified it defaults to `start` with `start` becoming `0`.
+     *
+     * @static
+     * @memberOf _
+     * @category Number
+     * @param {number} n The number to check.
+     * @param {number} [start=0] The start of the range.
+     * @param {number} end The end of the range.
+     * @returns {boolean} Returns `true` if `n` is in the range, else `false`.
+     * @example
+     *
+     * _.inRange(3, 2, 4);
+     * // => true
+     *
+     * _.inRange(4, 8);
+     * // => true
+     *
+     * _.inRange(4, 2);
+     * // => false
+     *
+     * _.inRange(2, 2);
+     * // => false
+     *
+     * _.inRange(1.2, 2);
+     * // => true
+     *
+     * _.inRange(5.2, 4);
+     * // => false
+     */
+    function inRange(value, start, end) {
+      start = +start || 0;
+      if (typeof end === 'undefined') {
+        end = start;
+        start = 0;
+      } else {
+        end = +end || 0;
+      }
+      return value >= start && value < end;
+    }
+
+    /**
      * Produces a random number between `min` and `max` (inclusive). If only one
      * argument is provided a number between `0` and the given number is returned.
      * If `floating` is `true`, or either `min` or `max` are floats, a floating-point
@@ -42123,7 +42694,7 @@ angular.module('ui.router.state')
 
     /**
      * Converts `string` to camel case.
-     * See [Wikipedia](http://en.wikipedia.org/wiki/CamelCase) for more details.
+     * See [Wikipedia](https://en.wikipedia.org/wiki/CamelCase) for more details.
      *
      * @static
      * @memberOf _
@@ -42143,7 +42714,7 @@ angular.module('ui.router.state')
      */
     var camelCase = createCompounder(function(result, word, index) {
       word = word.toLowerCase();
-      return index ? (result + word.charAt(0).toUpperCase() + word.slice(1)) : word;
+      return result + (index ? (word.charAt(0).toUpperCase() + word.slice(1)) : word);
     });
 
     /**
@@ -42166,7 +42737,7 @@ angular.module('ui.router.state')
 
     /**
      * Deburrs `string` by converting latin-1 supplementary letters to basic latin letters.
-     * See [Wikipedia](http://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
+     * See [Wikipedia](https://en.wikipedia.org/wiki/Latin-1_Supplement_(Unicode_block)#Character_table)
      * for more details.
      *
      * @static
@@ -42219,18 +42790,18 @@ angular.module('ui.router.state')
      * their corresponding HTML entities.
      *
      * **Note:** No other characters are escaped. To escape additional characters
-     * use a third-party library like [_he_](http://mths.be/he).
+     * use a third-party library like [_he_](https://mths.be/he).
      *
      * Though the ">" character is escaped for symmetry, characters like
      * ">" and "/" don't require escaping in HTML and have no special meaning
      * unless they're part of a tag or unquoted attribute value.
-     * See [Mathias Bynens's article](http://mathiasbynens.be/notes/ambiguous-ampersands)
+     * See [Mathias Bynens's article](https://mathiasbynens.be/notes/ambiguous-ampersands)
      * (under "semi-related fun fact") for more details.
      *
      * Backticks are escaped because in Internet Explorer < 9, they can break out
-     * of attribute values or HTML comments. See [#102](http://html5sec.org/#102),
-     * [#108](http://html5sec.org/#108), and [#133](http://html5sec.org/#133) of
-     * the [HTML5 Security Cheatsheet](http://html5sec.org/) for more details.
+     * of attribute values or HTML comments. See [#102](https://html5sec.org/#102),
+     * [#108](https://html5sec.org/#108), and [#133](https://html5sec.org/#133) of
+     * the [HTML5 Security Cheatsheet](https://html5sec.org/) for more details.
      *
      * When working with HTML you should always quote attribute values to reduce
      * XSS vectors. See [Ryan Grove's article](http://wonko.com/post/html-escaping)
@@ -42276,8 +42847,8 @@ angular.module('ui.router.state')
     }
 
     /**
-     * Converts `string` to kebab case (a.k.a. spinal case).
-     * See [Wikipedia](http://en.wikipedia.org/wiki/Letter_case#Computers) for
+     * Converts `string` to kebab case.
+     * See [Wikipedia](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) for
      * more details.
      *
      * @static
@@ -42401,7 +42972,7 @@ angular.module('ui.router.state')
      * in which case a `radix` of `16` is used.
      *
      * **Note:** This method aligns with the ES5 implementation of `parseInt`.
-     * See the [ES5 spec](http://es5.github.io/#E) for more details.
+     * See the [ES5 spec](https://es5.github.io/#E) for more details.
      *
      * @static
      * @memberOf _
@@ -42427,9 +42998,9 @@ angular.module('ui.router.state')
     // Fallback for environments with pre-ES5 implementations.
     if (nativeParseInt(whitespace + '08') != 8) {
       parseInt = function(string, radix, guard) {
-        // Firefox < 21 and Opera < 15 follow ES3 for `parseInt` and
+        // Firefox < 21 and Opera < 15 follow ES3 for `parseInt`.
         // Chrome fails to trim leading <BOM> whitespace characters.
-        // See https://code.google.com/p/v8/issues/detail?id=3109.
+        // See https://code.google.com/p/v8/issues/detail?id=3109 for more details.
         if (guard ? isIterateeCall(string, radix, guard) : radix == null) {
           radix = 0;
         } else if (radix) {
@@ -42468,7 +43039,7 @@ angular.module('ui.router.state')
         return result;
       }
       // Leverage the exponentiation by squaring algorithm for a faster repeat.
-      // See http://en.wikipedia.org/wiki/Exponentiation_by_squaring.
+      // See https://en.wikipedia.org/wiki/Exponentiation_by_squaring for more details.
       do {
         if (n % 2) {
           result += string;
@@ -42482,7 +43053,7 @@ angular.module('ui.router.state')
 
     /**
      * Converts `string` to snake case.
-     * See [Wikipedia](http://en.wikipedia.org/wiki/Snake_case) for more details.
+     * See [Wikipedia](https://en.wikipedia.org/wiki/Snake_case) for more details.
      *
      * @static
      * @memberOf _
@@ -42494,14 +43065,39 @@ angular.module('ui.router.state')
      * _.snakeCase('Foo Bar');
      * // => 'foo_bar'
      *
-     * _.snakeCase('--foo-bar');
+     * _.snakeCase('fooBar');
      * // => 'foo_bar'
      *
-     * _.snakeCase('fooBar');
+     * _.snakeCase('--foo-bar');
      * // => 'foo_bar'
      */
     var snakeCase = createCompounder(function(result, word, index) {
       return result + (index ? '_' : '') + word.toLowerCase();
+    });
+
+    /**
+     * Converts `string` to start case.
+     * See [Wikipedia](https://en.wikipedia.org/wiki/Letter_case#Stylistic_or_specialised_usage)
+     * for more details.
+     *
+     * @static
+     * @memberOf _
+     * @category String
+     * @param {string} [string=''] The string to convert.
+     * @returns {string} Returns the start cased string.
+     * @example
+     *
+     * _.startCase('--foo-bar');
+     * // => 'Foo Bar'
+     *
+     * _.startCase('fooBar');
+     * // => 'Foo Bar'
+     *
+     * _.startCase('__foo_bar__');
+     * // => 'Foo Bar'
+     */
+    var startCase = createCompounder(function(result, word, index) {
+      return result + (index ? ' ' : '') + (word.charAt(0).toUpperCase() + word.slice(1));
     });
 
     /**
@@ -42543,7 +43139,7 @@ angular.module('ui.router.state')
      * for more details.
      *
      * For more information on precompiling templates see
-     * [Lo-Dash's custom builds documentation](https://lodash.com/custom-builds).
+     * [lodash's custom builds documentation](https://lodash.com/custom-builds).
      *
      * For more information on Chrome extension sandboxes see
      * [Chrome's extensions documentation](https://developer.chrome.com/extensions/sandboxingEval).
@@ -42583,7 +43179,7 @@ angular.module('ui.router.state')
      * compiled({ 'user': 'barney' });
      * // => 'hello barney!'
      *
-     * // using the ES6 delimiter as an alternative to the default "interpolate" delimiter
+     * // using the ES delimiter as an alternative to the default "interpolate" delimiter
      * var compiled = _.template('hello ${ user }!');
      * compiled({ 'user': 'pebbles' });
      * // => 'hello pebbles!'
@@ -42657,7 +43253,6 @@ angular.module('ui.router.state')
       , 'g');
 
       // Use a sourceURL for easier debugging.
-      // See http://www.html5rocks.com/en/tutorials/developertools/sourcemaps/#toc-sourceurl.
       var sourceURL = '//# sourceURL=' +
         ('sourceURL' in options
           ? options.sourceURL
@@ -42764,7 +43359,7 @@ angular.module('ui.router.state')
       if (guard ? isIterateeCall(value, chars, guard) : chars == null) {
         return string.slice(trimmedLeftIndex(string), trimmedRightIndex(string) + 1);
       }
-      chars = baseToString(chars);
+      chars = (chars + '');
       return string.slice(charsLeftIndex(string, chars), charsRightIndex(string, chars) + 1);
     }
 
@@ -42793,9 +43388,9 @@ angular.module('ui.router.state')
         return string;
       }
       if (guard ? isIterateeCall(value, chars, guard) : chars == null) {
-        return string.slice(trimmedLeftIndex(string))
+        return string.slice(trimmedLeftIndex(string));
       }
-      return string.slice(charsLeftIndex(string, baseToString(chars)));
+      return string.slice(charsLeftIndex(string, (chars + '')));
     }
 
     /**
@@ -42823,9 +43418,9 @@ angular.module('ui.router.state')
         return string;
       }
       if (guard ? isIterateeCall(value, chars, guard) : chars == null) {
-        return string.slice(0, trimmedRightIndex(string) + 1)
+        return string.slice(0, trimmedRightIndex(string) + 1);
       }
-      return string.slice(0, charsRightIndex(string, baseToString(chars)) + 1);
+      return string.slice(0, charsRightIndex(string, (chars + '')) + 1);
     }
 
     /**
@@ -42851,13 +43446,21 @@ angular.module('ui.router.state')
      * _.trunc('hi-diddly-ho there, neighborino', 24);
      * // => 'hi-diddly-ho there, n...'
      *
-     * _.trunc('hi-diddly-ho there, neighborino', { 'length': 24, 'separator': ' ' });
+     * _.trunc('hi-diddly-ho there, neighborino', {
+     *   'length': 24,
+     *   'separator': ' '
+     * });
      * // => 'hi-diddly-ho there,...'
      *
-     * _.trunc('hi-diddly-ho there, neighborino', { 'length': 24, 'separator': /,? +/ });
+     * _.trunc('hi-diddly-ho there, neighborino', {
+     *   'length': 24,
+     *   'separator': /,? +/
+     * });
      * //=> 'hi-diddly-ho there...'
      *
-     * _.trunc('hi-diddly-ho there, neighborino', { 'omission': ' [...]' });
+     * _.trunc('hi-diddly-ho there, neighborino', {
+     *   'omission': ' [...]'
+     * });
      * // => 'hi-diddly-ho there, neig [...]'
      */
     function trunc(string, options, guard) {
@@ -42918,7 +43521,7 @@ angular.module('ui.router.state')
      * corresponding characters.
      *
      * **Note:** No other HTML entities are unescaped. To unescape additional HTML
-     * entities use a third-party library like [_he_](http://mths.be/he).
+     * entities use a third-party library like [_he_](https://mths.be/he).
      *
      * @static
      * @memberOf _
@@ -42966,8 +43569,8 @@ angular.module('ui.router.state')
     /*------------------------------------------------------------------------*/
 
     /**
-     * Attempts to invoke `func`, returning either the result or the caught
-     * error object.
+     * Attempts to invoke `func`, returning either the result or the caught error
+     * object. Any additional arguments are provided to `func` when it is invoked.
      *
      * @static
      * @memberOf _
@@ -42977,27 +43580,35 @@ angular.module('ui.router.state')
      * @example
      *
      * // avoid throwing errors for invalid selectors
-     * var elements = _.attempt(function() {
+     * var elements = _.attempt(function(selector) {
      *   return document.querySelectorAll(selector);
-     * });
+     * }, '>_>');
      *
      * if (_.isError(elements)) {
      *   elements = [];
      * }
      */
-    function attempt(func) {
+    function attempt() {
+      var length = arguments.length,
+          func = arguments[0];
+
       try {
-        return func();
+        var args = Array(length ? length - 1 : 0);
+        while (--length > 0) {
+          args[length - 1] = arguments[length];
+        }
+        return func.apply(undefined, args);
       } catch(e) {
-        return isError(e) ? e : Error(e);
+        return isError(e) ? e : new Error(e);
       }
     }
 
     /**
-     * Creates a function bound to an optional `thisArg`. If `func` is a property
-     * name the created callback returns the property value for a given element.
-     * If `func` is an object the created callback returns `true` for elements
-     * that contain the equivalent object properties, otherwise it returns `false`.
+     * Creates a function that invokes `func` with the `this` binding of `thisArg`
+     * and arguments of the created function. If `func` is a property name the
+     * created callback returns the property value for a given element. If `func`
+     * is an object the created callback returns `true` for elements that contain
+     * the equivalent object properties, otherwise it returns `false`.
      *
      * @static
      * @memberOf _
@@ -43021,7 +43632,9 @@ angular.module('ui.router.state')
      *     return callback(func, thisArg);
      *   }
      *   return function(object) {
-     *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
+     *     return match[2] == 'gt'
+     *       ? object[match[1]] > match[3]
+     *       : object[match[1]] < match[3];
      *   };
      * });
      *
@@ -43032,7 +43645,9 @@ angular.module('ui.router.state')
       if (guard && isIterateeCall(func, thisArg, guard)) {
         thisArg = null;
       }
-      return baseCallback(func, thisArg);
+      return isObjectLike(func)
+        ? matches(func)
+        : baseCallback(func, thisArg);
     }
 
     /**
@@ -43047,6 +43662,7 @@ angular.module('ui.router.state')
      *
      * var object = { 'user': 'fred' };
      * var getter = _.constant(object);
+     *
      * getter() === object;
      * // => true
      */
@@ -43067,6 +43683,7 @@ angular.module('ui.router.state')
      * @example
      *
      * var object = { 'user': 'fred' };
+     *
      * _.identity(object) === object;
      * // => true
      */
@@ -43079,6 +43696,11 @@ angular.module('ui.router.state')
      * and `source`, returning `true` if the given object has equivalent property
      * values, else `false`.
      *
+     * **Note:** This method supports comparing arrays, booleans, `Date` objects,
+     * numbers, `Object` objects, regexes, and strings. Objects are compared by
+     * their own, not inherited, enumerable properties. For comparing a single
+     * own or inherited property value see `_.matchesProperty`.
+     *
      * @static
      * @memberOf _
      * @category Utility
@@ -43087,20 +43709,44 @@ angular.module('ui.router.state')
      * @example
      *
      * var users = [
-     *   { 'user': 'fred',   'age': 40 },
-     *   { 'user': 'barney', 'age': 36 }
+     *   { 'user': 'barney', 'age': 36, 'active': true },
+     *   { 'user': 'fred',   'age': 40, 'active': false }
      * ];
      *
-     * var matchesAge = _.matches({ 'age': 36 });
-     *
-     * _.filter(users, matchesAge);
-     * // => [{ 'user': 'barney', 'age': 36 }]
-     *
-     * _.find(users, matchesAge);
-     * // => { 'user': 'barney', 'age': 36 }
+     * _.filter(users, _.matches({ 'age': 40, 'active': false }));
+     * // => [{ 'user': 'fred', 'age': 40, 'active': false }]
      */
     function matches(source) {
-      return baseMatches(source, true);
+      return baseMatches(baseClone(source, true));
+    }
+
+    /**
+     * Creates a function which compares the property value of `key` on a given
+     * object to `value`.
+     *
+     * **Note:** This method supports comparing arrays, booleans, `Date` objects,
+     * numbers, `Object` objects, regexes, and strings. Objects are compared by
+     * their own, not inherited, enumerable properties.
+     *
+     * @static
+     * @memberOf _
+     * @category Utility
+     * @param {string} key The key of the property to get.
+     * @param {*} value The value to compare.
+     * @returns {Function} Returns the new function.
+     * @example
+     *
+     * var users = [
+     *   { 'user': 'barney' },
+     *   { 'user': 'fred' },
+     *   { 'user': 'pebbles' }
+     * ];
+     *
+     * _.find(users, _.matchesProperty('user', 'fred'));
+     * // => { 'user': 'fred', 'age': 40 }
+     */
+    function matchesProperty(key, value) {
+      return baseMatchesProperty(key + '', baseClone(value, true));
     }
 
     /**
@@ -43124,6 +43770,9 @@ angular.module('ui.router.state')
      *     return /[aeiou]/i.test(v);
      *   });
      * }
+     *
+     * // use `_.runInContext` to avoid potential conflicts (esp. in Node.js)
+     * var _ = require('lodash').runInContext();
      *
      * _.mixin({ 'vowels': vowels });
      * _.vowels('fred');
@@ -43205,7 +43854,8 @@ angular.module('ui.router.state')
     }
 
     /**
-     * A no-operation function.
+     * A no-operation function which returns `undefined` regardless of the
+     * arguments it receives.
      *
      * @static
      * @memberOf _
@@ -43213,6 +43863,7 @@ angular.module('ui.router.state')
      * @example
      *
      * var object = { 'user': 'fred' };
+     *
      * _.noop(object) === undefined;
      * // => true
      */
@@ -43258,11 +43909,11 @@ angular.module('ui.router.state')
      * @returns {Function} Returns the new function.
      * @example
      *
-     * var object = { 'user': 'fred', 'age': 40, 'active': true };
-     * _.map(['active', 'user'], _.propertyOf(object));
-     * // => [true, 'fred']
-     *
      * var object = { 'a': 3, 'b': 1, 'c': 2 };
+     *
+     * _.map(['a', 'c'], _.propertyOf(object));
+     * // => [3, 2]
+     *
      * _.sortBy(['a', 'b', 'c'], _.propertyOf(object));
      * // => ['b', 'c', 'a']
      */
@@ -43274,8 +43925,9 @@ angular.module('ui.router.state')
 
     /**
      * Creates an array of numbers (positive and/or negative) progressing from
-     * `start` up to, but not including, `end`. If `start` is less than `end` a
-     * zero-length range is created unless a negative `step` is specified.
+     * `start` up to, but not including, `end`. If `end` is not specified it
+     * defaults to `start` with `start` becoming `0`. If `start` is less than
+     * `end` a zero-length range is created unless a negative `step` is specified.
      *
      * @static
      * @memberOf _
@@ -43318,7 +43970,7 @@ angular.module('ui.router.state')
         end = +end || 0;
       }
       // Use `Array(length)` so engines like Chakra and V8 avoid slower modes.
-      // See http://youtu.be/XAqIpGU8ZZk#t=17m25s.
+      // See https://youtu.be/XAqIpGU8ZZk#t=17m25s for more details.
       var index = -1,
           length = nativeMax(ceil((end - start) / (step || 1)), 0),
           result = Array(length);
@@ -43347,10 +43999,14 @@ angular.module('ui.router.state')
      * var diceRolls = _.times(3, _.partial(_.random, 1, 6, false));
      * // => [3, 6, 4]
      *
-     * _.times(3, function(n) { mage.castSpell(n); });
+     * _.times(3, function(n) {
+     *   mage.castSpell(n);
+     * });
      * // => invokes `mage.castSpell(n)` three times with `n` of `0`, `1`, and `2` respectively
      *
-     * _.times(3, function(n) { this.cast(n); }, mage);
+     * _.times(3, function(n) {
+     *   this.cast(n);
+     * }, mage);
      * // => also invokes `mage.castSpell(n)` three times
      */
     function times(n, iteratee, thisArg) {
@@ -43398,8 +44054,14 @@ angular.module('ui.router.state')
 
     /*------------------------------------------------------------------------*/
 
-    // Ensure `new LodashWrapper` is an instance of `lodash`.
-    LodashWrapper.prototype = lodash.prototype;
+    // Ensure wrappers are instances of `baseLodash`.
+    lodash.prototype = baseLodash.prototype;
+
+    LodashWrapper.prototype = baseCreate(baseLodash.prototype);
+    LodashWrapper.prototype.constructor = LodashWrapper;
+
+    LazyWrapper.prototype = baseCreate(baseLodash.prototype);
+    LazyWrapper.prototype.constructor = LazyWrapper;
 
     // Add functions to the `Map` cache.
     MapCache.prototype['delete'] = mapDelete;
@@ -43440,6 +44102,7 @@ angular.module('ui.router.state')
     lodash.dropRight = dropRight;
     lodash.dropRightWhile = dropRightWhile;
     lodash.dropWhile = dropWhile;
+    lodash.fill = fill;
     lodash.filter = filter;
     lodash.flatten = flatten;
     lodash.flattenDeep = flattenDeep;
@@ -43463,6 +44126,7 @@ angular.module('ui.router.state')
     lodash.map = map;
     lodash.mapValues = mapValues;
     lodash.matches = matches;
+    lodash.matchesProperty = matchesProperty;
     lodash.memoize = memoize;
     lodash.merge = merge;
     lodash.mixin = mixin;
@@ -43488,6 +44152,7 @@ angular.module('ui.router.state')
     lodash.slice = slice;
     lodash.sortBy = sortBy;
     lodash.sortByAll = sortByAll;
+    lodash.spread = spread;
     lodash.take = take;
     lodash.takeRight = takeRight;
     lodash.takeRightWhile = takeRightWhile;
@@ -43553,6 +44218,7 @@ angular.module('ui.router.state')
     lodash.identity = identity;
     lodash.includes = includes;
     lodash.indexOf = indexOf;
+    lodash.inRange = inRange;
     lodash.isArguments = isArguments;
     lodash.isArray = isArray;
     lodash.isBoolean = isBoolean;
@@ -43597,6 +44263,7 @@ angular.module('ui.router.state')
     lodash.some = some;
     lodash.sortedIndex = sortedIndex;
     lodash.sortedLastIndex = sortedLastIndex;
+    lodash.startCase = startCase;
     lodash.startsWith = startsWith;
     lodash.template = template;
     lodash.trim = trim;
@@ -43660,14 +44327,15 @@ angular.module('ui.router.state')
 
     // Add `LazyWrapper` methods that accept an `iteratee` value.
     arrayEach(['filter', 'map', 'takeWhile'], function(methodName, index) {
-      var isFilter = index == LAZY_FILTER_FLAG;
+      var isFilter = index == LAZY_FILTER_FLAG,
+          isWhile = index == LAZY_WHILE_FLAG;
 
       LazyWrapper.prototype[methodName] = function(iteratee, thisArg) {
         var result = this.clone(),
-            filtered = result.filtered,
-            iteratees = result.iteratees || (result.iteratees = []);
+            filtered = result.__filtered__,
+            iteratees = result.__iteratees__ || (result.__iteratees__ = []);
 
-        result.filtered = filtered || isFilter || (index == LAZY_WHILE_FLAG && result.dir < 0);
+        result.__filtered__ = filtered || isFilter || (isWhile && result.__dir__ < 0);
         iteratees.push({ 'iteratee': getCallback(iteratee, thisArg, 3), 'type': index });
         return result;
       };
@@ -43675,19 +44343,19 @@ angular.module('ui.router.state')
 
     // Add `LazyWrapper` methods for `_.drop` and `_.take` variants.
     arrayEach(['drop', 'take'], function(methodName, index) {
-      var countName = methodName + 'Count',
+      var countName = '__' + methodName + 'Count__',
           whileName = methodName + 'While';
 
       LazyWrapper.prototype[methodName] = function(n) {
-        n = n == null ? 1 : nativeMax(+n || 0, 0);
+        n = n == null ? 1 : nativeMax(floor(n) || 0, 0);
 
         var result = this.clone();
-        if (result.filtered) {
+        if (result.__filtered__) {
           var value = result[countName];
           result[countName] = index ? nativeMin(value, n) : (value + n);
         } else {
-          var views = result.views || (result.views = []);
-          views.push({ 'size': n, 'type': methodName + (result.dir < 0 ? 'Right' : '') });
+          var views = result.__views__ || (result.__views__ = []);
+          views.push({ 'size': n, 'type': methodName + (result.__dir__ < 0 ? 'Right' : '') });
         }
         return result;
       };
@@ -43703,7 +44371,7 @@ angular.module('ui.router.state')
 
     // Add `LazyWrapper` methods for `_.first` and `_.last`.
     arrayEach(['first', 'last'], function(methodName, index) {
-      var takeName = 'take' + (index ? 'Right': '');
+      var takeName = 'take' + (index ? 'Right' : '');
 
       LazyWrapper.prototype[methodName] = function() {
         return this[takeName](1).value()[0];
@@ -43722,30 +44390,29 @@ angular.module('ui.router.state')
     // Add `LazyWrapper` methods for `_.pluck` and `_.where`.
     arrayEach(['pluck', 'where'], function(methodName, index) {
       var operationName = index ? 'filter' : 'map',
-          createCallback = index ? matches : property;
+          createCallback = index ? baseMatches : baseProperty;
 
       LazyWrapper.prototype[methodName] = function(value) {
         return this[operationName](createCallback(value));
       };
     });
 
-    LazyWrapper.prototype.dropWhile = function(iteratee, thisArg) {
-      var done,
-          lastIndex,
-          isRight = this.dir < 0;
+    LazyWrapper.prototype.compact = function() {
+      return this.filter(identity);
+    };
 
-      iteratee = getCallback(iteratee, thisArg, 3);
+    LazyWrapper.prototype.dropWhile = function(predicate, thisArg) {
+      var done;
+      predicate = getCallback(predicate, thisArg, 3);
       return this.filter(function(value, index, array) {
-        done = done && (isRight ? index < lastIndex : index > lastIndex);
-        lastIndex = index;
-        return done || (done = !iteratee(value, index, array));
+        return done || (done = !predicate(value, index, array));
       });
     };
 
-    LazyWrapper.prototype.reject = function(iteratee, thisArg) {
-      iteratee = getCallback(iteratee, thisArg, 3);
+    LazyWrapper.prototype.reject = function(predicate, thisArg) {
+      predicate = getCallback(predicate, thisArg, 3);
       return this.filter(function(value, index, array) {
-        return !iteratee(value, index, array);
+        return !predicate(value, index, array);
       });
     };
 
@@ -43760,9 +44427,14 @@ angular.module('ui.router.state')
       return result;
     };
 
+    LazyWrapper.prototype.toArray = function() {
+      return this.drop(0);
+    };
+
     // Add `LazyWrapper` methods to `lodash.prototype`.
     baseForOwn(LazyWrapper.prototype, function(func, methodName) {
-      var retUnwrapped = /^(?:first|last)$/.test(methodName);
+      var lodashFunc = lodash[methodName],
+          retUnwrapped = /^(?:first|last)$/.test(methodName);
 
       lodash.prototype[methodName] = function() {
         var value = this.__wrapped__,
@@ -43775,19 +44447,19 @@ angular.module('ui.router.state')
         if (retUnwrapped && !chainAll) {
           return onlyLazy
             ? func.call(value)
-            : lodash[methodName](this.value());
+            : lodashFunc.call(lodash, this.value());
         }
         var interceptor = function(value) {
           var otherArgs = [value];
           push.apply(otherArgs, args);
-          return lodash[methodName].apply(lodash, otherArgs);
+          return lodashFunc.apply(lodash, otherArgs);
         };
         if (isLazy || isArray(value)) {
           var wrapper = onlyLazy ? value : new LazyWrapper(this),
               result = func.apply(wrapper, args);
 
-          if (!retUnwrapped && (isHybrid || result.actions)) {
-            var actions = result.actions || (result.actions = []);
+          if (!retUnwrapped && (isHybrid || result.__actions__)) {
+            var actions = result.__actions__ || (result.__actions__ = []);
             actions.push({ 'func': thru, 'args': [interceptor], 'thisArg': lodash });
           }
           return new LodashWrapper(result, chainAll);
@@ -43818,13 +44490,15 @@ angular.module('ui.router.state')
     LazyWrapper.prototype.reverse = lazyReverse;
     LazyWrapper.prototype.value = lazyValue;
 
-    // Add chaining functions to the lodash wrapper.
+    // Add chaining functions to the `lodash` wrapper.
     lodash.prototype.chain = wrapperChain;
+    lodash.prototype.commit = wrapperCommit;
+    lodash.prototype.plant = wrapperPlant;
     lodash.prototype.reverse = wrapperReverse;
     lodash.prototype.toString = wrapperToString;
-    lodash.prototype.toJSON = lodash.prototype.valueOf = lodash.prototype.value = wrapperValue;
+    lodash.prototype.run = lodash.prototype.toJSON = lodash.prototype.valueOf = lodash.prototype.value = wrapperValue;
 
-    // Add function aliases to the lodash wrapper.
+    // Add function aliases to the `lodash` wrapper.
     lodash.prototype.collect = lodash.prototype.map;
     lodash.prototype.head = lodash.prototype.first;
     lodash.prototype.select = lodash.prototype.filter;
@@ -43835,14 +44509,15 @@ angular.module('ui.router.state')
 
   /*--------------------------------------------------------------------------*/
 
-  // Export Lo-Dash.
+  // Export lodash.
   var _ = runInContext();
 
   // Some AMD build optimizers like r.js check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // Expose Lo-Dash to the global object when an AMD loader is present to avoid
-    // errors in cases where Lo-Dash is loaded by a script tag and not intended
-    // as an AMD module. See http://requirejs.org/docs/errors.html#mismatch.
+    // Expose lodash to the global object when an AMD loader is present to avoid
+    // errors in cases where lodash is loaded by a script tag and not intended
+    // as an AMD module. See http://requirejs.org/docs/errors.html#mismatch for
+    // more details.
     root._ = _;
 
     // Define as an anonymous module so, through path mapping, it can be
@@ -43867,6 +44542,3311 @@ angular.module('ui.router.state')
     root._ = _;
   }
 }.call(this));
+
+/*! Hammer.JS - v2.0.4 - 2014-09-28
+ * http://hammerjs.github.io/
+ *
+ * Copyright (c) 2014 Jorik Tangelder;
+ * Licensed under the MIT license */
+(function(window, document, exportName, undefined) {
+  'use strict';
+
+var VENDOR_PREFIXES = ['', 'webkit', 'moz', 'MS', 'ms', 'o'];
+var TEST_ELEMENT = document.createElement('div');
+
+var TYPE_FUNCTION = 'function';
+
+var round = Math.round;
+var abs = Math.abs;
+var now = Date.now;
+
+/**
+ * set a timeout with a given scope
+ * @param {Function} fn
+ * @param {Number} timeout
+ * @param {Object} context
+ * @returns {number}
+ */
+function setTimeoutContext(fn, timeout, context) {
+    return setTimeout(bindFn(fn, context), timeout);
+}
+
+/**
+ * if the argument is an array, we want to execute the fn on each entry
+ * if it aint an array we don't want to do a thing.
+ * this is used by all the methods that accept a single and array argument.
+ * @param {*|Array} arg
+ * @param {String} fn
+ * @param {Object} [context]
+ * @returns {Boolean}
+ */
+function invokeArrayArg(arg, fn, context) {
+    if (Array.isArray(arg)) {
+        each(arg, context[fn], context);
+        return true;
+    }
+    return false;
+}
+
+/**
+ * walk objects and arrays
+ * @param {Object} obj
+ * @param {Function} iterator
+ * @param {Object} context
+ */
+function each(obj, iterator, context) {
+    var i;
+
+    if (!obj) {
+        return;
+    }
+
+    if (obj.forEach) {
+        obj.forEach(iterator, context);
+    } else if (obj.length !== undefined) {
+        i = 0;
+        while (i < obj.length) {
+            iterator.call(context, obj[i], i, obj);
+            i++;
+        }
+    } else {
+        for (i in obj) {
+            obj.hasOwnProperty(i) && iterator.call(context, obj[i], i, obj);
+        }
+    }
+}
+
+/**
+ * extend object.
+ * means that properties in dest will be overwritten by the ones in src.
+ * @param {Object} dest
+ * @param {Object} src
+ * @param {Boolean} [merge]
+ * @returns {Object} dest
+ */
+function extend(dest, src, merge) {
+    var keys = Object.keys(src);
+    var i = 0;
+    while (i < keys.length) {
+        if (!merge || (merge && dest[keys[i]] === undefined)) {
+            dest[keys[i]] = src[keys[i]];
+        }
+        i++;
+    }
+    return dest;
+}
+
+/**
+ * merge the values from src in the dest.
+ * means that properties that exist in dest will not be overwritten by src
+ * @param {Object} dest
+ * @param {Object} src
+ * @returns {Object} dest
+ */
+function merge(dest, src) {
+    return extend(dest, src, true);
+}
+
+/**
+ * simple class inheritance
+ * @param {Function} child
+ * @param {Function} base
+ * @param {Object} [properties]
+ */
+function inherit(child, base, properties) {
+    var baseP = base.prototype,
+        childP;
+
+    childP = child.prototype = Object.create(baseP);
+    childP.constructor = child;
+    childP._super = baseP;
+
+    if (properties) {
+        extend(childP, properties);
+    }
+}
+
+/**
+ * simple function bind
+ * @param {Function} fn
+ * @param {Object} context
+ * @returns {Function}
+ */
+function bindFn(fn, context) {
+    return function boundFn() {
+        return fn.apply(context, arguments);
+    };
+}
+
+/**
+ * let a boolean value also be a function that must return a boolean
+ * this first item in args will be used as the context
+ * @param {Boolean|Function} val
+ * @param {Array} [args]
+ * @returns {Boolean}
+ */
+function boolOrFn(val, args) {
+    if (typeof val == TYPE_FUNCTION) {
+        return val.apply(args ? args[0] || undefined : undefined, args);
+    }
+    return val;
+}
+
+/**
+ * use the val2 when val1 is undefined
+ * @param {*} val1
+ * @param {*} val2
+ * @returns {*}
+ */
+function ifUndefined(val1, val2) {
+    return (val1 === undefined) ? val2 : val1;
+}
+
+/**
+ * addEventListener with multiple events at once
+ * @param {EventTarget} target
+ * @param {String} types
+ * @param {Function} handler
+ */
+function addEventListeners(target, types, handler) {
+    each(splitStr(types), function(type) {
+        target.addEventListener(type, handler, false);
+    });
+}
+
+/**
+ * removeEventListener with multiple events at once
+ * @param {EventTarget} target
+ * @param {String} types
+ * @param {Function} handler
+ */
+function removeEventListeners(target, types, handler) {
+    each(splitStr(types), function(type) {
+        target.removeEventListener(type, handler, false);
+    });
+}
+
+/**
+ * find if a node is in the given parent
+ * @method hasParent
+ * @param {HTMLElement} node
+ * @param {HTMLElement} parent
+ * @return {Boolean} found
+ */
+function hasParent(node, parent) {
+    while (node) {
+        if (node == parent) {
+            return true;
+        }
+        node = node.parentNode;
+    }
+    return false;
+}
+
+/**
+ * small indexOf wrapper
+ * @param {String} str
+ * @param {String} find
+ * @returns {Boolean} found
+ */
+function inStr(str, find) {
+    return str.indexOf(find) > -1;
+}
+
+/**
+ * split string on whitespace
+ * @param {String} str
+ * @returns {Array} words
+ */
+function splitStr(str) {
+    return str.trim().split(/\s+/g);
+}
+
+/**
+ * find if a array contains the object using indexOf or a simple polyFill
+ * @param {Array} src
+ * @param {String} find
+ * @param {String} [findByKey]
+ * @return {Boolean|Number} false when not found, or the index
+ */
+function inArray(src, find, findByKey) {
+    if (src.indexOf && !findByKey) {
+        return src.indexOf(find);
+    } else {
+        var i = 0;
+        while (i < src.length) {
+            if ((findByKey && src[i][findByKey] == find) || (!findByKey && src[i] === find)) {
+                return i;
+            }
+            i++;
+        }
+        return -1;
+    }
+}
+
+/**
+ * convert array-like objects to real arrays
+ * @param {Object} obj
+ * @returns {Array}
+ */
+function toArray(obj) {
+    return Array.prototype.slice.call(obj, 0);
+}
+
+/**
+ * unique array with objects based on a key (like 'id') or just by the array's value
+ * @param {Array} src [{id:1},{id:2},{id:1}]
+ * @param {String} [key]
+ * @param {Boolean} [sort=False]
+ * @returns {Array} [{id:1},{id:2}]
+ */
+function uniqueArray(src, key, sort) {
+    var results = [];
+    var values = [];
+    var i = 0;
+
+    while (i < src.length) {
+        var val = key ? src[i][key] : src[i];
+        if (inArray(values, val) < 0) {
+            results.push(src[i]);
+        }
+        values[i] = val;
+        i++;
+    }
+
+    if (sort) {
+        if (!key) {
+            results = results.sort();
+        } else {
+            results = results.sort(function sortUniqueArray(a, b) {
+                return a[key] > b[key];
+            });
+        }
+    }
+
+    return results;
+}
+
+/**
+ * get the prefixed property
+ * @param {Object} obj
+ * @param {String} property
+ * @returns {String|Undefined} prefixed
+ */
+function prefixed(obj, property) {
+    var prefix, prop;
+    var camelProp = property[0].toUpperCase() + property.slice(1);
+
+    var i = 0;
+    while (i < VENDOR_PREFIXES.length) {
+        prefix = VENDOR_PREFIXES[i];
+        prop = (prefix) ? prefix + camelProp : property;
+
+        if (prop in obj) {
+            return prop;
+        }
+        i++;
+    }
+    return undefined;
+}
+
+/**
+ * get a unique id
+ * @returns {number} uniqueId
+ */
+var _uniqueId = 1;
+function uniqueId() {
+    return _uniqueId++;
+}
+
+/**
+ * get the window object of an element
+ * @param {HTMLElement} element
+ * @returns {DocumentView|Window}
+ */
+function getWindowForElement(element) {
+    var doc = element.ownerDocument;
+    return (doc.defaultView || doc.parentWindow);
+}
+
+var MOBILE_REGEX = /mobile|tablet|ip(ad|hone|od)|android/i;
+
+var SUPPORT_TOUCH = ('ontouchstart' in window);
+var SUPPORT_POINTER_EVENTS = prefixed(window, 'PointerEvent') !== undefined;
+var SUPPORT_ONLY_TOUCH = SUPPORT_TOUCH && MOBILE_REGEX.test(navigator.userAgent);
+
+var INPUT_TYPE_TOUCH = 'touch';
+var INPUT_TYPE_PEN = 'pen';
+var INPUT_TYPE_MOUSE = 'mouse';
+var INPUT_TYPE_KINECT = 'kinect';
+
+var COMPUTE_INTERVAL = 25;
+
+var INPUT_START = 1;
+var INPUT_MOVE = 2;
+var INPUT_END = 4;
+var INPUT_CANCEL = 8;
+
+var DIRECTION_NONE = 1;
+var DIRECTION_LEFT = 2;
+var DIRECTION_RIGHT = 4;
+var DIRECTION_UP = 8;
+var DIRECTION_DOWN = 16;
+
+var DIRECTION_HORIZONTAL = DIRECTION_LEFT | DIRECTION_RIGHT;
+var DIRECTION_VERTICAL = DIRECTION_UP | DIRECTION_DOWN;
+var DIRECTION_ALL = DIRECTION_HORIZONTAL | DIRECTION_VERTICAL;
+
+var PROPS_XY = ['x', 'y'];
+var PROPS_CLIENT_XY = ['clientX', 'clientY'];
+
+/**
+ * create new input type manager
+ * @param {Manager} manager
+ * @param {Function} callback
+ * @returns {Input}
+ * @constructor
+ */
+function Input(manager, callback) {
+    var self = this;
+    this.manager = manager;
+    this.callback = callback;
+    this.element = manager.element;
+    this.target = manager.options.inputTarget;
+
+    // smaller wrapper around the handler, for the scope and the enabled state of the manager,
+    // so when disabled the input events are completely bypassed.
+    this.domHandler = function(ev) {
+        if (boolOrFn(manager.options.enable, [manager])) {
+            self.handler(ev);
+        }
+    };
+
+    this.init();
+
+}
+
+Input.prototype = {
+    /**
+     * should handle the inputEvent data and trigger the callback
+     * @virtual
+     */
+    handler: function() { },
+
+    /**
+     * bind the events
+     */
+    init: function() {
+        this.evEl && addEventListeners(this.element, this.evEl, this.domHandler);
+        this.evTarget && addEventListeners(this.target, this.evTarget, this.domHandler);
+        this.evWin && addEventListeners(getWindowForElement(this.element), this.evWin, this.domHandler);
+    },
+
+    /**
+     * unbind the events
+     */
+    destroy: function() {
+        this.evEl && removeEventListeners(this.element, this.evEl, this.domHandler);
+        this.evTarget && removeEventListeners(this.target, this.evTarget, this.domHandler);
+        this.evWin && removeEventListeners(getWindowForElement(this.element), this.evWin, this.domHandler);
+    }
+};
+
+/**
+ * create new input type manager
+ * called by the Manager constructor
+ * @param {Hammer} manager
+ * @returns {Input}
+ */
+function createInputInstance(manager) {
+    var Type;
+    var inputClass = manager.options.inputClass;
+
+    if (inputClass) {
+        Type = inputClass;
+    } else if (SUPPORT_POINTER_EVENTS) {
+        Type = PointerEventInput;
+    } else if (SUPPORT_ONLY_TOUCH) {
+        Type = TouchInput;
+    } else if (!SUPPORT_TOUCH) {
+        Type = MouseInput;
+    } else {
+        Type = TouchMouseInput;
+    }
+    return new (Type)(manager, inputHandler);
+}
+
+/**
+ * handle input events
+ * @param {Manager} manager
+ * @param {String} eventType
+ * @param {Object} input
+ */
+function inputHandler(manager, eventType, input) {
+    var pointersLen = input.pointers.length;
+    var changedPointersLen = input.changedPointers.length;
+    var isFirst = (eventType & INPUT_START && (pointersLen - changedPointersLen === 0));
+    var isFinal = (eventType & (INPUT_END | INPUT_CANCEL) && (pointersLen - changedPointersLen === 0));
+
+    input.isFirst = !!isFirst;
+    input.isFinal = !!isFinal;
+
+    if (isFirst) {
+        manager.session = {};
+    }
+
+    // source event is the normalized value of the domEvents
+    // like 'touchstart, mouseup, pointerdown'
+    input.eventType = eventType;
+
+    // compute scale, rotation etc
+    computeInputData(manager, input);
+
+    // emit secret event
+    manager.emit('hammer.input', input);
+
+    manager.recognize(input);
+    manager.session.prevInput = input;
+}
+
+/**
+ * extend the data with some usable properties like scale, rotate, velocity etc
+ * @param {Object} manager
+ * @param {Object} input
+ */
+function computeInputData(manager, input) {
+    var session = manager.session;
+    var pointers = input.pointers;
+    var pointersLength = pointers.length;
+
+    // store the first input to calculate the distance and direction
+    if (!session.firstInput) {
+        session.firstInput = simpleCloneInputData(input);
+    }
+
+    // to compute scale and rotation we need to store the multiple touches
+    if (pointersLength > 1 && !session.firstMultiple) {
+        session.firstMultiple = simpleCloneInputData(input);
+    } else if (pointersLength === 1) {
+        session.firstMultiple = false;
+    }
+
+    var firstInput = session.firstInput;
+    var firstMultiple = session.firstMultiple;
+    var offsetCenter = firstMultiple ? firstMultiple.center : firstInput.center;
+
+    var center = input.center = getCenter(pointers);
+    input.timeStamp = now();
+    input.deltaTime = input.timeStamp - firstInput.timeStamp;
+
+    input.angle = getAngle(offsetCenter, center);
+    input.distance = getDistance(offsetCenter, center);
+
+    computeDeltaXY(session, input);
+    input.offsetDirection = getDirection(input.deltaX, input.deltaY);
+
+    input.scale = firstMultiple ? getScale(firstMultiple.pointers, pointers) : 1;
+    input.rotation = firstMultiple ? getRotation(firstMultiple.pointers, pointers) : 0;
+
+    computeIntervalInputData(session, input);
+
+    // find the correct target
+    var target = manager.element;
+    if (hasParent(input.srcEvent.target, target)) {
+        target = input.srcEvent.target;
+    }
+    input.target = target;
+}
+
+function computeDeltaXY(session, input) {
+    var center = input.center;
+    var offset = session.offsetDelta || {};
+    var prevDelta = session.prevDelta || {};
+    var prevInput = session.prevInput || {};
+
+    if (input.eventType === INPUT_START || prevInput.eventType === INPUT_END) {
+        prevDelta = session.prevDelta = {
+            x: prevInput.deltaX || 0,
+            y: prevInput.deltaY || 0
+        };
+
+        offset = session.offsetDelta = {
+            x: center.x,
+            y: center.y
+        };
+    }
+
+    input.deltaX = prevDelta.x + (center.x - offset.x);
+    input.deltaY = prevDelta.y + (center.y - offset.y);
+}
+
+/**
+ * velocity is calculated every x ms
+ * @param {Object} session
+ * @param {Object} input
+ */
+function computeIntervalInputData(session, input) {
+    var last = session.lastInterval || input,
+        deltaTime = input.timeStamp - last.timeStamp,
+        velocity, velocityX, velocityY, direction;
+
+    if (input.eventType != INPUT_CANCEL && (deltaTime > COMPUTE_INTERVAL || last.velocity === undefined)) {
+        var deltaX = last.deltaX - input.deltaX;
+        var deltaY = last.deltaY - input.deltaY;
+
+        var v = getVelocity(deltaTime, deltaX, deltaY);
+        velocityX = v.x;
+        velocityY = v.y;
+        velocity = (abs(v.x) > abs(v.y)) ? v.x : v.y;
+        direction = getDirection(deltaX, deltaY);
+
+        session.lastInterval = input;
+    } else {
+        // use latest velocity info if it doesn't overtake a minimum period
+        velocity = last.velocity;
+        velocityX = last.velocityX;
+        velocityY = last.velocityY;
+        direction = last.direction;
+    }
+
+    input.velocity = velocity;
+    input.velocityX = velocityX;
+    input.velocityY = velocityY;
+    input.direction = direction;
+}
+
+/**
+ * create a simple clone from the input used for storage of firstInput and firstMultiple
+ * @param {Object} input
+ * @returns {Object} clonedInputData
+ */
+function simpleCloneInputData(input) {
+    // make a simple copy of the pointers because we will get a reference if we don't
+    // we only need clientXY for the calculations
+    var pointers = [];
+    var i = 0;
+    while (i < input.pointers.length) {
+        pointers[i] = {
+            clientX: round(input.pointers[i].clientX),
+            clientY: round(input.pointers[i].clientY)
+        };
+        i++;
+    }
+
+    return {
+        timeStamp: now(),
+        pointers: pointers,
+        center: getCenter(pointers),
+        deltaX: input.deltaX,
+        deltaY: input.deltaY
+    };
+}
+
+/**
+ * get the center of all the pointers
+ * @param {Array} pointers
+ * @return {Object} center contains `x` and `y` properties
+ */
+function getCenter(pointers) {
+    var pointersLength = pointers.length;
+
+    // no need to loop when only one touch
+    if (pointersLength === 1) {
+        return {
+            x: round(pointers[0].clientX),
+            y: round(pointers[0].clientY)
+        };
+    }
+
+    var x = 0, y = 0, i = 0;
+    while (i < pointersLength) {
+        x += pointers[i].clientX;
+        y += pointers[i].clientY;
+        i++;
+    }
+
+    return {
+        x: round(x / pointersLength),
+        y: round(y / pointersLength)
+    };
+}
+
+/**
+ * calculate the velocity between two points. unit is in px per ms.
+ * @param {Number} deltaTime
+ * @param {Number} x
+ * @param {Number} y
+ * @return {Object} velocity `x` and `y`
+ */
+function getVelocity(deltaTime, x, y) {
+    return {
+        x: x / deltaTime || 0,
+        y: y / deltaTime || 0
+    };
+}
+
+/**
+ * get the direction between two points
+ * @param {Number} x
+ * @param {Number} y
+ * @return {Number} direction
+ */
+function getDirection(x, y) {
+    if (x === y) {
+        return DIRECTION_NONE;
+    }
+
+    if (abs(x) >= abs(y)) {
+        return x > 0 ? DIRECTION_LEFT : DIRECTION_RIGHT;
+    }
+    return y > 0 ? DIRECTION_UP : DIRECTION_DOWN;
+}
+
+/**
+ * calculate the absolute distance between two points
+ * @param {Object} p1 {x, y}
+ * @param {Object} p2 {x, y}
+ * @param {Array} [props] containing x and y keys
+ * @return {Number} distance
+ */
+function getDistance(p1, p2, props) {
+    if (!props) {
+        props = PROPS_XY;
+    }
+    var x = p2[props[0]] - p1[props[0]],
+        y = p2[props[1]] - p1[props[1]];
+
+    return Math.sqrt((x * x) + (y * y));
+}
+
+/**
+ * calculate the angle between two coordinates
+ * @param {Object} p1
+ * @param {Object} p2
+ * @param {Array} [props] containing x and y keys
+ * @return {Number} angle
+ */
+function getAngle(p1, p2, props) {
+    if (!props) {
+        props = PROPS_XY;
+    }
+    var x = p2[props[0]] - p1[props[0]],
+        y = p2[props[1]] - p1[props[1]];
+    return Math.atan2(y, x) * 180 / Math.PI;
+}
+
+/**
+ * calculate the rotation degrees between two pointersets
+ * @param {Array} start array of pointers
+ * @param {Array} end array of pointers
+ * @return {Number} rotation
+ */
+function getRotation(start, end) {
+    return getAngle(end[1], end[0], PROPS_CLIENT_XY) - getAngle(start[1], start[0], PROPS_CLIENT_XY);
+}
+
+/**
+ * calculate the scale factor between two pointersets
+ * no scale is 1, and goes down to 0 when pinched together, and bigger when pinched out
+ * @param {Array} start array of pointers
+ * @param {Array} end array of pointers
+ * @return {Number} scale
+ */
+function getScale(start, end) {
+    return getDistance(end[0], end[1], PROPS_CLIENT_XY) / getDistance(start[0], start[1], PROPS_CLIENT_XY);
+}
+
+var MOUSE_INPUT_MAP = {
+    mousedown: INPUT_START,
+    mousemove: INPUT_MOVE,
+    mouseup: INPUT_END
+};
+
+var MOUSE_ELEMENT_EVENTS = 'mousedown';
+var MOUSE_WINDOW_EVENTS = 'mousemove mouseup';
+
+/**
+ * Mouse events input
+ * @constructor
+ * @extends Input
+ */
+function MouseInput() {
+    this.evEl = MOUSE_ELEMENT_EVENTS;
+    this.evWin = MOUSE_WINDOW_EVENTS;
+
+    this.allow = true; // used by Input.TouchMouse to disable mouse events
+    this.pressed = false; // mousedown state
+
+    Input.apply(this, arguments);
+}
+
+inherit(MouseInput, Input, {
+    /**
+     * handle mouse events
+     * @param {Object} ev
+     */
+    handler: function MEhandler(ev) {
+        var eventType = MOUSE_INPUT_MAP[ev.type];
+
+        // on start we want to have the left mouse button down
+        if (eventType & INPUT_START && ev.button === 0) {
+            this.pressed = true;
+        }
+
+        if (eventType & INPUT_MOVE && ev.which !== 1) {
+            eventType = INPUT_END;
+        }
+
+        // mouse must be down, and mouse events are allowed (see the TouchMouse input)
+        if (!this.pressed || !this.allow) {
+            return;
+        }
+
+        if (eventType & INPUT_END) {
+            this.pressed = false;
+        }
+
+        this.callback(this.manager, eventType, {
+            pointers: [ev],
+            changedPointers: [ev],
+            pointerType: INPUT_TYPE_MOUSE,
+            srcEvent: ev
+        });
+    }
+});
+
+var POINTER_INPUT_MAP = {
+    pointerdown: INPUT_START,
+    pointermove: INPUT_MOVE,
+    pointerup: INPUT_END,
+    pointercancel: INPUT_CANCEL,
+    pointerout: INPUT_CANCEL
+};
+
+// in IE10 the pointer types is defined as an enum
+var IE10_POINTER_TYPE_ENUM = {
+    2: INPUT_TYPE_TOUCH,
+    3: INPUT_TYPE_PEN,
+    4: INPUT_TYPE_MOUSE,
+    5: INPUT_TYPE_KINECT // see https://twitter.com/jacobrossi/status/480596438489890816
+};
+
+var POINTER_ELEMENT_EVENTS = 'pointerdown';
+var POINTER_WINDOW_EVENTS = 'pointermove pointerup pointercancel';
+
+// IE10 has prefixed support, and case-sensitive
+if (window.MSPointerEvent) {
+    POINTER_ELEMENT_EVENTS = 'MSPointerDown';
+    POINTER_WINDOW_EVENTS = 'MSPointerMove MSPointerUp MSPointerCancel';
+}
+
+/**
+ * Pointer events input
+ * @constructor
+ * @extends Input
+ */
+function PointerEventInput() {
+    this.evEl = POINTER_ELEMENT_EVENTS;
+    this.evWin = POINTER_WINDOW_EVENTS;
+
+    Input.apply(this, arguments);
+
+    this.store = (this.manager.session.pointerEvents = []);
+}
+
+inherit(PointerEventInput, Input, {
+    /**
+     * handle mouse events
+     * @param {Object} ev
+     */
+    handler: function PEhandler(ev) {
+        var store = this.store;
+        var removePointer = false;
+
+        var eventTypeNormalized = ev.type.toLowerCase().replace('ms', '');
+        var eventType = POINTER_INPUT_MAP[eventTypeNormalized];
+        var pointerType = IE10_POINTER_TYPE_ENUM[ev.pointerType] || ev.pointerType;
+
+        var isTouch = (pointerType == INPUT_TYPE_TOUCH);
+
+        // get index of the event in the store
+        var storeIndex = inArray(store, ev.pointerId, 'pointerId');
+
+        // start and mouse must be down
+        if (eventType & INPUT_START && (ev.button === 0 || isTouch)) {
+            if (storeIndex < 0) {
+                store.push(ev);
+                storeIndex = store.length - 1;
+            }
+        } else if (eventType & (INPUT_END | INPUT_CANCEL)) {
+            removePointer = true;
+        }
+
+        // it not found, so the pointer hasn't been down (so it's probably a hover)
+        if (storeIndex < 0) {
+            return;
+        }
+
+        // update the event in the store
+        store[storeIndex] = ev;
+
+        this.callback(this.manager, eventType, {
+            pointers: store,
+            changedPointers: [ev],
+            pointerType: pointerType,
+            srcEvent: ev
+        });
+
+        if (removePointer) {
+            // remove from the store
+            store.splice(storeIndex, 1);
+        }
+    }
+});
+
+var SINGLE_TOUCH_INPUT_MAP = {
+    touchstart: INPUT_START,
+    touchmove: INPUT_MOVE,
+    touchend: INPUT_END,
+    touchcancel: INPUT_CANCEL
+};
+
+var SINGLE_TOUCH_TARGET_EVENTS = 'touchstart';
+var SINGLE_TOUCH_WINDOW_EVENTS = 'touchstart touchmove touchend touchcancel';
+
+/**
+ * Touch events input
+ * @constructor
+ * @extends Input
+ */
+function SingleTouchInput() {
+    this.evTarget = SINGLE_TOUCH_TARGET_EVENTS;
+    this.evWin = SINGLE_TOUCH_WINDOW_EVENTS;
+    this.started = false;
+
+    Input.apply(this, arguments);
+}
+
+inherit(SingleTouchInput, Input, {
+    handler: function TEhandler(ev) {
+        var type = SINGLE_TOUCH_INPUT_MAP[ev.type];
+
+        // should we handle the touch events?
+        if (type === INPUT_START) {
+            this.started = true;
+        }
+
+        if (!this.started) {
+            return;
+        }
+
+        var touches = normalizeSingleTouches.call(this, ev, type);
+
+        // when done, reset the started state
+        if (type & (INPUT_END | INPUT_CANCEL) && touches[0].length - touches[1].length === 0) {
+            this.started = false;
+        }
+
+        this.callback(this.manager, type, {
+            pointers: touches[0],
+            changedPointers: touches[1],
+            pointerType: INPUT_TYPE_TOUCH,
+            srcEvent: ev
+        });
+    }
+});
+
+/**
+ * @this {TouchInput}
+ * @param {Object} ev
+ * @param {Number} type flag
+ * @returns {undefined|Array} [all, changed]
+ */
+function normalizeSingleTouches(ev, type) {
+    var all = toArray(ev.touches);
+    var changed = toArray(ev.changedTouches);
+
+    if (type & (INPUT_END | INPUT_CANCEL)) {
+        all = uniqueArray(all.concat(changed), 'identifier', true);
+    }
+
+    return [all, changed];
+}
+
+var TOUCH_INPUT_MAP = {
+    touchstart: INPUT_START,
+    touchmove: INPUT_MOVE,
+    touchend: INPUT_END,
+    touchcancel: INPUT_CANCEL
+};
+
+var TOUCH_TARGET_EVENTS = 'touchstart touchmove touchend touchcancel';
+
+/**
+ * Multi-user touch events input
+ * @constructor
+ * @extends Input
+ */
+function TouchInput() {
+    this.evTarget = TOUCH_TARGET_EVENTS;
+    this.targetIds = {};
+
+    Input.apply(this, arguments);
+}
+
+inherit(TouchInput, Input, {
+    handler: function MTEhandler(ev) {
+        var type = TOUCH_INPUT_MAP[ev.type];
+        var touches = getTouches.call(this, ev, type);
+        if (!touches) {
+            return;
+        }
+
+        this.callback(this.manager, type, {
+            pointers: touches[0],
+            changedPointers: touches[1],
+            pointerType: INPUT_TYPE_TOUCH,
+            srcEvent: ev
+        });
+    }
+});
+
+/**
+ * @this {TouchInput}
+ * @param {Object} ev
+ * @param {Number} type flag
+ * @returns {undefined|Array} [all, changed]
+ */
+function getTouches(ev, type) {
+    var allTouches = toArray(ev.touches);
+    var targetIds = this.targetIds;
+
+    // when there is only one touch, the process can be simplified
+    if (type & (INPUT_START | INPUT_MOVE) && allTouches.length === 1) {
+        targetIds[allTouches[0].identifier] = true;
+        return [allTouches, allTouches];
+    }
+
+    var i,
+        targetTouches,
+        changedTouches = toArray(ev.changedTouches),
+        changedTargetTouches = [],
+        target = this.target;
+
+    // get target touches from touches
+    targetTouches = allTouches.filter(function(touch) {
+        return hasParent(touch.target, target);
+    });
+
+    // collect touches
+    if (type === INPUT_START) {
+        i = 0;
+        while (i < targetTouches.length) {
+            targetIds[targetTouches[i].identifier] = true;
+            i++;
+        }
+    }
+
+    // filter changed touches to only contain touches that exist in the collected target ids
+    i = 0;
+    while (i < changedTouches.length) {
+        if (targetIds[changedTouches[i].identifier]) {
+            changedTargetTouches.push(changedTouches[i]);
+        }
+
+        // cleanup removed touches
+        if (type & (INPUT_END | INPUT_CANCEL)) {
+            delete targetIds[changedTouches[i].identifier];
+        }
+        i++;
+    }
+
+    if (!changedTargetTouches.length) {
+        return;
+    }
+
+    return [
+        // merge targetTouches with changedTargetTouches so it contains ALL touches, including 'end' and 'cancel'
+        uniqueArray(targetTouches.concat(changedTargetTouches), 'identifier', true),
+        changedTargetTouches
+    ];
+}
+
+/**
+ * Combined touch and mouse input
+ *
+ * Touch has a higher priority then mouse, and while touching no mouse events are allowed.
+ * This because touch devices also emit mouse events while doing a touch.
+ *
+ * @constructor
+ * @extends Input
+ */
+function TouchMouseInput() {
+    Input.apply(this, arguments);
+
+    var handler = bindFn(this.handler, this);
+    this.touch = new TouchInput(this.manager, handler);
+    this.mouse = new MouseInput(this.manager, handler);
+}
+
+inherit(TouchMouseInput, Input, {
+    /**
+     * handle mouse and touch events
+     * @param {Hammer} manager
+     * @param {String} inputEvent
+     * @param {Object} inputData
+     */
+    handler: function TMEhandler(manager, inputEvent, inputData) {
+        var isTouch = (inputData.pointerType == INPUT_TYPE_TOUCH),
+            isMouse = (inputData.pointerType == INPUT_TYPE_MOUSE);
+
+        // when we're in a touch event, so  block all upcoming mouse events
+        // most mobile browser also emit mouseevents, right after touchstart
+        if (isTouch) {
+            this.mouse.allow = false;
+        } else if (isMouse && !this.mouse.allow) {
+            return;
+        }
+
+        // reset the allowMouse when we're done
+        if (inputEvent & (INPUT_END | INPUT_CANCEL)) {
+            this.mouse.allow = true;
+        }
+
+        this.callback(manager, inputEvent, inputData);
+    },
+
+    /**
+     * remove the event listeners
+     */
+    destroy: function destroy() {
+        this.touch.destroy();
+        this.mouse.destroy();
+    }
+});
+
+var PREFIXED_TOUCH_ACTION = prefixed(TEST_ELEMENT.style, 'touchAction');
+var NATIVE_TOUCH_ACTION = PREFIXED_TOUCH_ACTION !== undefined;
+
+// magical touchAction value
+var TOUCH_ACTION_COMPUTE = 'compute';
+var TOUCH_ACTION_AUTO = 'auto';
+var TOUCH_ACTION_MANIPULATION = 'manipulation'; // not implemented
+var TOUCH_ACTION_NONE = 'none';
+var TOUCH_ACTION_PAN_X = 'pan-x';
+var TOUCH_ACTION_PAN_Y = 'pan-y';
+
+/**
+ * Touch Action
+ * sets the touchAction property or uses the js alternative
+ * @param {Manager} manager
+ * @param {String} value
+ * @constructor
+ */
+function TouchAction(manager, value) {
+    this.manager = manager;
+    this.set(value);
+}
+
+TouchAction.prototype = {
+    /**
+     * set the touchAction value on the element or enable the polyfill
+     * @param {String} value
+     */
+    set: function(value) {
+        // find out the touch-action by the event handlers
+        if (value == TOUCH_ACTION_COMPUTE) {
+            value = this.compute();
+        }
+
+        if (NATIVE_TOUCH_ACTION) {
+            this.manager.element.style[PREFIXED_TOUCH_ACTION] = value;
+        }
+        this.actions = value.toLowerCase().trim();
+    },
+
+    /**
+     * just re-set the touchAction value
+     */
+    update: function() {
+        this.set(this.manager.options.touchAction);
+    },
+
+    /**
+     * compute the value for the touchAction property based on the recognizer's settings
+     * @returns {String} value
+     */
+    compute: function() {
+        var actions = [];
+        each(this.manager.recognizers, function(recognizer) {
+            if (boolOrFn(recognizer.options.enable, [recognizer])) {
+                actions = actions.concat(recognizer.getTouchAction());
+            }
+        });
+        return cleanTouchActions(actions.join(' '));
+    },
+
+    /**
+     * this method is called on each input cycle and provides the preventing of the browser behavior
+     * @param {Object} input
+     */
+    preventDefaults: function(input) {
+        // not needed with native support for the touchAction property
+        if (NATIVE_TOUCH_ACTION) {
+            return;
+        }
+
+        var srcEvent = input.srcEvent;
+        var direction = input.offsetDirection;
+
+        // if the touch action did prevented once this session
+        if (this.manager.session.prevented) {
+            srcEvent.preventDefault();
+            return;
+        }
+
+        var actions = this.actions;
+        var hasNone = inStr(actions, TOUCH_ACTION_NONE);
+        var hasPanY = inStr(actions, TOUCH_ACTION_PAN_Y);
+        var hasPanX = inStr(actions, TOUCH_ACTION_PAN_X);
+
+        if (hasNone ||
+            (hasPanY && direction & DIRECTION_HORIZONTAL) ||
+            (hasPanX && direction & DIRECTION_VERTICAL)) {
+            return this.preventSrc(srcEvent);
+        }
+    },
+
+    /**
+     * call preventDefault to prevent the browser's default behavior (scrolling in most cases)
+     * @param {Object} srcEvent
+     */
+    preventSrc: function(srcEvent) {
+        this.manager.session.prevented = true;
+        srcEvent.preventDefault();
+    }
+};
+
+/**
+ * when the touchActions are collected they are not a valid value, so we need to clean things up. *
+ * @param {String} actions
+ * @returns {*}
+ */
+function cleanTouchActions(actions) {
+    // none
+    if (inStr(actions, TOUCH_ACTION_NONE)) {
+        return TOUCH_ACTION_NONE;
+    }
+
+    var hasPanX = inStr(actions, TOUCH_ACTION_PAN_X);
+    var hasPanY = inStr(actions, TOUCH_ACTION_PAN_Y);
+
+    // pan-x and pan-y can be combined
+    if (hasPanX && hasPanY) {
+        return TOUCH_ACTION_PAN_X + ' ' + TOUCH_ACTION_PAN_Y;
+    }
+
+    // pan-x OR pan-y
+    if (hasPanX || hasPanY) {
+        return hasPanX ? TOUCH_ACTION_PAN_X : TOUCH_ACTION_PAN_Y;
+    }
+
+    // manipulation
+    if (inStr(actions, TOUCH_ACTION_MANIPULATION)) {
+        return TOUCH_ACTION_MANIPULATION;
+    }
+
+    return TOUCH_ACTION_AUTO;
+}
+
+/**
+ * Recognizer flow explained; *
+ * All recognizers have the initial state of POSSIBLE when a input session starts.
+ * The definition of a input session is from the first input until the last input, with all it's movement in it. *
+ * Example session for mouse-input: mousedown -> mousemove -> mouseup
+ *
+ * On each recognizing cycle (see Manager.recognize) the .recognize() method is executed
+ * which determines with state it should be.
+ *
+ * If the recognizer has the state FAILED, CANCELLED or RECOGNIZED (equals ENDED), it is reset to
+ * POSSIBLE to give it another change on the next cycle.
+ *
+ *               Possible
+ *                  |
+ *            +-----+---------------+
+ *            |                     |
+ *      +-----+-----+               |
+ *      |           |               |
+ *   Failed      Cancelled          |
+ *                          +-------+------+
+ *                          |              |
+ *                      Recognized       Began
+ *                                         |
+ *                                      Changed
+ *                                         |
+ *                                  Ended/Recognized
+ */
+var STATE_POSSIBLE = 1;
+var STATE_BEGAN = 2;
+var STATE_CHANGED = 4;
+var STATE_ENDED = 8;
+var STATE_RECOGNIZED = STATE_ENDED;
+var STATE_CANCELLED = 16;
+var STATE_FAILED = 32;
+
+/**
+ * Recognizer
+ * Every recognizer needs to extend from this class.
+ * @constructor
+ * @param {Object} options
+ */
+function Recognizer(options) {
+    this.id = uniqueId();
+
+    this.manager = null;
+    this.options = merge(options || {}, this.defaults);
+
+    // default is enable true
+    this.options.enable = ifUndefined(this.options.enable, true);
+
+    this.state = STATE_POSSIBLE;
+
+    this.simultaneous = {};
+    this.requireFail = [];
+}
+
+Recognizer.prototype = {
+    /**
+     * @virtual
+     * @type {Object}
+     */
+    defaults: {},
+
+    /**
+     * set options
+     * @param {Object} options
+     * @return {Recognizer}
+     */
+    set: function(options) {
+        extend(this.options, options);
+
+        // also update the touchAction, in case something changed about the directions/enabled state
+        this.manager && this.manager.touchAction.update();
+        return this;
+    },
+
+    /**
+     * recognize simultaneous with an other recognizer.
+     * @param {Recognizer} otherRecognizer
+     * @returns {Recognizer} this
+     */
+    recognizeWith: function(otherRecognizer) {
+        if (invokeArrayArg(otherRecognizer, 'recognizeWith', this)) {
+            return this;
+        }
+
+        var simultaneous = this.simultaneous;
+        otherRecognizer = getRecognizerByNameIfManager(otherRecognizer, this);
+        if (!simultaneous[otherRecognizer.id]) {
+            simultaneous[otherRecognizer.id] = otherRecognizer;
+            otherRecognizer.recognizeWith(this);
+        }
+        return this;
+    },
+
+    /**
+     * drop the simultaneous link. it doesnt remove the link on the other recognizer.
+     * @param {Recognizer} otherRecognizer
+     * @returns {Recognizer} this
+     */
+    dropRecognizeWith: function(otherRecognizer) {
+        if (invokeArrayArg(otherRecognizer, 'dropRecognizeWith', this)) {
+            return this;
+        }
+
+        otherRecognizer = getRecognizerByNameIfManager(otherRecognizer, this);
+        delete this.simultaneous[otherRecognizer.id];
+        return this;
+    },
+
+    /**
+     * recognizer can only run when an other is failing
+     * @param {Recognizer} otherRecognizer
+     * @returns {Recognizer} this
+     */
+    requireFailure: function(otherRecognizer) {
+        if (invokeArrayArg(otherRecognizer, 'requireFailure', this)) {
+            return this;
+        }
+
+        var requireFail = this.requireFail;
+        otherRecognizer = getRecognizerByNameIfManager(otherRecognizer, this);
+        if (inArray(requireFail, otherRecognizer) === -1) {
+            requireFail.push(otherRecognizer);
+            otherRecognizer.requireFailure(this);
+        }
+        return this;
+    },
+
+    /**
+     * drop the requireFailure link. it does not remove the link on the other recognizer.
+     * @param {Recognizer} otherRecognizer
+     * @returns {Recognizer} this
+     */
+    dropRequireFailure: function(otherRecognizer) {
+        if (invokeArrayArg(otherRecognizer, 'dropRequireFailure', this)) {
+            return this;
+        }
+
+        otherRecognizer = getRecognizerByNameIfManager(otherRecognizer, this);
+        var index = inArray(this.requireFail, otherRecognizer);
+        if (index > -1) {
+            this.requireFail.splice(index, 1);
+        }
+        return this;
+    },
+
+    /**
+     * has require failures boolean
+     * @returns {boolean}
+     */
+    hasRequireFailures: function() {
+        return this.requireFail.length > 0;
+    },
+
+    /**
+     * if the recognizer can recognize simultaneous with an other recognizer
+     * @param {Recognizer} otherRecognizer
+     * @returns {Boolean}
+     */
+    canRecognizeWith: function(otherRecognizer) {
+        return !!this.simultaneous[otherRecognizer.id];
+    },
+
+    /**
+     * You should use `tryEmit` instead of `emit` directly to check
+     * that all the needed recognizers has failed before emitting.
+     * @param {Object} input
+     */
+    emit: function(input) {
+        var self = this;
+        var state = this.state;
+
+        function emit(withState) {
+            self.manager.emit(self.options.event + (withState ? stateStr(state) : ''), input);
+        }
+
+        // 'panstart' and 'panmove'
+        if (state < STATE_ENDED) {
+            emit(true);
+        }
+
+        emit(); // simple 'eventName' events
+
+        // panend and pancancel
+        if (state >= STATE_ENDED) {
+            emit(true);
+        }
+    },
+
+    /**
+     * Check that all the require failure recognizers has failed,
+     * if true, it emits a gesture event,
+     * otherwise, setup the state to FAILED.
+     * @param {Object} input
+     */
+    tryEmit: function(input) {
+        if (this.canEmit()) {
+            return this.emit(input);
+        }
+        // it's failing anyway
+        this.state = STATE_FAILED;
+    },
+
+    /**
+     * can we emit?
+     * @returns {boolean}
+     */
+    canEmit: function() {
+        var i = 0;
+        while (i < this.requireFail.length) {
+            if (!(this.requireFail[i].state & (STATE_FAILED | STATE_POSSIBLE))) {
+                return false;
+            }
+            i++;
+        }
+        return true;
+    },
+
+    /**
+     * update the recognizer
+     * @param {Object} inputData
+     */
+    recognize: function(inputData) {
+        // make a new copy of the inputData
+        // so we can change the inputData without messing up the other recognizers
+        var inputDataClone = extend({}, inputData);
+
+        // is is enabled and allow recognizing?
+        if (!boolOrFn(this.options.enable, [this, inputDataClone])) {
+            this.reset();
+            this.state = STATE_FAILED;
+            return;
+        }
+
+        // reset when we've reached the end
+        if (this.state & (STATE_RECOGNIZED | STATE_CANCELLED | STATE_FAILED)) {
+            this.state = STATE_POSSIBLE;
+        }
+
+        this.state = this.process(inputDataClone);
+
+        // the recognizer has recognized a gesture
+        // so trigger an event
+        if (this.state & (STATE_BEGAN | STATE_CHANGED | STATE_ENDED | STATE_CANCELLED)) {
+            this.tryEmit(inputDataClone);
+        }
+    },
+
+    /**
+     * return the state of the recognizer
+     * the actual recognizing happens in this method
+     * @virtual
+     * @param {Object} inputData
+     * @returns {Const} STATE
+     */
+    process: function(inputData) { }, // jshint ignore:line
+
+    /**
+     * return the preferred touch-action
+     * @virtual
+     * @returns {Array}
+     */
+    getTouchAction: function() { },
+
+    /**
+     * called when the gesture isn't allowed to recognize
+     * like when another is being recognized or it is disabled
+     * @virtual
+     */
+    reset: function() { }
+};
+
+/**
+ * get a usable string, used as event postfix
+ * @param {Const} state
+ * @returns {String} state
+ */
+function stateStr(state) {
+    if (state & STATE_CANCELLED) {
+        return 'cancel';
+    } else if (state & STATE_ENDED) {
+        return 'end';
+    } else if (state & STATE_CHANGED) {
+        return 'move';
+    } else if (state & STATE_BEGAN) {
+        return 'start';
+    }
+    return '';
+}
+
+/**
+ * direction cons to string
+ * @param {Const} direction
+ * @returns {String}
+ */
+function directionStr(direction) {
+    if (direction == DIRECTION_DOWN) {
+        return 'down';
+    } else if (direction == DIRECTION_UP) {
+        return 'up';
+    } else if (direction == DIRECTION_LEFT) {
+        return 'left';
+    } else if (direction == DIRECTION_RIGHT) {
+        return 'right';
+    }
+    return '';
+}
+
+/**
+ * get a recognizer by name if it is bound to a manager
+ * @param {Recognizer|String} otherRecognizer
+ * @param {Recognizer} recognizer
+ * @returns {Recognizer}
+ */
+function getRecognizerByNameIfManager(otherRecognizer, recognizer) {
+    var manager = recognizer.manager;
+    if (manager) {
+        return manager.get(otherRecognizer);
+    }
+    return otherRecognizer;
+}
+
+/**
+ * This recognizer is just used as a base for the simple attribute recognizers.
+ * @constructor
+ * @extends Recognizer
+ */
+function AttrRecognizer() {
+    Recognizer.apply(this, arguments);
+}
+
+inherit(AttrRecognizer, Recognizer, {
+    /**
+     * @namespace
+     * @memberof AttrRecognizer
+     */
+    defaults: {
+        /**
+         * @type {Number}
+         * @default 1
+         */
+        pointers: 1
+    },
+
+    /**
+     * Used to check if it the recognizer receives valid input, like input.distance > 10.
+     * @memberof AttrRecognizer
+     * @param {Object} input
+     * @returns {Boolean} recognized
+     */
+    attrTest: function(input) {
+        var optionPointers = this.options.pointers;
+        return optionPointers === 0 || input.pointers.length === optionPointers;
+    },
+
+    /**
+     * Process the input and return the state for the recognizer
+     * @memberof AttrRecognizer
+     * @param {Object} input
+     * @returns {*} State
+     */
+    process: function(input) {
+        var state = this.state;
+        var eventType = input.eventType;
+
+        var isRecognized = state & (STATE_BEGAN | STATE_CHANGED);
+        var isValid = this.attrTest(input);
+
+        // on cancel input and we've recognized before, return STATE_CANCELLED
+        if (isRecognized && (eventType & INPUT_CANCEL || !isValid)) {
+            return state | STATE_CANCELLED;
+        } else if (isRecognized || isValid) {
+            if (eventType & INPUT_END) {
+                return state | STATE_ENDED;
+            } else if (!(state & STATE_BEGAN)) {
+                return STATE_BEGAN;
+            }
+            return state | STATE_CHANGED;
+        }
+        return STATE_FAILED;
+    }
+});
+
+/**
+ * Pan
+ * Recognized when the pointer is down and moved in the allowed direction.
+ * @constructor
+ * @extends AttrRecognizer
+ */
+function PanRecognizer() {
+    AttrRecognizer.apply(this, arguments);
+
+    this.pX = null;
+    this.pY = null;
+}
+
+inherit(PanRecognizer, AttrRecognizer, {
+    /**
+     * @namespace
+     * @memberof PanRecognizer
+     */
+    defaults: {
+        event: 'pan',
+        threshold: 10,
+        pointers: 1,
+        direction: DIRECTION_ALL
+    },
+
+    getTouchAction: function() {
+        var direction = this.options.direction;
+        var actions = [];
+        if (direction & DIRECTION_HORIZONTAL) {
+            actions.push(TOUCH_ACTION_PAN_Y);
+        }
+        if (direction & DIRECTION_VERTICAL) {
+            actions.push(TOUCH_ACTION_PAN_X);
+        }
+        return actions;
+    },
+
+    directionTest: function(input) {
+        var options = this.options;
+        var hasMoved = true;
+        var distance = input.distance;
+        var direction = input.direction;
+        var x = input.deltaX;
+        var y = input.deltaY;
+
+        // lock to axis?
+        if (!(direction & options.direction)) {
+            if (options.direction & DIRECTION_HORIZONTAL) {
+                direction = (x === 0) ? DIRECTION_NONE : (x < 0) ? DIRECTION_LEFT : DIRECTION_RIGHT;
+                hasMoved = x != this.pX;
+                distance = Math.abs(input.deltaX);
+            } else {
+                direction = (y === 0) ? DIRECTION_NONE : (y < 0) ? DIRECTION_UP : DIRECTION_DOWN;
+                hasMoved = y != this.pY;
+                distance = Math.abs(input.deltaY);
+            }
+        }
+        input.direction = direction;
+        return hasMoved && distance > options.threshold && direction & options.direction;
+    },
+
+    attrTest: function(input) {
+        return AttrRecognizer.prototype.attrTest.call(this, input) &&
+            (this.state & STATE_BEGAN || (!(this.state & STATE_BEGAN) && this.directionTest(input)));
+    },
+
+    emit: function(input) {
+        this.pX = input.deltaX;
+        this.pY = input.deltaY;
+
+        var direction = directionStr(input.direction);
+        if (direction) {
+            this.manager.emit(this.options.event + direction, input);
+        }
+
+        this._super.emit.call(this, input);
+    }
+});
+
+/**
+ * Pinch
+ * Recognized when two or more pointers are moving toward (zoom-in) or away from each other (zoom-out).
+ * @constructor
+ * @extends AttrRecognizer
+ */
+function PinchRecognizer() {
+    AttrRecognizer.apply(this, arguments);
+}
+
+inherit(PinchRecognizer, AttrRecognizer, {
+    /**
+     * @namespace
+     * @memberof PinchRecognizer
+     */
+    defaults: {
+        event: 'pinch',
+        threshold: 0,
+        pointers: 2
+    },
+
+    getTouchAction: function() {
+        return [TOUCH_ACTION_NONE];
+    },
+
+    attrTest: function(input) {
+        return this._super.attrTest.call(this, input) &&
+            (Math.abs(input.scale - 1) > this.options.threshold || this.state & STATE_BEGAN);
+    },
+
+    emit: function(input) {
+        this._super.emit.call(this, input);
+        if (input.scale !== 1) {
+            var inOut = input.scale < 1 ? 'in' : 'out';
+            this.manager.emit(this.options.event + inOut, input);
+        }
+    }
+});
+
+/**
+ * Press
+ * Recognized when the pointer is down for x ms without any movement.
+ * @constructor
+ * @extends Recognizer
+ */
+function PressRecognizer() {
+    Recognizer.apply(this, arguments);
+
+    this._timer = null;
+    this._input = null;
+}
+
+inherit(PressRecognizer, Recognizer, {
+    /**
+     * @namespace
+     * @memberof PressRecognizer
+     */
+    defaults: {
+        event: 'press',
+        pointers: 1,
+        time: 500, // minimal time of the pointer to be pressed
+        threshold: 5 // a minimal movement is ok, but keep it low
+    },
+
+    getTouchAction: function() {
+        return [TOUCH_ACTION_AUTO];
+    },
+
+    process: function(input) {
+        var options = this.options;
+        var validPointers = input.pointers.length === options.pointers;
+        var validMovement = input.distance < options.threshold;
+        var validTime = input.deltaTime > options.time;
+
+        this._input = input;
+
+        // we only allow little movement
+        // and we've reached an end event, so a tap is possible
+        if (!validMovement || !validPointers || (input.eventType & (INPUT_END | INPUT_CANCEL) && !validTime)) {
+            this.reset();
+        } else if (input.eventType & INPUT_START) {
+            this.reset();
+            this._timer = setTimeoutContext(function() {
+                this.state = STATE_RECOGNIZED;
+                this.tryEmit();
+            }, options.time, this);
+        } else if (input.eventType & INPUT_END) {
+            return STATE_RECOGNIZED;
+        }
+        return STATE_FAILED;
+    },
+
+    reset: function() {
+        clearTimeout(this._timer);
+    },
+
+    emit: function(input) {
+        if (this.state !== STATE_RECOGNIZED) {
+            return;
+        }
+
+        if (input && (input.eventType & INPUT_END)) {
+            this.manager.emit(this.options.event + 'up', input);
+        } else {
+            this._input.timeStamp = now();
+            this.manager.emit(this.options.event, this._input);
+        }
+    }
+});
+
+/**
+ * Rotate
+ * Recognized when two or more pointer are moving in a circular motion.
+ * @constructor
+ * @extends AttrRecognizer
+ */
+function RotateRecognizer() {
+    AttrRecognizer.apply(this, arguments);
+}
+
+inherit(RotateRecognizer, AttrRecognizer, {
+    /**
+     * @namespace
+     * @memberof RotateRecognizer
+     */
+    defaults: {
+        event: 'rotate',
+        threshold: 0,
+        pointers: 2
+    },
+
+    getTouchAction: function() {
+        return [TOUCH_ACTION_NONE];
+    },
+
+    attrTest: function(input) {
+        return this._super.attrTest.call(this, input) &&
+            (Math.abs(input.rotation) > this.options.threshold || this.state & STATE_BEGAN);
+    }
+});
+
+/**
+ * Swipe
+ * Recognized when the pointer is moving fast (velocity), with enough distance in the allowed direction.
+ * @constructor
+ * @extends AttrRecognizer
+ */
+function SwipeRecognizer() {
+    AttrRecognizer.apply(this, arguments);
+}
+
+inherit(SwipeRecognizer, AttrRecognizer, {
+    /**
+     * @namespace
+     * @memberof SwipeRecognizer
+     */
+    defaults: {
+        event: 'swipe',
+        threshold: 10,
+        velocity: 0.65,
+        direction: DIRECTION_HORIZONTAL | DIRECTION_VERTICAL,
+        pointers: 1
+    },
+
+    getTouchAction: function() {
+        return PanRecognizer.prototype.getTouchAction.call(this);
+    },
+
+    attrTest: function(input) {
+        var direction = this.options.direction;
+        var velocity;
+
+        if (direction & (DIRECTION_HORIZONTAL | DIRECTION_VERTICAL)) {
+            velocity = input.velocity;
+        } else if (direction & DIRECTION_HORIZONTAL) {
+            velocity = input.velocityX;
+        } else if (direction & DIRECTION_VERTICAL) {
+            velocity = input.velocityY;
+        }
+
+        return this._super.attrTest.call(this, input) &&
+            direction & input.direction &&
+            input.distance > this.options.threshold &&
+            abs(velocity) > this.options.velocity && input.eventType & INPUT_END;
+    },
+
+    emit: function(input) {
+        var direction = directionStr(input.direction);
+        if (direction) {
+            this.manager.emit(this.options.event + direction, input);
+        }
+
+        this.manager.emit(this.options.event, input);
+    }
+});
+
+/**
+ * A tap is ecognized when the pointer is doing a small tap/click. Multiple taps are recognized if they occur
+ * between the given interval and position. The delay option can be used to recognize multi-taps without firing
+ * a single tap.
+ *
+ * The eventData from the emitted event contains the property `tapCount`, which contains the amount of
+ * multi-taps being recognized.
+ * @constructor
+ * @extends Recognizer
+ */
+function TapRecognizer() {
+    Recognizer.apply(this, arguments);
+
+    // previous time and center,
+    // used for tap counting
+    this.pTime = false;
+    this.pCenter = false;
+
+    this._timer = null;
+    this._input = null;
+    this.count = 0;
+}
+
+inherit(TapRecognizer, Recognizer, {
+    /**
+     * @namespace
+     * @memberof PinchRecognizer
+     */
+    defaults: {
+        event: 'tap',
+        pointers: 1,
+        taps: 1,
+        interval: 300, // max time between the multi-tap taps
+        time: 250, // max time of the pointer to be down (like finger on the screen)
+        threshold: 2, // a minimal movement is ok, but keep it low
+        posThreshold: 10 // a multi-tap can be a bit off the initial position
+    },
+
+    getTouchAction: function() {
+        return [TOUCH_ACTION_MANIPULATION];
+    },
+
+    process: function(input) {
+        var options = this.options;
+
+        var validPointers = input.pointers.length === options.pointers;
+        var validMovement = input.distance < options.threshold;
+        var validTouchTime = input.deltaTime < options.time;
+
+        this.reset();
+
+        if ((input.eventType & INPUT_START) && (this.count === 0)) {
+            return this.failTimeout();
+        }
+
+        // we only allow little movement
+        // and we've reached an end event, so a tap is possible
+        if (validMovement && validTouchTime && validPointers) {
+            if (input.eventType != INPUT_END) {
+                return this.failTimeout();
+            }
+
+            var validInterval = this.pTime ? (input.timeStamp - this.pTime < options.interval) : true;
+            var validMultiTap = !this.pCenter || getDistance(this.pCenter, input.center) < options.posThreshold;
+
+            this.pTime = input.timeStamp;
+            this.pCenter = input.center;
+
+            if (!validMultiTap || !validInterval) {
+                this.count = 1;
+            } else {
+                this.count += 1;
+            }
+
+            this._input = input;
+
+            // if tap count matches we have recognized it,
+            // else it has began recognizing...
+            var tapCount = this.count % options.taps;
+            if (tapCount === 0) {
+                // no failing requirements, immediately trigger the tap event
+                // or wait as long as the multitap interval to trigger
+                if (!this.hasRequireFailures()) {
+                    return STATE_RECOGNIZED;
+                } else {
+                    this._timer = setTimeoutContext(function() {
+                        this.state = STATE_RECOGNIZED;
+                        this.tryEmit();
+                    }, options.interval, this);
+                    return STATE_BEGAN;
+                }
+            }
+        }
+        return STATE_FAILED;
+    },
+
+    failTimeout: function() {
+        this._timer = setTimeoutContext(function() {
+            this.state = STATE_FAILED;
+        }, this.options.interval, this);
+        return STATE_FAILED;
+    },
+
+    reset: function() {
+        clearTimeout(this._timer);
+    },
+
+    emit: function() {
+        if (this.state == STATE_RECOGNIZED ) {
+            this._input.tapCount = this.count;
+            this.manager.emit(this.options.event, this._input);
+        }
+    }
+});
+
+/**
+ * Simple way to create an manager with a default set of recognizers.
+ * @param {HTMLElement} element
+ * @param {Object} [options]
+ * @constructor
+ */
+function Hammer(element, options) {
+    options = options || {};
+    options.recognizers = ifUndefined(options.recognizers, Hammer.defaults.preset);
+    return new Manager(element, options);
+}
+
+/**
+ * @const {string}
+ */
+Hammer.VERSION = '2.0.4';
+
+/**
+ * default settings
+ * @namespace
+ */
+Hammer.defaults = {
+    /**
+     * set if DOM events are being triggered.
+     * But this is slower and unused by simple implementations, so disabled by default.
+     * @type {Boolean}
+     * @default false
+     */
+    domEvents: false,
+
+    /**
+     * The value for the touchAction property/fallback.
+     * When set to `compute` it will magically set the correct value based on the added recognizers.
+     * @type {String}
+     * @default compute
+     */
+    touchAction: TOUCH_ACTION_COMPUTE,
+
+    /**
+     * @type {Boolean}
+     * @default true
+     */
+    enable: true,
+
+    /**
+     * EXPERIMENTAL FEATURE -- can be removed/changed
+     * Change the parent input target element.
+     * If Null, then it is being set the to main element.
+     * @type {Null|EventTarget}
+     * @default null
+     */
+    inputTarget: null,
+
+    /**
+     * force an input class
+     * @type {Null|Function}
+     * @default null
+     */
+    inputClass: null,
+
+    /**
+     * Default recognizer setup when calling `Hammer()`
+     * When creating a new Manager these will be skipped.
+     * @type {Array}
+     */
+    preset: [
+        // RecognizerClass, options, [recognizeWith, ...], [requireFailure, ...]
+        [RotateRecognizer, { enable: false }],
+        [PinchRecognizer, { enable: false }, ['rotate']],
+        [SwipeRecognizer,{ direction: DIRECTION_HORIZONTAL }],
+        [PanRecognizer, { direction: DIRECTION_HORIZONTAL }, ['swipe']],
+        [TapRecognizer],
+        [TapRecognizer, { event: 'doubletap', taps: 2 }, ['tap']],
+        [PressRecognizer]
+    ],
+
+    /**
+     * Some CSS properties can be used to improve the working of Hammer.
+     * Add them to this method and they will be set when creating a new Manager.
+     * @namespace
+     */
+    cssProps: {
+        /**
+         * Disables text selection to improve the dragging gesture. Mainly for desktop browsers.
+         * @type {String}
+         * @default 'none'
+         */
+        userSelect: 'none',
+
+        /**
+         * Disable the Windows Phone grippers when pressing an element.
+         * @type {String}
+         * @default 'none'
+         */
+        touchSelect: 'none',
+
+        /**
+         * Disables the default callout shown when you touch and hold a touch target.
+         * On iOS, when you touch and hold a touch target such as a link, Safari displays
+         * a callout containing information about the link. This property allows you to disable that callout.
+         * @type {String}
+         * @default 'none'
+         */
+        touchCallout: 'none',
+
+        /**
+         * Specifies whether zooming is enabled. Used by IE10>
+         * @type {String}
+         * @default 'none'
+         */
+        contentZooming: 'none',
+
+        /**
+         * Specifies that an entire element should be draggable instead of its contents. Mainly for desktop browsers.
+         * @type {String}
+         * @default 'none'
+         */
+        userDrag: 'none',
+
+        /**
+         * Overrides the highlight color shown when the user taps a link or a JavaScript
+         * clickable element in iOS. This property obeys the alpha value, if specified.
+         * @type {String}
+         * @default 'rgba(0,0,0,0)'
+         */
+        tapHighlightColor: 'rgba(0,0,0,0)'
+    }
+};
+
+var STOP = 1;
+var FORCED_STOP = 2;
+
+/**
+ * Manager
+ * @param {HTMLElement} element
+ * @param {Object} [options]
+ * @constructor
+ */
+function Manager(element, options) {
+    options = options || {};
+
+    this.options = merge(options, Hammer.defaults);
+    this.options.inputTarget = this.options.inputTarget || element;
+
+    this.handlers = {};
+    this.session = {};
+    this.recognizers = [];
+
+    this.element = element;
+    this.input = createInputInstance(this);
+    this.touchAction = new TouchAction(this, this.options.touchAction);
+
+    toggleCssProps(this, true);
+
+    each(options.recognizers, function(item) {
+        var recognizer = this.add(new (item[0])(item[1]));
+        item[2] && recognizer.recognizeWith(item[2]);
+        item[3] && recognizer.requireFailure(item[3]);
+    }, this);
+}
+
+Manager.prototype = {
+    /**
+     * set options
+     * @param {Object} options
+     * @returns {Manager}
+     */
+    set: function(options) {
+        extend(this.options, options);
+
+        // Options that need a little more setup
+        if (options.touchAction) {
+            this.touchAction.update();
+        }
+        if (options.inputTarget) {
+            // Clean up existing event listeners and reinitialize
+            this.input.destroy();
+            this.input.target = options.inputTarget;
+            this.input.init();
+        }
+        return this;
+    },
+
+    /**
+     * stop recognizing for this session.
+     * This session will be discarded, when a new [input]start event is fired.
+     * When forced, the recognizer cycle is stopped immediately.
+     * @param {Boolean} [force]
+     */
+    stop: function(force) {
+        this.session.stopped = force ? FORCED_STOP : STOP;
+    },
+
+    /**
+     * run the recognizers!
+     * called by the inputHandler function on every movement of the pointers (touches)
+     * it walks through all the recognizers and tries to detect the gesture that is being made
+     * @param {Object} inputData
+     */
+    recognize: function(inputData) {
+        var session = this.session;
+        if (session.stopped) {
+            return;
+        }
+
+        // run the touch-action polyfill
+        this.touchAction.preventDefaults(inputData);
+
+        var recognizer;
+        var recognizers = this.recognizers;
+
+        // this holds the recognizer that is being recognized.
+        // so the recognizer's state needs to be BEGAN, CHANGED, ENDED or RECOGNIZED
+        // if no recognizer is detecting a thing, it is set to `null`
+        var curRecognizer = session.curRecognizer;
+
+        // reset when the last recognizer is recognized
+        // or when we're in a new session
+        if (!curRecognizer || (curRecognizer && curRecognizer.state & STATE_RECOGNIZED)) {
+            curRecognizer = session.curRecognizer = null;
+        }
+
+        var i = 0;
+        while (i < recognizers.length) {
+            recognizer = recognizers[i];
+
+            // find out if we are allowed try to recognize the input for this one.
+            // 1.   allow if the session is NOT forced stopped (see the .stop() method)
+            // 2.   allow if we still haven't recognized a gesture in this session, or the this recognizer is the one
+            //      that is being recognized.
+            // 3.   allow if the recognizer is allowed to run simultaneous with the current recognized recognizer.
+            //      this can be setup with the `recognizeWith()` method on the recognizer.
+            if (session.stopped !== FORCED_STOP && ( // 1
+                    !curRecognizer || recognizer == curRecognizer || // 2
+                    recognizer.canRecognizeWith(curRecognizer))) { // 3
+                recognizer.recognize(inputData);
+            } else {
+                recognizer.reset();
+            }
+
+            // if the recognizer has been recognizing the input as a valid gesture, we want to store this one as the
+            // current active recognizer. but only if we don't already have an active recognizer
+            if (!curRecognizer && recognizer.state & (STATE_BEGAN | STATE_CHANGED | STATE_ENDED)) {
+                curRecognizer = session.curRecognizer = recognizer;
+            }
+            i++;
+        }
+    },
+
+    /**
+     * get a recognizer by its event name.
+     * @param {Recognizer|String} recognizer
+     * @returns {Recognizer|Null}
+     */
+    get: function(recognizer) {
+        if (recognizer instanceof Recognizer) {
+            return recognizer;
+        }
+
+        var recognizers = this.recognizers;
+        for (var i = 0; i < recognizers.length; i++) {
+            if (recognizers[i].options.event == recognizer) {
+                return recognizers[i];
+            }
+        }
+        return null;
+    },
+
+    /**
+     * add a recognizer to the manager
+     * existing recognizers with the same event name will be removed
+     * @param {Recognizer} recognizer
+     * @returns {Recognizer|Manager}
+     */
+    add: function(recognizer) {
+        if (invokeArrayArg(recognizer, 'add', this)) {
+            return this;
+        }
+
+        // remove existing
+        var existing = this.get(recognizer.options.event);
+        if (existing) {
+            this.remove(existing);
+        }
+
+        this.recognizers.push(recognizer);
+        recognizer.manager = this;
+
+        this.touchAction.update();
+        return recognizer;
+    },
+
+    /**
+     * remove a recognizer by name or instance
+     * @param {Recognizer|String} recognizer
+     * @returns {Manager}
+     */
+    remove: function(recognizer) {
+        if (invokeArrayArg(recognizer, 'remove', this)) {
+            return this;
+        }
+
+        var recognizers = this.recognizers;
+        recognizer = this.get(recognizer);
+        recognizers.splice(inArray(recognizers, recognizer), 1);
+
+        this.touchAction.update();
+        return this;
+    },
+
+    /**
+     * bind event
+     * @param {String} events
+     * @param {Function} handler
+     * @returns {EventEmitter} this
+     */
+    on: function(events, handler) {
+        var handlers = this.handlers;
+        each(splitStr(events), function(event) {
+            handlers[event] = handlers[event] || [];
+            handlers[event].push(handler);
+        });
+        return this;
+    },
+
+    /**
+     * unbind event, leave emit blank to remove all handlers
+     * @param {String} events
+     * @param {Function} [handler]
+     * @returns {EventEmitter} this
+     */
+    off: function(events, handler) {
+        var handlers = this.handlers;
+        each(splitStr(events), function(event) {
+            if (!handler) {
+                delete handlers[event];
+            } else {
+                handlers[event].splice(inArray(handlers[event], handler), 1);
+            }
+        });
+        return this;
+    },
+
+    /**
+     * emit event to the listeners
+     * @param {String} event
+     * @param {Object} data
+     */
+    emit: function(event, data) {
+        // we also want to trigger dom events
+        if (this.options.domEvents) {
+            triggerDomEvent(event, data);
+        }
+
+        // no handlers, so skip it all
+        var handlers = this.handlers[event] && this.handlers[event].slice();
+        if (!handlers || !handlers.length) {
+            return;
+        }
+
+        data.type = event;
+        data.preventDefault = function() {
+            data.srcEvent.preventDefault();
+        };
+
+        var i = 0;
+        while (i < handlers.length) {
+            handlers[i](data);
+            i++;
+        }
+    },
+
+    /**
+     * destroy the manager and unbinds all events
+     * it doesn't unbind dom events, that is the user own responsibility
+     */
+    destroy: function() {
+        this.element && toggleCssProps(this, false);
+
+        this.handlers = {};
+        this.session = {};
+        this.input.destroy();
+        this.element = null;
+    }
+};
+
+/**
+ * add/remove the css properties as defined in manager.options.cssProps
+ * @param {Manager} manager
+ * @param {Boolean} add
+ */
+function toggleCssProps(manager, add) {
+    var element = manager.element;
+    each(manager.options.cssProps, function(value, name) {
+        element.style[prefixed(element.style, name)] = add ? value : '';
+    });
+}
+
+/**
+ * trigger dom event
+ * @param {String} event
+ * @param {Object} data
+ */
+function triggerDomEvent(event, data) {
+    var gestureEvent = document.createEvent('Event');
+    gestureEvent.initEvent(event, true, true);
+    gestureEvent.gesture = data;
+    data.target.dispatchEvent(gestureEvent);
+}
+
+extend(Hammer, {
+    INPUT_START: INPUT_START,
+    INPUT_MOVE: INPUT_MOVE,
+    INPUT_END: INPUT_END,
+    INPUT_CANCEL: INPUT_CANCEL,
+
+    STATE_POSSIBLE: STATE_POSSIBLE,
+    STATE_BEGAN: STATE_BEGAN,
+    STATE_CHANGED: STATE_CHANGED,
+    STATE_ENDED: STATE_ENDED,
+    STATE_RECOGNIZED: STATE_RECOGNIZED,
+    STATE_CANCELLED: STATE_CANCELLED,
+    STATE_FAILED: STATE_FAILED,
+
+    DIRECTION_NONE: DIRECTION_NONE,
+    DIRECTION_LEFT: DIRECTION_LEFT,
+    DIRECTION_RIGHT: DIRECTION_RIGHT,
+    DIRECTION_UP: DIRECTION_UP,
+    DIRECTION_DOWN: DIRECTION_DOWN,
+    DIRECTION_HORIZONTAL: DIRECTION_HORIZONTAL,
+    DIRECTION_VERTICAL: DIRECTION_VERTICAL,
+    DIRECTION_ALL: DIRECTION_ALL,
+
+    Manager: Manager,
+    Input: Input,
+    TouchAction: TouchAction,
+
+    TouchInput: TouchInput,
+    MouseInput: MouseInput,
+    PointerEventInput: PointerEventInput,
+    TouchMouseInput: TouchMouseInput,
+    SingleTouchInput: SingleTouchInput,
+
+    Recognizer: Recognizer,
+    AttrRecognizer: AttrRecognizer,
+    Tap: TapRecognizer,
+    Pan: PanRecognizer,
+    Swipe: SwipeRecognizer,
+    Pinch: PinchRecognizer,
+    Rotate: RotateRecognizer,
+    Press: PressRecognizer,
+
+    on: addEventListeners,
+    off: removeEventListeners,
+    each: each,
+    merge: merge,
+    extend: extend,
+    inherit: inherit,
+    bindFn: bindFn,
+    prefixed: prefixed
+});
+
+if (typeof define == TYPE_FUNCTION && define.amd) {
+    define(function() {
+        return Hammer;
+    });
+} else if (typeof module != 'undefined' && module.exports) {
+    module.exports = Hammer;
+} else {
+    window[exportName] = Hammer;
+}
+
+})(window, document, 'Hammer');
+
+// ---- Angular Hammer ----
+
+// Copyright (c) 2014 Ryan S Mullins <ryan@ryanmullins.org>
+// Licensed under the MIT Software License
+
+(function (window, angular, Hammer) {
+  'use strict';
+
+  // Checking to make sure Hammer and Angular are defined
+
+  if (typeof angular === 'undefined') {
+    if (typeof require !== 'undefined' && require) {
+      try {
+        angular = require('angular');
+      } catch (e) {
+        return console.log('ERROR: Angular Hammer could not require() a reference to angular');
+      }
+    } else if (typeof window.angular !== 'undefined') {
+      angular = window.angular;
+    } else {
+      return console.log('ERROR: Angular Hammer could not find or require() a reference to angular');
+    }
+  }
+
+  if (typeof Hammer === 'undefined') {
+    if (typeof require !== 'undefined' && require) {
+      try {
+        Hammer = require('hammerjs');
+      } catch (e) {
+        return console.log('ERROR: Angular Hammer could not require() a reference to Hammer');
+      }
+    } else if (typeof window.Hammer !== 'undefined') {
+      Hammer = window.Hammer;
+    } else {
+      return console.log('ERROR: Angular Hammer could not find or require() a reference to Hammer');
+    }
+  }
+
+  /**
+   * Mapping of the gesture event names with the Angular attribute directive
+   * names. Follows the form: <directiveName>:<eventName>.
+   *
+   * @type {Array}
+   */
+  var gestureTypes = [
+    'hmCustom:custom',
+    'hmSwipe:swipe',
+    'hmSwipeleft:swipeleft',
+    'hmSwiperight:swiperight',
+    'hmSwipeup:swipeup',
+    'hmSwipedown:swipedown',
+    'hmPan:pan',
+    'hmPanstart:panstart',
+    'hmPanmove:panmove',
+    'hmPanend:panend',
+    'hmPancancel:pancancel',
+    'hmPanleft:panleft',
+    'hmPanright:panright',
+    'hmPanup:panup',
+    'hmPandown:pandown',
+    'hmPress:press',
+    'hmPressup:pressup',
+    'hmRotate:rotate',
+    'hmRotatestart:rotatestart',
+    'hmRotatemove:rotatemove',
+    'hmRotateend:rotateend',
+    'hmRotatecancel:rotatecancel',
+    'hmPinch:pinch',
+    'hmPinchstart:pinchstart',
+    'hmPinchmove:pinchmove',
+    'hmPinchend:pinchend',
+    'hmPinchcancel:pinchcancel',
+    'hmPinchin:pinchin',
+    'hmPinchout:pinchout',
+    'hmTap:tap',
+    'hmDoubletap:doubletap'
+  ];
+
+  // ---- Module Definition ----
+
+  /**
+   * @module hmTouchEvents
+   * @description Angular.js module for adding Hammer.js event listeners to HTML
+   * elements using attribute directives
+   * @requires angular
+   * @requires hammer
+   */
+  angular.module('hmTouchEvents', []);
+
+  /**
+   * Iterates through each gesture type mapping and creates a directive for
+   * each of the
+   *
+   * @param  {String} type Mapping in the form of <directiveName>:<eventName>
+   * @return None
+   */
+  angular.forEach(gestureTypes, function (type) {
+    var directive = type.split(':'),
+        directiveName = directive[0],
+        eventName = directive[1];
+
+    angular.module('hmTouchEvents')
+      .directive(directiveName, ['$parse', '$window', function ($parse, $window) {
+        return {
+          'restrict' : 'A',
+          'link' : function (scope, element, attrs) {
+
+            // Check for Hammer and required functionality
+            // If no Hammer, maybe bind tap and doubletap to click and dblclick
+
+            if (!Hammer || !$window.addEventListener) {
+              if (directiveName === 'hmTap') {
+                element.bind('click', handler);
+              }
+
+              if (directiveName === 'hmDoubletap') {
+                element.bind('dblclick', handler);
+              }
+
+              return;
+            }
+
+            var hammer = element.data('hammer'),
+                managerOpts = angular.fromJson(attrs.hmManagerOptions),
+                recognizerOpts = angular.fromJson(attrs.hmRecognizerOptions);
+
+
+            // Check for a manager, make one if needed and destroy it when
+            // the scope is destroyed
+
+            if (!hammer) {
+              hammer = new Hammer.Manager(element[0], managerOpts);
+              element.data('hammer', hammer);
+              scope.$on('$destroy', function () {
+                hammer.destroy();
+              });
+            }
+
+            // Instantiate the handler
+
+            var handlerName = attrs[directiveName],
+                handlerExpr = $parse(handlerName),
+                handler = function (event) {
+                  var phase = scope.$root.$$phase,
+                      recognizer = hammer.get(event.type);
+
+                  event.element = element;
+
+                  if (recognizer) {
+                    if (recognizer.options.preventDefault) {
+                      event.preventDefault();
+                    }
+
+                    if (recognizer.options.stopPropagation) {
+                      event.srcEvent.stopPropagation();
+                    }
+                  }
+
+                  if (phase === '$apply' || phase === '$digest') {
+                    callHandler();
+                  } else {
+                    scope.$apply(callHandler);
+                  }
+
+                  function callHandler () {
+                    var fn = handlerExpr(scope, {'$event':event});
+
+                    if (fn) {
+                      fn.call(scope, event);
+                    }
+                  }
+                };
+
+            // Setting up the recognizers based on the supplied options
+
+            if (angular.isArray(recognizerOpts)) {
+              // The recognizer options may be stored in an array. In this
+              // case, Angular Hammer iterates through the array of options
+              // trying to find an occurrence of the options.type in the event
+              // name. If it find the type in the event name, it applies those
+              // options to the recognizer for events with that name. If it
+              // does not find the type in the event name it moves on.
+
+              angular.forEach(recognizerOpts, function (options) {
+                if (directiveName === 'hmCustom') {
+                  eventName = options.event;
+                } else {
+                  if (!options.type) {
+                    options.type = getRecognizerTypeFromeventName(eventName);
+                  }
+
+                  if (options.event) {
+                    delete options.event;
+                  }
+                }
+
+                if (directiveName === 'hmCustom' ||
+                    eventName.indexOf(options.type) > -1) {
+                  setupRecognizerWithOptions(
+                    hammer,
+                    applyManagerOptions(managerOpts, options),
+                    element);
+                }
+              });
+            } else if (angular.isObject(recognizerOpts)) {
+              // Recognizer options may be stored as an object. In this case,
+              // Angular Hammer checks to make sure that the options type
+              // property is found in the event name. If the options are
+              // designated for this general type of event, Angular Hammer
+              // applies the options directly to the manager instance for
+              // this element.
+
+              if (directiveName === 'hmCustom') {
+                eventName = recognizerOpts.event;
+              } else {
+                  if (!recognizerOpts.type) {
+                    recognizerOpts.type = getRecognizerTypeFromeventName(eventName);
+                  }
+
+                  if (recognizerOpts.event) {
+                    delete recognizerOpts.event;
+                  }
+              }
+
+              if (directiveName === 'hmCustom' ||
+                  eventName.indexOf(recognizerOpts.type) > -1) {
+                setupRecognizerWithOptions(
+                  hammer,
+                  applyManagerOptions(managerOpts, recognizerOpts),
+                  element);
+              }
+            } else if (directiveName !== 'hmCustom') {
+              // If no options are supplied, or the supplied options do not
+              // match any of the above conditions, Angular Hammer sets up
+              // the default options that a manager instantiated using
+              // Hammer() would have.
+
+              recognizerOpts = {
+                'type': getRecognizerTypeFromeventName(eventName)
+              };
+
+              if (directiveName === 'hmDoubletap') {
+                recognizerOpts.event = eventName;
+                recognizerOpts.taps = 2;
+
+                if (hammer.get('tap')) {
+                  recognizerOpts.recognizeWith = 'tap';
+                }
+              }
+
+              if (recognizerOpts.type.indexOf('pan') > -1 &&
+                  hammer.get('swipe')) {
+                recognizerOpts.recognizeWith = 'swipe';
+              }
+
+              if (recognizerOpts.type.indexOf('pinch') > -1 &&
+                  hammer.get('rotate')) {
+                recognizerOpts.recognizeWith = 'rotate';
+              }
+
+              setupRecognizerWithOptions(
+                hammer,
+                applyManagerOptions(managerOpts, recognizerOpts),
+                element);
+            } else {
+              eventName = null;
+            }
+
+            if (eventName) {
+              hammer.on(eventName, handler);
+            }
+          }
+        };
+      }]);
+  });
+
+  // ---- Private Functions -----
+
+  /**
+   * Adds a gesture recognizer to a given manager. The type of recognizer to
+   * add is determined by the value of the options.type property.
+   *
+   * @param {Object}  manager Hammer.js manager object assigned to an element
+   * @param {Object}  options Options that define the recognizer to add
+   * @return {Object} Reference to the new gesture recognizer, if successful,
+   *                  null otherwise.
+   */
+  function addRecognizer (manager, options) {
+    if (!manager || !options || !options.type) { return null; }
+
+    var recognizer;
+
+    if (options.type.indexOf('pan') > -1) {
+      recognizer = new Hammer.Pan(options);
+    } else if (options.type.indexOf('pinch') > -1) {
+      recognizer = new Hammer.Pinch(options);
+    } else if (options.type.indexOf('press') > -1) {
+      recognizer = new Hammer.Press(options);
+    } else if (options.type.indexOf('rotate') > -1) {
+      recognizer = new Hammer.Rotate(options);
+    } else if (options.type.indexOf('swipe') > -1) {
+      recognizer = new Hammer.Swipe(options);
+    } else {
+      recognizer = new Hammer.Tap(options);
+    }
+
+    manager.add(recognizer);
+    return recognizer;
+  }
+
+  /**
+   * Applies certain manager options to individual recognizer options.
+   *
+   * @param  {Object} managerOpts    Manager options
+   * @param  {Object} recognizerOpts Recognizer options
+   * @return None
+   */
+  function applyManagerOptions (managerOpts, recognizerOpts) {
+    if (managerOpts) {
+      recognizerOpts.preventGhosts = managerOpts.preventGhosts;
+    }
+
+    return recognizerOpts;
+  }
+
+  /**
+   * Extracts the type of recognizer that should be instantiated from a given
+   * event name. Used only when no recognizer options are provided.
+   *
+   * @param  {String} eventName Name to derive the recognizer type from
+   * @return {string}           Type of recognizer that fires events with that name
+   */
+  function getRecognizerTypeFromeventName (eventName) {
+    if (eventName.indexOf('pan') > -1) {
+      return 'pan';
+    } else if (eventName.indexOf('pinch') > -1) {
+      return 'pinch';
+    } else if (eventName.indexOf('press') > -1) {
+      return 'press';
+    } else if (eventName.indexOf('rotate') > -1) {
+      return 'rotate';
+    } else if (eventName.indexOf('swipe') > -1) {
+      return 'swipe';
+    } else {
+      return 'tap';
+    }
+  }
+
+  /**
+   * Applies the passed options object to the appropriate gesture recognizer.
+   * Recognizers are created if they do not already exist. See the README for a
+   * description of the options object that can be passed to this function.
+   *
+   * @param  {Object} manager Hammer.js manager object assigned to an element
+   * @param  {Object} options Options applied to a recognizer managed by manager
+   * @return None
+   */
+  function setupRecognizerWithOptions (manager, options, element) {
+    if (!manager || !options) { return; }
+
+    var recognizer = manager.get(options.type);
+
+    if (!recognizer) {
+      recognizer = addRecognizer(manager, options);
+    }
+
+    if (!options.directions) {
+      if (options.type === 'pan' || options.type === 'swipe') {
+        options.directions = 'DIRECTION_ALL';
+      } else if (options.type.indexOf('left') > -1) {
+        options.directions = 'DIRECTION_LEFT';
+      } else if (options.type.indexOf('right') > -1) {
+        options.directions = 'DIRECTION_RIGHT';
+      } else if (options.type.indexOf('up') > -1) {
+        options.directions = 'DIRECTION_UP';
+      } else if (options.type.indexOf('down') > -1) {
+        options.directions = 'DIRECTION_DOWN';
+      } else {
+        options.directions = '';
+      }
+    }
+
+    options.direction = parseDirections(options.directions);
+    recognizer.set(options);
+
+    if (options.recognizeWith) {
+      if (!manager.get(options.recognizeWith)){
+        addRecognizer(manager, {type:options.recognizeWith});
+      }
+
+      recognizer.recognizeWith(manager.get(options.recognizeWith));
+    }
+
+    if (options.dropRecognizeWith && manager.get(options.dropRecognizeWith)) {
+      recognizer.dropRecognizeWith(manager.get(options.dropRecognizeWith));
+    }
+
+    if (options.requireFailure) {
+      if (!manager.get(options.requireFailure)){
+        addRecognizer(manager, {type:options.requireFailure});
+      }
+
+      recognizer.requireFailure(manager.get(options.requireFailure));
+    }
+
+    if (options.dropRequireFailure && manager.get(options.dropRequireFailure)) {
+      recognizer.dropRequireFailure(manager.get(options.dropRequireFailure));
+    }
+
+    if (options.preventGhosts && element) {
+      preventGhosts(element);
+    }
+  }
+
+  /**
+   * Parses the value of the directions property of any Angular Hammer options
+   * object and converts them into the standard Hammer.js directions values.
+   *
+   * @param  {String} dirs Direction names separated by '|' characters
+   * @return {Number}      Hammer.js direction value
+   */
+  function parseDirections (dirs) {
+    var directions = 0;
+
+    angular.forEach(dirs.split('|'), function (direction) {
+      if (Hammer.hasOwnProperty(direction)) {
+        directions = directions | Hammer[direction];
+      }
+    });
+
+    return directions;
+  }
+
+  // ---- Preventing Ghost Clicks ----
+
+  /**
+   * Modified from: https://gist.github.com/jtangelder/361052976f044200ea17
+   *
+   * Prevent click events after a touchend.
+   *
+   * Inspired/copy-paste from this article of Google by Ryan Fioravanti
+   * https://developers.google.com/mobile/articles/fast_buttons#ghost
+   */
+
+  function preventGhosts (element) {
+    if (!element) { return; }
+
+    var coordinates = [],
+        threshold = 25,
+        timeout = 2500;
+
+    if ('ontouchstart' in window) {
+      element[0].addEventListener('touchstart', resetCoordinates, true);
+      element[0].addEventListener('touchend', registerCoordinates, true);
+      element[0].addEventListener('click', preventGhostClick, true);
+      element[0].addEventListener('mouseup', preventGhostClick, true);
+    }
+
+    /**
+     * prevent clicks if they're in a registered XY region
+     * @param {MouseEvent} ev
+     */
+    function preventGhostClick (ev) {
+      for (var i = 0; i < coordinates.length; i++) {
+        var x = coordinates[i][0];
+        var y = coordinates[i][1];
+
+        // within the range, so prevent the click
+        if (Math.abs(ev.clientX - x) < threshold &&
+            Math.abs(ev.clientY - y) < threshold) {
+          ev.stopPropagation();
+          ev.preventDefault();
+          break;
+        }
+      }
+    }
+
+    /**
+     * reset the coordinates array
+     */
+    function resetCoordinates () {
+      coordinates = [];
+    }
+
+    /**
+     * remove the first coordinates set from the array
+     */
+    function popCoordinates () {
+      coordinates.splice(0, 1);
+    }
+
+    /**
+     * if it is an final touchend, we want to register it's place
+     * @param {TouchEvent} ev
+     */
+    function registerCoordinates (ev) {
+      // touchend is triggered on every releasing finger
+      // changed touches always contain the removed touches on a touchend
+      // the touches object might contain these also at some browsers (firefox os)
+      // so touches - changedTouches will be 0 or lower, like -1, on the final touchend
+      if(ev.touches.length - ev.changedTouches.length <= 0) {
+        var touch = ev.changedTouches[0];
+        coordinates.push([touch.clientX, touch.clientY]);
+
+        setTimeout(popCoordinates, timeout);
+      }
+    }
+  }
+})(window, window.angular, window.Hammer);
+
+// Generated by CoffeeScript 1.8.0
+(function() {
+  'use strict';
+  var addWindowInViewItem, bindWindowEvents, checkInView, debounce, getBoundingClientRect, getViewportHeight, removeWindowInViewItem, trackInViewContainer, triggerInViewCallback, unbindWindowEvents, untrackInViewContainer, windowCheckInView, windowEventsHandler, _containersControllers, _windowEventsHandlerBinded, _windowInViewItems,
+    __slice = [].slice;
+
+  angular.module('angular-inview', []).directive('inView', [
+    '$parse', function($parse) {
+      return {
+        restrict: 'A',
+        require: '?^inViewContainer',
+        link: function(scope, element, attrs, containerController) {
+          var inViewFunc, item, options, performCheck, _ref, _ref1;
+          if (!attrs.inView) {
+            return;
+          }
+          inViewFunc = $parse(attrs.inView);
+          item = {
+            element: element,
+            wasInView: false,
+            offset: 0,
+            customDebouncedCheck: null,
+            callback: function($event, $inview, $inviewpart) {
+              if ($event == null) {
+                $event = {};
+              }
+              return scope.$evalAsync((function(_this) {
+                return function() {
+                  $event.inViewTarget = element[0];
+                  return inViewFunc(scope, {
+                    '$event': $event,
+                    '$inview': $inview,
+                    '$inviewpart': $inviewpart
+                  });
+                };
+              })(this));
+            }
+          };
+          if ((attrs.inViewOptions != null) && (options = scope.$eval(attrs.inViewOptions))) {
+            item.offset = options.offset || [options.offsetTop || 0, options.offsetBottom || 0];
+            if (options.debounce) {
+              item.customDebouncedCheck = debounce((function(event) {
+                return checkInView([item], element[0], event);
+              }), options.debounce);
+            }
+          }
+          performCheck = (_ref = (_ref1 = item.customDebouncedCheck) != null ? _ref1 : containerController != null ? containerController.checkInView : void 0) != null ? _ref : windowCheckInView;
+          if (containerController != null) {
+            containerController.addItem(item);
+          } else {
+            addWindowInViewItem(item);
+          }
+          setTimeout(performCheck);
+          return scope.$on('$destroy', function() {
+            if (containerController != null) {
+              containerController.removeItem(item);
+            }
+            return removeWindowInViewItem(item);
+          });
+        }
+      };
+    }
+  ]).directive('inViewContainer', function() {
+    return {
+      restrict: 'AC',
+      controller: [
+        '$element', function($element) {
+          this.items = [];
+          this.addItem = function(item) {
+            return this.items.push(item);
+          };
+          this.removeItem = function(item) {
+            var i;
+            return this.items = (function() {
+              var _i, _len, _ref, _results;
+              _ref = this.items;
+              _results = [];
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                i = _ref[_i];
+                if (i !== item) {
+                  _results.push(i);
+                }
+              }
+              return _results;
+            }).call(this);
+          };
+          this.checkInView = (function(_this) {
+            return function(event) {
+              var i, _i, _len, _ref;
+              _ref = _this.items;
+              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                i = _ref[_i];
+                if (i.customDebouncedCheck != null) {
+                  i.customDebouncedCheck();
+                }
+              }
+              return checkInView((function() {
+                var _j, _len1, _ref1, _results;
+                _ref1 = this.items;
+                _results = [];
+                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                  i = _ref1[_j];
+                  if (i.customDebouncedCheck == null) {
+                    _results.push(i);
+                  }
+                }
+                return _results;
+              }).call(_this), $element[0], event);
+            };
+          })(this);
+          return this;
+        }
+      ],
+      link: function(scope, element, attrs, controller) {
+        element.bind('scroll', controller.checkInView);
+        trackInViewContainer(controller);
+        return scope.$on('$destroy', function() {
+          element.unbind('scroll', controller.checkInView);
+          return untrackInViewContainer(controller);
+        });
+      }
+    };
+  });
+
+  _windowInViewItems = [];
+
+  addWindowInViewItem = function(item) {
+    _windowInViewItems.push(item);
+    return bindWindowEvents();
+  };
+
+  removeWindowInViewItem = function(item) {
+    var i;
+    _windowInViewItems = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = _windowInViewItems.length; _i < _len; _i++) {
+        i = _windowInViewItems[_i];
+        if (i !== item) {
+          _results.push(i);
+        }
+      }
+      return _results;
+    })();
+    return unbindWindowEvents();
+  };
+
+  _containersControllers = [];
+
+  trackInViewContainer = function(controller) {
+    _containersControllers.push(controller);
+    return bindWindowEvents();
+  };
+
+  untrackInViewContainer = function(container) {
+    var c;
+    _containersControllers = (function() {
+      var _i, _len, _results;
+      _results = [];
+      for (_i = 0, _len = _containersControllers.length; _i < _len; _i++) {
+        c = _containersControllers[_i];
+        if (c !== container) {
+          _results.push(c);
+        }
+      }
+      return _results;
+    })();
+    return unbindWindowEvents();
+  };
+
+  _windowEventsHandlerBinded = false;
+
+  windowEventsHandler = function(event) {
+    var c, _i, _len;
+    for (_i = 0, _len = _containersControllers.length; _i < _len; _i++) {
+      c = _containersControllers[_i];
+      c.checkInView(event);
+    }
+    if (_windowInViewItems.length) {
+      return windowCheckInView(event);
+    }
+  };
+
+  bindWindowEvents = function() {
+    if (_windowEventsHandlerBinded) {
+      return;
+    }
+    _windowEventsHandlerBinded = true;
+    return angular.element(window).bind('checkInView click ready scroll resize', windowEventsHandler);
+  };
+
+  unbindWindowEvents = function() {
+    if (!_windowEventsHandlerBinded) {
+      return;
+    }
+    if (_windowInViewItems.length || _containersControllers.length) {
+      return;
+    }
+    _windowEventsHandlerBinded = false;
+    return angular.element(window).unbind('checkInView click ready scroll resize', windowEventsHandler);
+  };
+
+  triggerInViewCallback = function(event, item, inview, isTopVisible, isBottomVisible) {
+    var elOffsetTop, inviewpart;
+    if (inview) {
+      elOffsetTop = getBoundingClientRect(item.element[0]).top + window.pageYOffset;
+      inviewpart = (isTopVisible && isBottomVisible && 'neither') || (isTopVisible && 'top') || (isBottomVisible && 'bottom') || 'both';
+      if (!(item.wasInView && item.wasInView === inviewpart && elOffsetTop === item.lastOffsetTop)) {
+        item.lastOffsetTop = elOffsetTop;
+        item.wasInView = inviewpart;
+        return item.callback(event, true, inviewpart);
+      }
+    } else if (item.wasInView) {
+      item.wasInView = false;
+      return item.callback(event, false);
+    }
+  };
+
+  checkInView = function(items, container, event) {
+    var bounds, boundsBottom, boundsTop, element, item, viewport, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _results;
+    viewport = {
+      top: 0,
+      bottom: getViewportHeight()
+    };
+    if (container && container !== window) {
+      bounds = getBoundingClientRect(container);
+      if (bounds.top > viewport.bottom || bounds.bottom < viewport.top) {
+        for (_i = 0, _len = items.length; _i < _len; _i++) {
+          item = items[_i];
+          triggerInViewCallback(event, item, false);
+        }
+        return;
+      }
+      if (bounds.top > viewport.top) {
+        viewport.top = bounds.top;
+      }
+      if (bounds.bottom < viewport.bottom) {
+        viewport.bottom = bounds.bottom;
+      }
+    }
+    _results = [];
+    for (_j = 0, _len1 = items.length; _j < _len1; _j++) {
+      item = items[_j];
+      element = item.element[0];
+      bounds = getBoundingClientRect(element);
+      boundsTop = bounds.top + parseInt((_ref = (_ref1 = item.offset) != null ? _ref1[0] : void 0) != null ? _ref : item.offset);
+      boundsBottom = bounds.bottom + parseInt((_ref2 = (_ref3 = item.offset) != null ? _ref3[1] : void 0) != null ? _ref2 : item.offset);
+      if (boundsTop < viewport.bottom && boundsBottom >= viewport.top) {
+        _results.push(triggerInViewCallback(event, item, true, boundsBottom > viewport.bottom, boundsTop < viewport.top));
+      } else {
+        _results.push(triggerInViewCallback(event, item, false));
+      }
+    }
+    return _results;
+  };
+
+  getViewportHeight = function() {
+    var height, mode, _ref;
+    height = window.innerHeight;
+    if (height) {
+      return height;
+    }
+    mode = document.compatMode;
+    if (mode || !(typeof $ !== "undefined" && $ !== null ? (_ref = $.support) != null ? _ref.boxModel : void 0 : void 0)) {
+      height = mode === 'CSS1Compat' ? document.documentElement.clientHeight : document.body.clientHeight;
+    }
+    return height;
+  };
+
+  getBoundingClientRect = function(element) {
+    var el, parent, top;
+    if (element.getBoundingClientRect != null) {
+      return element.getBoundingClientRect();
+    }
+    top = 0;
+    el = element;
+    while (el) {
+      top += el.offsetTop;
+      el = el.offsetParent;
+    }
+    parent = element.parentElement;
+    while (parent) {
+      if (parent.scrollTop != null) {
+        top -= parent.scrollTop;
+      }
+      parent = parent.parentElement;
+    }
+    return {
+      top: top,
+      bottom: top + element.offsetHeight
+    };
+  };
+
+  debounce = function(f, t) {
+    var timer;
+    timer = null;
+    return function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      if (timer != null) {
+        clearTimeout(timer);
+      }
+      return timer = setTimeout((function() {
+        return f.apply(null, args);
+      }), t != null ? t : 100);
+    };
+  };
+
+  windowCheckInView = function(event) {
+    var i, _i, _len;
+    for (_i = 0, _len = _windowInViewItems.length; _i < _len; _i++) {
+      i = _windowInViewItems[_i];
+      if (i.customDebouncedCheck != null) {
+        i.customDebouncedCheck();
+      }
+    }
+    return checkInView((function() {
+      var _j, _len1, _results;
+      _results = [];
+      for (_j = 0, _len1 = _windowInViewItems.length; _j < _len1; _j++) {
+        i = _windowInViewItems[_j];
+        if (i.customDebouncedCheck == null) {
+          _results.push(i);
+        }
+      }
+      return _results;
+    })(), null, event);
+  };
+
+}).call(this);
 
 var App;
 
@@ -43927,27 +47907,27 @@ imagoModel = (function() {
     this.assets = {
       get: (function(_this) {
         return function(id) {
-          return $http.get("" + _this.imagoSettings.host + "/api/assets/" + id);
+          return _this.$http.get("" + _this.imagoSettings.host + "/api/assets/" + id);
         };
       })(this),
       create: (function(_this) {
         return function(assets) {
-          return $http.post("" + _this.imagoSettings.host + "/api/assets", assets);
+          return _this.$http.post("" + _this.imagoSettings.host + "/api/assets", assets);
         };
       })(this),
       update: (function(_this) {
         return function(item) {
-          return $http.put("" + _this.imagoSettings.host + "/api/assets/" + item._id, item);
+          return _this.$http.put("" + _this.imagoSettings.host + "/api/assets/" + item._id, item);
         };
       })(this),
       "delete": (function(_this) {
         return function(id) {
-          return $http["delete"]("" + _this.imagoSettings.host + "/api/assets/" + id);
+          return _this.$http["delete"]("" + _this.imagoSettings.host + "/api/assets/" + id);
         };
       })(this),
       trash: (function(_this) {
         return function(assets) {
-          return $http.post("" + _this.imagoSettings.host + "/api/assets/trash", assets);
+          return _this.$http.post("" + _this.imagoSettings.host + "/api/assets/trash", assets);
         };
       })(this),
       move: (function(_this) {
@@ -43958,7 +47938,7 @@ imagoModel = (function() {
             dest: dest,
             items: items
           };
-          return $http.post("" + _this.imagoSettings.host + "/api/assets/move", data);
+          return _this.$http.post("" + _this.imagoSettings.host + "/api/assets/move", data);
         };
       })(this),
       copy: (function(_this) {
@@ -43969,16 +47949,22 @@ imagoModel = (function() {
             dest: dest,
             items: items
           };
-          return $http.post("" + _this.imagoSettings.host + "/api/assets/copy", data);
+          return _this.$http.post("" + _this.imagoSettings.host + "/api/assets/copy", data);
         };
       })(this),
       batch: (function(_this) {
         return function(list) {
-          return $http.put("" + _this.imagoSettings.host + "/api/assets/update", {
+          return _this.$http.put("" + _this.imagoSettings.host + "/api/assets/update", {
             assets: list
           });
         };
-      })(this)
+      })(this),
+      download: function(ids, res) {
+        return this.$http.post("" + this.imagoSettings.host + "/api/assets/download", {
+          assets: ids,
+          resolution: res
+        });
+      }
     };
   }
 
@@ -44182,7 +48168,7 @@ imagoModel = (function() {
   };
 
   imagoModel.prototype.findChildren = function(asset) {
-    return _.where(this.data, {
+    return _.filter(this.data, {
       parent: asset._id
     });
   };
@@ -44197,7 +48183,7 @@ imagoModel = (function() {
     if (options == null) {
       options = {};
     }
-    return _.where(this.data, options);
+    return _.filter(this.data, options);
   };
 
   imagoModel.prototype.find = function(options) {
@@ -44469,7 +48455,7 @@ imagoModel = (function() {
       return function(asset) {
         var deferAsset, exists, i, original_name;
         deferAsset = _this.$q.defer();
-        if (!options.checkdups || _.where(assetsChildren, {
+        if (!options.checkdups || _.filter(assetsChildren, {
           name: asset.name
         }).length === 0) {
           deferAsset.resolve(asset);
@@ -44480,7 +48466,7 @@ imagoModel = (function() {
           while (exists) {
             asset.name = "" + original_name + "_" + i;
             i++;
-            exists = (_.where(assetsChildren, {
+            exists = (_.filter(assetsChildren, {
               name: asset.name
             }).length > 0 ? true : false);
           }
@@ -44618,7 +48604,7 @@ imagoModel = (function() {
     }
     name = this.imagoUtils.normalize(asset.name);
     result = void 0;
-    assetsChildren = _.where(assets, (function(_this) {
+    assetsChildren = _.filter(assets, (function(_this) {
       return function(chr) {
         var normalizeName;
         if (!chr.name) {
@@ -45192,7 +49178,7 @@ imagoUtils = (function() {
         'Zimbabwe': 'ZW',
         'Serbia and Montenegro': 'CS'
       },
-      COUNTRIES: ['Andorra', 'United Arab Emirates', 'Afghanistan', 'Antigua and Barbuda', 'Anguilla', 'Albania', 'Armenia', 'Angola', 'Antarctica', 'Argentina', 'American Samoa', 'Austria', 'Australia', 'Aruba', 'Aland Islands', 'Azerbaijan', 'Bosnia and Herzegovina', 'Barbados', 'Bangladesh', 'Belgium', 'Burkina Faso', 'Bulgaria', 'Bahrain', 'Burundi', 'Benin', 'Saint Barthelemy', 'Bermuda', 'Brunei', 'Bolivia', 'Bonaire', 'Brazil', 'Bahamas', 'Bhutan', 'Bouvet', 'Botswana', 'Belarus', 'Belize', 'Canada', 'Cocos Islands', 'Democratic Republic of the Congo', 'Central African Republic', 'Republic of the Congo', 'Switzerland', 'Ivory Coast', 'Cook Islands', 'Chile', 'Cameroon', 'China', 'Colombia', 'Costa Rica', 'Cuba', 'Cape Verde', 'Curacao', 'Christmas Island', 'Cyprus', 'Czech Republic', 'Germany', 'Djibouti', 'Denmark', 'Dominica', 'Dominican Republic', 'Algeria', 'Ecuador', 'Estonia', 'Egypt', 'Western Sahara', 'Eritrea', 'Spain', 'Ethiopia', 'Finland', 'Fiji', 'Falkland Islands', 'Micronesia', 'Faroe Islands', 'France', 'Gabon', 'United Kingdom', 'Grenada', 'Georgia', 'French Guiana', 'Guernsey', 'Ghana', 'Gibraltar', 'Greenland', 'Gambia', 'Guinea', 'Guadeloupe', 'Equatorial Guinea', 'Greece', 'South Georgia and the South Sandwich Islands', 'Guatemala', 'Guam', 'Guinea-Bissau', 'Guyana', 'Hong Kong', 'Heard Island and McDonald Islands', 'Honduras', 'Croatia', 'Haiti', 'Hungary', 'Indonesia', 'Ireland', 'Israel', 'Isle of Man', 'India', 'British Indian Ocean Territory', 'Iraq', 'Iran', 'Iceland', 'Italy', 'Jersey', 'Jamaica', 'Jordan', 'Japan', 'Kenya', 'Kyrgyzstan', 'Cambodia', 'Kiribati', 'Comoros', 'Saint Kitts and Nevis', 'North Korea', 'South Korea', 'Kosovo', 'Kuwait', 'Cayman Islands', 'Kazakhstan', 'Laos', 'Lebanon', 'Saint Lucia', 'Liechtenstein', 'Sri Lanka', 'Liberia', 'Lesotho', 'Lithuania', 'Luxembourg', 'Latvia', 'Libya', 'Morocco', 'Monaco', 'Moldova', 'Montenegro', 'Saint Martin', 'Madagascar', 'Marshall Islands', 'Macedonia', 'Mali', 'Myanmar', 'Mongolia', 'Macao', 'Northern Mariana Islands', 'Martinique', 'Mauritania', 'Montserrat', 'Malta', 'Mauritius', 'Maldives', 'Malawi', 'Mexico', 'Malaysia', 'Mozambique', 'Namibia', 'New Caledonia', 'Niger', 'Norfolk Island', 'Nigeria', 'Nicaragua', 'Netherlands', 'Norway', 'Nepal', 'Nauru', 'Niue', 'New Zealand', 'Oman', 'Panama', 'Peru', 'French Polynesia', 'Papua New Guinea', 'Philippines', 'Pakistan', 'Poland', 'Saint Pierre and Miquelon', 'Pitcairn', 'Puerto Rico', 'Palestinian Territory', 'Portugal', 'Palau', 'Paraguay', 'Qatar', 'Reunion', 'Romania', 'Serbia', 'Russia', 'Rwanda', 'Saudi Arabia', 'Solomon Islands', 'Seychelles', 'Sudan', 'South Sudan', 'Sweden', 'Singapore', 'Saint Helena', 'Slovenia', 'Svalbard', 'Slovakia', 'Sierra Leone', 'San Marino', 'Senegal', 'Somalia', 'Suriname', 'Sao Tome and Principe', 'El Salvador', 'Sint Maarten', 'Damascus', 'Swaziland', 'Turks and Caicos Islands', 'Chad', 'French Southern Territories', 'Togo', 'Thailand', 'Tajikistan', 'Tokelau', 'East Timor', 'Turkmenistan', 'Tunisia', 'Tonga', 'Turkey', 'Trinidad and Tobago', 'Tuvalu', 'Taiwan', 'Tanzania', 'Ukraine', 'Uganda', 'Northern Ireland', 'United States Minor Outlying Islands', 'United States', 'Uruguay', 'Uzbekistan', 'Vatican', 'Saint Vincent and the Grenadines', 'Venezuela', 'British Virgin Islands', 'U.S. Virgin Islands', 'Vietnam', 'Vanuatu', 'Wallis and Futuna', 'Samoa', 'Yemen', 'Mayotte', 'South Africa', 'Zambia', 'Zimbabwe', 'Serbia and Montenegro', 'USA', 'United States of America', 'Great Britain'],
+      COUNTRIES: ["Afghanistan", "Aland Islands", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla", "Antarctica", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bermuda", "Bhutan", "Bolivia", "Bonaire", "Bosnia and Herzegovina", "Botswana", "Bouvet", "Brazil", "British Indian Ocean Territory", "British Virgin Islands", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cambodia", "Cameroon", "Canada", "Cape Verde", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China", "Christmas Island", "Cocos Islands", "Colombia", "Comoros", "Cook Islands", "Costa Rica", "Croatia", "Cuba", "Curacao", "Cyprus", "Czech Republic", "Damascus", "Democratic Republic of the Congo", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "East Timor", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Ethiopia", "Falkland Islands", "Faroe Islands", "Fiji", "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Great Britain", "Greece", "Greenland", "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Heard Island and McDonald Islands", "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Isle of Man", "Israel", "Italy", "Ivory Coast", "Jamaica", "Japan", "Jersey", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Macao", "Macedonia", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius", "Mayotte", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue", "Norfolk Island", "North Korea", "Northern Ireland", "Northern Mariana Islands", "Norway", "Oman", "Pakistan", "Palau", "Palestinian Territory", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Pitcairn", "Poland", "Portugal", "Puerto Rico", "Qatar", "Republic of the Congo", "Reunion", "Romania", "Russia", "Rwanda", "Saint Barthelemy", "Saint Helena", "Saint Kitts and Nevis", "Saint Lucia", "Saint Martin", "Saint Pierre and Miquelon", "Saint Vincent and the Grenadines", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Serbia and Montenegro", "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia and the South Sandwich Islands", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Svalbard", "Swaziland", "Sweden", "Switzerland", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Togo", "Tokelau", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu", "U.S. Virgin Islands", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "United States Minor Outlying Islands", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican", "Venezuela", "Vietnam", "Wallis and Futuna", "Western Sahara", "Yemen", "Zambia", "Zimbabwe"],
       STATES: {
         AUSTRALIA: ['ACT', 'NSW', 'NT', 'SA', 'TAS', 'QLD', 'VIC', 'WA'],
         CANADA: ['AB', 'BC', 'MB', 'NB', 'NL', 'NS', 'ON', 'PE', 'QC', 'SK'],
@@ -45355,6 +49341,9 @@ imagoUtils = (function() {
       },
       isSafari: function() {
         return !!navigator.userAgent.match(/Safari/i) && !this.isChrome();
+      },
+      isMobile: function() {
+        return !!navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i);
       },
       isEven: function(n) {
         return this.isNumber(n) && (n % 2 === 0);
@@ -45525,7 +49514,9 @@ Meta = (function() {
       if (!(input && value && input.fields[value])) {
         return;
       }
-      if (input.fields[value].value.type) {
+      if (input.fields[value].kind === 'file') {
+        return input.fields[value].download_url;
+      } else if (input.fields[value].kind === 'markup') {
         return input.fields[value].value.value;
       } else {
         return input.fields[value].value;
@@ -45943,6 +49934,7 @@ var imagoVideo;
 imagoVideo = (function() {
   function imagoVideo($q, $timeout, $window, imagoUtils) {
     return {
+      replace: true,
       scope: true,
       templateUrl: '/imago/imagoVideo.html',
       controller: function($scope, $element, $attrs, $transclude) {
@@ -46274,7 +50266,7 @@ Time = (function() {
 
 angular.module('imago').filter('time', [Time]);
 
-angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/controlsVideo.html","<div stop-propagation=\"stop-propagation\" ng-switch=\"isPlaying\" class=\"controls\"><a hm-tap=\"togglePlay\" ng-switch-when=\"false\" class=\"video-play fa fa-play\"></a><a hm-tap=\"togglePlay\" ng-switch-when=\"true\" class=\"video-pause fa fa-pause\"></a><span class=\"video-time\">{{currentTime | time}}</span><span class=\"video-seekbar\"><input type=\"range\" ng-model=\"currentTime\" min=\"0\" max=\"{{duration}}\" ng-change=\"seek(currentTime)\" class=\"seek\"/></span><a hm-tap=\"toggleSize\" class=\"size\">{{wrapperStyle.size}}</a><span class=\"volume\"><span ng-click=\"volumeUp\" class=\"fa fa-volume-up icon-volume-up\"></span><input type=\"range\" ng-model=\"volumeInput\" ng-change=\"onVolumeChange(volumeInput)\"/><span hm-tap=\"volumeDown\" class=\"fa fa-volume-down icon-volume-down\"></span></span><a hm-tap=\"fullScreen\" class=\"video-fullscreen fa fa-expand\"></a><a class=\"video-screen fa fa-compress\"></a></div>");
+angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/controlsVideo.html","<div stop-propagation=\"stop-propagation\" ng-switch=\"isPlaying\" class=\"controls\"><a hm-tap=\"togglePlay\" ng-switch-when=\"false\" class=\"video-play fa fa-play\"></a><a hm-tap=\"togglePlay\" ng-switch-when=\"true\" class=\"video-pause fa fa-pause\"></a><span class=\"video-time\">{{currentTime | time}}</span><span class=\"video-seekbar\"><input type=\"range\" ng-model=\"currentTime\" min=\"0\" max=\"{{duration}}\" ng-change=\"seek(currentTime)\" class=\"seek\"/></span><a hm-tap=\"toggleSize\" class=\"size\">{{wrapperStyle.size}}</a><span class=\"volume\"><span hm-tap=\"volumeUp\" class=\"fa fa-volume-up icon-volume-up\"></span><input type=\"range\" ng-model=\"volumeInput\" ng-change=\"onVolumeChange(volumeInput)\"/><span hm-tap=\"volumeDown\" class=\"fa fa-volume-down icon-volume-down\"></span></span><a hm-tap=\"fullScreen\" class=\"video-fullscreen fa fa-expand\"></a><a class=\"video-screen fa fa-compress\"></a></div>");
 $templateCache.put("/imago/imagoVideo.html","<div ng-class=\"{loading: loading}\" in-view=\"visible = $inview\" visible=\"visible\" responsive-events=\"responsive-events\" class=\"imagovideo {{wrapperStyle.backgroundPosition}} {{wrapperStyle.size}} {{wrapperStyle.sizemode}}\"><div ng-style=\"wrapperStyle\" ng-class=\"{playing: isPlaying}\" class=\"imagowrapper\"><a ng-hide=\"loading\" hm-tap=\"togglePlay()\" ng-class=\"{playing: isPlaying}\" stop-propagation=\"stop-propagation\" class=\"playbig fa fa-play\"></a><video ng-style=\"videoStyle\"><source ng-repeat=\"format in videoFormats\" src=\"{{format.src}}\" data-size=\"{{format.size}}\" data-codec=\"{{format.codec}}\" type=\"{{format.type}}\"/></video><div imago-controls=\"imago-controls\" ng-style=\"controlStyle\" ng-if=\"controls\" ng-show=\"hasPlayed\"></div></div></div>");}]);
 var imagoSlider;
 
@@ -46390,347 +50382,303 @@ imagoSlider = (function() {
 
 angular.module('imago').directive('imagoSlider', ['$rootScope', '$q', '$document', 'imagoModel', '$interval', imagoSlider]);
 
-angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/imagoSlider.html","<div ng-class=\"[conf.animation, action]\" hm-swipe-left=\"goNext\" hm-swipe-right=\"goPrev\" class=\"imagoslider\"><div ng-show=\"conf.enablearrows\" hm-tap=\"goPrev\" stop-propagation=\"stop-propagation\" class=\"prev\"></div><div ng-show=\"conf.enablearrows\" hm-tap=\"goNext\" stop-propagation=\"stop-propagation\" class=\"next\"></div></div>");}]);
-// Generated by CoffeeScript 1.7.1
-(function() {
-  'use strict';
-  var addWindowInViewItem, bindWindowEvents, checkInView, debounce, getBoundingClientRect, getViewportHeight, removeWindowInViewItem, trackInViewContainer, triggerInViewCallback, unbindWindowEvents, untrackInViewContainer, windowCheckInView, windowEventsHandler, _containersControllers, _windowEventsHandlerBinded, _windowInViewItems,
-    __slice = [].slice;
+angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/imagoSlider.html","<div ng-class=\"[conf.animation, action]\" hm-swipeleft=\"goNext\" hm-swiperight=\"goPrev\" class=\"imagoslider\"><div ng-show=\"conf.enablearrows\" hm-tap=\"goPrev\" stop-propagation=\"stop-propagation\" class=\"prev\"></div><div ng-show=\"conf.enablearrows\" hm-tap=\"goNext\" stop-propagation=\"stop-propagation\" class=\"next\"></div></div>");}]);
+var imagoPager;
 
-  angular.module('angular-inview', []).directive('inView', [
-    '$parse', function($parse) {
-      return {
-        restrict: 'A',
-        require: '?^inViewContainer',
-        link: function(scope, element, attrs, containerController) {
-          var inViewFunc, item, options, performCheck, _ref, _ref1;
-          if (!attrs.inView) {
-            return;
-          }
-          inViewFunc = $parse(attrs.inView);
-          item = {
-            element: element,
-            wasInView: false,
-            offset: 0,
-            customDebouncedCheck: null,
-            callback: function($event, $inview, $inviewpart) {
-              if ($event == null) {
-                $event = {};
-              }
-              return scope.$apply((function(_this) {
-                return function() {
-                  $event.inViewTarget = element[0];
-                  return inViewFunc(scope, {
-                    '$event': $event,
-                    '$inview': $inview,
-                    '$inviewpart': $inviewpart
-                  });
-                };
-              })(this));
-            }
-          };
-          if ((attrs.inViewOptions != null) && (options = scope.$eval(attrs.inViewOptions))) {
-            item.offset = options.offset || [options.offsetTop || 0, options.offsetBottom || 0];
-            if (options.debounce) {
-              item.customDebouncedCheck = debounce((function(event) {
-                return checkInView([item], element[0], event);
-              }), options.debounce);
-            }
-          }
-          performCheck = (_ref = (_ref1 = item.customDebouncedCheck) != null ? _ref1 : containerController != null ? containerController.checkInView : void 0) != null ? _ref : windowCheckInView;
-          if (containerController != null) {
-            containerController.addItem(item);
-          } else {
-            addWindowInViewItem(item);
-          }
-          setTimeout(performCheck);
-          return scope.$on('$destroy', function() {
-            if (containerController != null) {
-              containerController.removeItem(item);
-            }
-            return removeWindowInViewItem(item);
-          });
-        }
-      };
-    }
-  ]).directive('inViewContainer', function() {
+imagoPager = (function() {
+  function imagoPager(imagoModel) {
     return {
-      restrict: 'AC',
-      controller: [
-        '$element', function($element) {
-          this.items = [];
-          this.addItem = function(item) {
-            return this.items.push(item);
+      scope: {
+        posts: '=',
+        next: '&',
+        prev: '&',
+        path: '@',
+        pageSize: '@',
+        tags: '=',
+        currentPage: '='
+      },
+      templateUrl: '/imago/imagoPager.html',
+      controller: function($scope, $element, $attrs) {
+        this.fetchPosts = function() {
+          var pageNo, pageSize, query;
+          this.count += 1;
+          $scope.posts = [];
+          pageSize = parseInt($scope.pageSize);
+          pageNo = parseInt($scope.currentPage);
+          query = {
+            path: $scope.path,
+            page: pageNo,
+            pagesize: pageSize
           };
-          this.removeItem = function(item) {
-            var i;
-            return this.items = (function() {
-              var _i, _len, _ref, _results;
-              _ref = this.items;
+          if ($scope.tags) {
+            query['tags'] = $scope.tags;
+          }
+          return imagoModel.getData([query], {
+            localData: false
+          }).then((function(_this) {
+            return function(response) {
+              var collection, _i, _len, _results;
               _results = [];
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                i = _ref[_i];
-                if (i !== item) {
-                  _results.push(i);
-                }
+              for (_i = 0, _len = response.length; _i < _len; _i++) {
+                collection = response[_i];
+                $scope.posts = collection.assets;
+                $scope.totalPages = collection.count / pageSize;
+                break;
               }
               return _results;
-            }).call(this);
-          };
-          this.checkInView = (function(_this) {
-            return function(event) {
-              var i, _i, _len, _ref;
-              _ref = _this.items;
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                i = _ref[_i];
-                if (i.customDebouncedCheck != null) {
-                  i.customDebouncedCheck();
-                }
-              }
-              return checkInView((function() {
-                var _j, _len1, _ref1, _results;
-                _ref1 = this.items;
-                _results = [];
-                for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-                  i = _ref1[_j];
-                  if (i.customDebouncedCheck == null) {
-                    _results.push(i);
-                  }
-                }
-                return _results;
-              }).call(_this), $element[0], event);
             };
-          })(this);
-          return this;
+          })(this));
+        };
+        $scope.onNext = (function(_this) {
+          return function() {
+            $scope.currentPage = parseInt($scope.currentPage) + 1;
+            return $scope.next();
+          };
+        })(this);
+        $scope.onPrev = (function(_this) {
+          return function() {
+            $scope.currentPage = parseInt($scope.currentPage) - 1;
+            return $scope.prev();
+          };
+        })(this);
+        return $scope.$watchGroup(['currentPage', 'tags'], this.fetchPosts);
+      }
+    };
+  }
+
+  return imagoPager;
+
+})();
+
+angular.module('imago').directive('imagoPager', ['imagoModel', imagoPager]);
+
+angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/imagoPager.html","<div class=\"pager\"><button ng-disabled=\"currentPage &lt;= 1\" hm-tap=\"onPrev\">Previous</button><button ng-disabled=\"currentPage &gt;= totalPages || posts.length &lt; pageSize\" hm-tap=\"onNext\">Next</button></div>");}]);
+var imagoLike;
+
+imagoLike = (function() {
+  function imagoLike() {
+    return {
+      scope: {},
+      templateUrl: '/imago/imagoLike.html',
+      controller: function() {}
+    };
+  }
+
+  return imagoLike;
+
+})();
+
+angular.module('imago').directive('imagoLike', [imagoLike]);
+
+var imagoShare;
+
+imagoShare = (function() {
+  function imagoShare() {
+    return {
+      scope: {
+        asset: "="
+      },
+      templateUrl: '/imago/imagoShare.html',
+      controller: function($scope, $element, $attrs, $location) {
+        var watcher;
+        $scope.location = $location.absUrl();
+        return watcher = $scope.$watch('asset', (function(_this) {
+          return function(value) {
+            var key;
+            if (!value) {
+              return;
+            }
+            for (key in $attrs.$attr) {
+              if (key !== 'asset') {
+                $scope[key] = true;
+              }
+            }
+            return watcher();
+          };
+        })(this));
+      }
+    };
+  }
+
+  return imagoShare;
+
+})();
+
+angular.module('imago').directive('imagoShare', [imagoShare]);
+
+angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/imagoLike.html","<div class=\"social\"><a href=\"http://instagram.com/###\" target=\"_blank\" class=\"instagram\">Instagram</a><a href=\"https://www.facebook.com/###\" target=\"_blank\" class=\"facebook\">Facebook</a><a href=\"https://plus.google.com/###\" target=\"_blank\" class=\"googleplus\">Google +</a></div>");
+$templateCache.put("/imago/imagoShare.html","<div class=\"share\"><a href=\"http://www.facebook.com/share.php?u={{location}}\" target=\"_blank\" ng-if=\"facebook || all\" class=\"fa fa-facebook\"></a><a href=\"http://twitter.com/home?status={{location}}\" target=\"_blank\" ng-if=\"twitter || all\" class=\"fa fa-twitter\"></a><a href=\"https://plus.google.com/share?url={{location}}\" ng-if=\"google || all\" class=\"fa fa-google\"></a><a href=\"https://www.linkedin.com/shareArticle?mini=true&amp;url={{location}}&amp;title={{asset | meta:\'title\'}}&amp;summary=&amp;source={{asset.serving_url}}\" target=\"_blank\" ng-if=\"linkedin || all\" class=\"fa fa-linkedin\"></a><a href=\"http://www.tumblr.com/share/photo?source={{location}}&amp;caption={{asset | meta:\'title\'}}\" target=\"_blank\" ng-if=\"tumblr|| all\" class=\"fa fa-tumblr\"></a><a href=\"http://www.pinterest.com/pin/create/abutton/?url={{location}}/&amp;media={{asset.serving_url}}&amp;description={{asset | meta:\'title\'}}\" target=\"_blank\" title=\"Pin It\" ng-if=\"pintrest || all\" class=\"fa fa-pinterest\"></a></div>");}]);
+var CurrencySymbol;
+
+CurrencySymbol = (function() {
+  function CurrencySymbol(imagoUtils) {
+    return function(currency) {
+      if (!currency) {
+        return;
+      }
+      return imagoUtils.getCurrencySymbol(currency);
+    };
+  }
+
+  return CurrencySymbol;
+
+})();
+
+angular.module('imago').filter('currencySymbol', ['imagoUtils', CurrencySymbol]);
+
+var Price;
+
+Price = (function() {
+  function Price() {
+    return function(price) {
+      if (_.isUndefined(price)) {
+        return '0.00';
+      } else {
+        price = parseFloat(price);
+        price = (price / 100).toFixed(2);
+        return price;
+      }
+    };
+  }
+
+  return Price;
+
+})();
+
+angular.module('imago').filter('price', [Price]);
+
+var tagFilter,
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+tagFilter = (function() {
+  function tagFilter(imagoUtils) {
+    return function(input, tag) {
+      var asset, filtered, _i, _len;
+      filtered = [];
+      if (!input) {
+        return;
+      }
+      for (_i = 0, _len = input.length; _i < _len; _i++) {
+        asset = input[_i];
+        if (tag) {
+          if (__indexOf.call(imagoUtils.getMeta(asset, 'tags'), tag) >= 0) {
+            filtered.push(asset);
+          }
+        } else {
+          filtered.push(asset);
         }
-      ],
-      link: function(scope, element, attrs, controller) {
-        element.bind('scroll', controller.checkInView);
-        trackInViewContainer(controller);
-        return scope.$on('$destroy', function() {
-          element.unbind('scroll', controller.checkInView);
-          return untrackInViewContainer(controller);
+      }
+      return filtered;
+    };
+  }
+
+  return tagFilter;
+
+})();
+
+angular.module('imago').filter('tagFilter', ['imagoUtils', tagFilter]);
+
+var imagoSubmit,
+  __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+imagoSubmit = (function() {
+  function imagoSubmit($http, imagoUtils, imagoSettings) {
+    return {
+      getxsrf: function() {
+        var url;
+        url = imagoSettings.host + "/getxsrf";
+        return $http.get(url);
+      },
+      formToJson: function(form) {
+        var defaultFields, key, message, obj, value;
+        defaultFields = ['message', 'subscribe'];
+        obj = {};
+        message = '';
+        for (key in form) {
+          value = form[key];
+          if (__indexOf.call(defaultFields, key) < 0) {
+            message += "" + (imagoUtils.titleCase(key)) + ": " + value + "<br><br>";
+          }
+          obj[key] = value || '';
+        }
+        obj.message = message + imagoUtils.replaceNewLines(obj.message || '');
+        return angular.toJson(obj);
+      },
+      send: function(data) {
+        var postUrl;
+        postUrl = imagoSettings.host + "/api/contact";
+        return $http.post(postUrl, this.formToJson(data)).then((function(_this) {
+          return function(response) {
+            console.log('success: ', response);
+            return {
+              status: true,
+              message: ""
+            };
+          };
+        })(this), function(error) {
+          console.log('error: ', error);
+          return {
+            status: false,
+            message: "could not connect to Server."
+          };
         });
       }
     };
-  });
+  }
 
-  _windowInViewItems = [];
+  return imagoSubmit;
 
-  addWindowInViewItem = function(item) {
-    _windowInViewItems.push(item);
-    return bindWindowEvents();
-  };
+})();
 
-  removeWindowInViewItem = function(item) {
-    var i;
-    _windowInViewItems = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = _windowInViewItems.length; _i < _len; _i++) {
-        i = _windowInViewItems[_i];
-        if (i !== item) {
-          _results.push(i);
-        }
-      }
-      return _results;
-    })();
-    return unbindWindowEvents();
-  };
+angular.module('imago').service('imagoSubmit', ['$http', 'imagoUtils', 'imagoSettings', imagoSubmit]);
 
-  _containersControllers = [];
+var imagoForm;
 
-  trackInViewContainer = function(controller) {
-    _containersControllers.push(controller);
-    return bindWindowEvents();
-  };
-
-  untrackInViewContainer = function(container) {
-    var c;
-    _containersControllers = (function() {
-      var _i, _len, _results;
-      _results = [];
-      for (_i = 0, _len = _containersControllers.length; _i < _len; _i++) {
-        c = _containersControllers[_i];
-        if (c !== container) {
-          _results.push(c);
-        }
-      }
-      return _results;
-    })();
-    return unbindWindowEvents();
-  };
-
-  _windowEventsHandlerBinded = false;
-
-  windowEventsHandler = function(event) {
-    var c, _i, _len;
-    for (_i = 0, _len = _containersControllers.length; _i < _len; _i++) {
-      c = _containersControllers[_i];
-      c.checkInView(event);
-    }
-    if (_windowInViewItems.length) {
-      return windowCheckInView(event);
-    }
-  };
-
-  bindWindowEvents = function() {
-    if (_windowEventsHandlerBinded) {
-      return;
-    }
-    _windowEventsHandlerBinded = true;
-    return angular.element(window).bind('checkInView click ready scroll resize', windowEventsHandler);
-  };
-
-  unbindWindowEvents = function() {
-    if (!_windowEventsHandlerBinded) {
-      return;
-    }
-    if (_windowInViewItems.length || _containersControllers.length) {
-      return;
-    }
-    _windowEventsHandlerBinded = false;
-    return angular.element(window).unbind('checkInView click ready scroll resize', windowEventsHandler);
-  };
-
-  triggerInViewCallback = function(event, item, inview, isTopVisible, isBottomVisible) {
-    var elOffsetTop, inviewpart;
-    if (inview) {
-      elOffsetTop = getBoundingClientRect(item.element[0]).top + window.pageYOffset;
-      inviewpart = (isTopVisible && 'top') || (isBottomVisible && 'bottom') || 'both';
-      if (!(item.wasInView && item.wasInView === inviewpart && elOffsetTop === item.lastOffsetTop)) {
-        item.lastOffsetTop = elOffsetTop;
-        item.wasInView = inviewpart;
-        return item.callback(event, true, inviewpart);
-      }
-    } else if (item.wasInView) {
-      item.wasInView = false;
-      return item.callback(event, false);
-    }
-  };
-
-  checkInView = function(items, container, event) {
-    var bounds, boundsBottom, boundsTop, element, item, viewport, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3, _results;
-    viewport = {
-      top: 0,
-      bottom: getViewportHeight()
-    };
-    if (container && container !== window) {
-      bounds = getBoundingClientRect(container);
-      if (bounds.top > viewport.bottom || bounds.bottom < viewport.top) {
-        for (_i = 0, _len = items.length; _i < _len; _i++) {
-          item = items[_i];
-          triggerInViewCallback(event, item, false);
-        }
-        return;
-      }
-      if (bounds.top > viewport.top) {
-        viewport.top = bounds.top;
-      }
-      if (bounds.bottom < viewport.bottom) {
-        viewport.bottom = bounds.bottom;
-      }
-    }
-    _results = [];
-    for (_j = 0, _len1 = items.length; _j < _len1; _j++) {
-      item = items[_j];
-      element = item.element[0];
-      bounds = getBoundingClientRect(element);
-      boundsTop = bounds.top + parseInt((_ref = (_ref1 = item.offset) != null ? _ref1[0] : void 0) != null ? _ref : item.offset);
-      boundsBottom = bounds.bottom + parseInt((_ref2 = (_ref3 = item.offset) != null ? _ref3[1] : void 0) != null ? _ref2 : item.offset);
-      if (boundsTop < viewport.bottom && boundsBottom >= viewport.top) {
-        _results.push(triggerInViewCallback(event, item, true, boundsBottom > viewport.bottom, boundsTop < viewport.top));
-      } else {
-        _results.push(triggerInViewCallback(event, item, false));
-      }
-    }
-    return _results;
-  };
-
-  getViewportHeight = function() {
-    var height, mode, _ref;
-    height = window.innerHeight;
-    if (height) {
-      return height;
-    }
-    mode = document.compatMode;
-    if (mode || !(typeof $ !== "undefined" && $ !== null ? (_ref = $.support) != null ? _ref.boxModel : void 0 : void 0)) {
-      height = mode === 'CSS1Compat' ? document.documentElement.clientHeight : document.body.clientHeight;
-    }
-    return height;
-  };
-
-  getBoundingClientRect = function(element) {
-    var el, parent, top;
-    if (element.getBoundingClientRect != null) {
-      return element.getBoundingClientRect();
-    }
-    top = 0;
-    el = element;
-    while (el) {
-      top += el.offsetTop;
-      el = el.offsetParent;
-    }
-    parent = element.parentElement;
-    while (parent) {
-      if (parent.scrollTop != null) {
-        top -= parent.scrollTop;
-      }
-      parent = parent.parentElement;
-    }
+imagoForm = (function() {
+  function imagoForm(imagoSubmit) {
     return {
-      top: top,
-      bottom: top + element.offsetHeight
+      scope: {},
+      replace: true,
+      transclude: true,
+      templateUrl: '/imago/imagoForm.html',
+      link: function(scope, element, attr, cntrl, transclude) {
+        scope.data = {};
+        transclude(scope, function(clone, scope) {
+          return element.append(clone);
+        });
+        return scope.submitForm = (function(_this) {
+          return function(isValid) {
+            if (isValid) {
+              return imagoSubmit.send(scope.data).then(function(result) {
+                scope.status = result.status;
+                scope.error = result.message || '';
+                if (scope.status) {
+                  return scope.data = {};
+                }
+              });
+            }
+          };
+        })(this);
+      }
     };
-  };
+  }
 
-  debounce = function(f, t) {
-    var timer;
-    timer = null;
-    return function() {
-      var args;
-      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      if (timer != null) {
-        clearTimeout(timer);
-      }
-      return timer = setTimeout((function() {
-        return f.apply(null, args);
-      }), t != null ? t : 100);
-    };
-  };
+  return imagoForm;
 
-  windowCheckInView = function(event) {
-    var i, _i, _len;
-    for (_i = 0, _len = _windowInViewItems.length; _i < _len; _i++) {
-      i = _windowInViewItems[_i];
-      if (i.customDebouncedCheck != null) {
-        i.customDebouncedCheck();
-      }
-    }
-    return checkInView((function() {
-      var _j, _len1, _results;
-      _results = [];
-      for (_j = 0, _len1 = _windowInViewItems.length; _j < _len1; _j++) {
-        i = _windowInViewItems[_j];
-        if (i.customDebouncedCheck == null) {
-          _results.push(i);
-        }
-      }
-      return _results;
-    })(), null, event);
-  };
+})();
 
-}).call(this);
+angular.module('imago').directive('imagoForm', ['imagoSubmit', imagoForm]);
 
+angular.module("imago").run(["$templateCache", function($templateCache) {$templateCache.put("/imago/imagoForm.html","<div class=\"imagoForm\"></div>");}]);
 var Load, Setup, app, data, debug, imagoSettings, tenant;
 
-tenant = 'TENANT';
+tenant = 'creativeandpartners';
 
 data = 'online';
 
 debug = true;
 
-app = angular.module('app', ['ngAnimate', 'ui.router', 'ngTouch', 'templatesApp', 'imago.widgets.angular', 'lodash']);
+app = angular.module('app', ['ngAnimate', 'ui.router', 'hmTouchEvents', 'templatesApp', 'angular-inview', 'imago', 'lodash']);
 
 imagoSettings = (function() {
   function imagoSettings() {
@@ -46771,12 +50719,13 @@ Setup = (function() {
 })();
 
 Load = (function() {
-  function Load($rootScope, $location, $timeout, $state, $urlRouter) {
+  function Load($rootScope, $location, $state, $urlRouter, $window) {
     $rootScope.js = true;
     $rootScope.$on('$stateChangeSuccess', function(evt) {
       var path, state;
       state = $state.current.name.split('.').join(' ');
       path = $location.path().split('/').join(' ');
+      $window.scrollTo(0, 0);
       $rootScope.state = state;
       return $rootScope.path = path;
     });
@@ -46786,22 +50735,29 @@ Load = (function() {
 
 })();
 
-angular.module('app').constant('imagoSettings', imagoSettings()).config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$location', '$timeout', '$state', '$urlRouter', Load]);
+angular.module('app').constant('imagoSettings', imagoSettings()).config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$location', '$state', '$urlRouter', '$window', Load]);
 
 var Blog;
 
 Blog = (function() {
-  function Blog($scope, $state) {
-    this.path = '/blog';
-    this.pageSize = 5;
+  function Blog($scope, $state, $location) {
+    this.path = $state.current.data.path || '/blog';
+    this.pageSize = 6;
     this.tags = $state.params.tag || '';
+    this.currentPage = $state.params.page || 1;
+    this.onNext = function() {
+      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) + 1));
+    };
+    this.onPrev = function() {
+      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) - 1));
+    };
   }
 
   return Blog;
 
 })();
 
-angular.module('app').controller('blog', ['$scope', '$state', Blog]);
+angular.module('app').controller('blog', ['$scope', '$state', '$location', Blog]);
 
 var Home;
 
@@ -46827,14 +50783,14 @@ imagoPage = (function() {
   function imagoPage($scope, $location, $state, imagoModel) {
     imagoModel.getData().then((function(_this) {
       return function(response) {
-        var data, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = response.length; _i < _len; _i++) {
-          data = response[_i];
+        var data, i, len, results;
+        results = [];
+        for (i = 0, len = response.length; i < len; i++) {
+          data = response[i];
           _this.data = data;
           break;
         }
-        return _results;
+        return results;
       };
     })(this));
   }
@@ -46858,19 +50814,37 @@ Maintenance = (function() {
 
 angular.module('app').controller('maintenance', ['$scope', Maintenance]);
 
+var Footer;
+
+Footer = (function() {
+  function Footer() {
+    return {
+      restrict: 'AE',
+      templateUrl: '/app/directives/views/footer.html',
+      controller: function($scope) {}
+    };
+  }
+
+  return Footer;
+
+})();
+
+angular.module('app').directive('footer', [Footer]);
+
 var Header;
 
 Header = (function() {
-  function Header($location, $timeout, $urlRouter) {
+  function Header($location, $timeout, $rootScope, $urlRouter, imagoUtils) {
     return {
       templateUrl: '/app/directives/views/header.html',
       controller: function($scope, $element, $attrs) {
-        var currentLink, i, l, link, links, onClass, url, urlMap, _i, _len;
+        var currentLink, i, j, l, len, link, links, onClass, url, urlMap;
         links = $element.find("a");
         onClass = "active";
         currentLink = void 0;
         urlMap = {};
-        for (i = _i = 0, _len = links.length; _i < _len; i = ++_i) {
+        $rootScope.navActive = false;
+        for (i = j = 0, len = links.length; j < len; i = ++j) {
           l = links[i];
           link = angular.element(links[i]);
           url = link.attr("href");
@@ -46884,6 +50858,8 @@ Header = (function() {
           var path, pathLink;
           path = $location.path();
           pathLink = urlMap[$location.path()];
+          $scope.active = false;
+          $rootScope.navActive = false;
           if (pathLink) {
             if (currentLink) {
               currentLink.removeClass(onClass);
@@ -46894,6 +50870,13 @@ Header = (function() {
             return currentLink.removeClass(onClass);
           }
         });
+      },
+      link: function(scope, element, attrs) {
+        scope.active = false;
+        return scope.activate = function() {
+          scope.active = !scope.active;
+          return $rootScope.navActive = !$rootScope.navActive;
+        };
       }
     };
   }
@@ -46902,13 +50885,47 @@ Header = (function() {
 
 })();
 
-angular.module('app').directive('header', ['$location', '$timeout', '$urlRouter', Header]);
+angular.module('app').directive('header', ['$location', '$timeout', '$rootScope', '$urlRouter', 'imagoUtils', Header]);
+
+var imagoContact;
+
+imagoContact = (function() {
+  function imagoContact(imagoSubmit) {
+    return {
+      scope: {},
+      templateUrl: '/app/directives/views/imagoContact.html',
+      controllerAs: 'contact',
+      controller: function($scope) {
+        this.data = {
+          subscribe: true
+        };
+        return this.submitForm = (function(_this) {
+          return function(isValid) {
+            if (isValid) {
+              return imagoSubmit.send(_this.data).then(function(result) {
+                _this.status = result.status;
+                return _this.error = result.message || '';
+              });
+            }
+          };
+        })(this);
+      }
+    };
+  }
+
+  return imagoContact;
+
+})();
+
+angular.module('app').directive('imagoContact', ['imagoSubmit', imagoContact]);
 
 angular.module("templatesApp", []).run(["$templateCache", function($templateCache) {$templateCache.put("/app/views/blog.html","<div class=\"blog\"><div class=\"list\"><div ng-repeat=\"asset in blog.assets\" class=\"post\"><a href=\"{{asset.path}}\"><div imago-image=\"asset\"></div></a><div class=\"caption\"><h2>{{ asset | meta:\'title\' }}</h2><ul class=\"tags\"><li ng-repeat=\"tag in asset | meta:\'tags\'\"><a href=\"/blog/tag/{{tag}}\" ng-click=\"blog.tags = tag\">{{tag}}</a></li></ul></div></div><div imago-pager=\"imago-pager\" posts=\"blog.assets\" next=\"blog.onNext()\" prev=\"blog.onPrev()\" path=\"{{ blog.path }}\" page-size=\"{{ blog.pageSize }}\" tags=\"blog.tags\"></div></div></div>");
 $templateCache.put("/app/views/browserwarning.html","<h1>Sorry your Browser is not supported.</h1><p>You are using {{bowser.name}} version {{bowser.version}}.</p><br/><p>Please install recent version of<a href=\"http://google.com/chrome\" target=\"_blank\"> Google Chrome</a>,<a href=\"http://www.apple.com/safari/\" target=\"_blank\"> Safari</a>,<a href=\"http://getfirefox.com\" target=\"_blank\"> Firefox</a> or<a href=\"http://windows.microsoft.com/en-us/internet-explorer/download-ie\" target=\"_blank\"> Internet Explorer</a></p>");
-$templateCache.put("/app/views/home.html","<div class=\"home\"></div>");
+$templateCache.put("/app/views/home.html","<div class=\"home\"><h1 class=\"logo\"><a href=\"mailto:info@creativeandpartners.com\"></a></h1></div>");
 $templateCache.put("/app/views/maintenance.html","<img src=\"//{{ tenant }}.imagoapp.com/logo=s260\" width=\"130\"/><br/><br/><br/><h4>We are busy updating the Site for you<br/>We will be back soon.</h4>");
 $templateCache.put("/app/views/post.html","<div class=\"post\"><h1>{{ post.data | meta:\'title\' }}</h1><div imago-image=\"post.data\"></div><div ng-bind-html=\"post.data | meta:\'text\'\" class=\"text\"></div><ul class=\"tags\"><li ng-repeat=\"tag in post.data | meta:\'tags\'\"><a href=\"/blog/tag/{{tag}}\" ng-click=\"blog.tags = tag\">{{tag}}</a></li></ul></div>");
 $templateCache.put("/app/views/social.html","<div class=\"social\"><a href=\"http://instagram.com/xx\" target=\"_blank\" class=\"instagram\">Instagram</a><a href=\"https://www.facebook.com/xx\" target=\"_blank\" class=\"facebook\">Facebook</a><a href=\"https://plus.google.com/xx\" target=\"_blank\" class=\"googleplus\">Google +</a></div>");
-$templateCache.put("/app/directives/views/header.html","<nav><a href=\"/test\">Test</a></nav>");}]);
+$templateCache.put("/app/directives/views/footer.html","<h2>footer</h2>");
+$templateCache.put("/app/directives/views/header.html","<button ng-show=\"mobile\" hm-tap=\"activate\"><div></div><div></div><div></div></button><nav ng-class=\"{\'active\': active}\"><a href=\"/\" class=\"home\">Home</a><a href=\"/artists\" class=\"artists\">Artists</a><a href=\"/manifesto\" class=\"manifesto\">manifesto</a><a href=\"/social\" class=\"social\">Social</a><a href=\"/contact\" class=\"contact\">Contact</a></nav>");
+$templateCache.put("/app/directives/views/imagoContact.html","<div class=\"imago-form\"><form name=\"imagoContact\" ng-submit=\"contact.submitForm(imagoContact.$valid)\" novalidate=\"novalidate\" ng-if=\"!contact.status\"><div class=\"imago-field\"><label for=\"name\">Name</label><input type=\"text\" name=\"name\" ng-model=\"contact.data.name\" placeholder=\"Name\" required=\"required\"/></div><div class=\"imago-field\"><label for=\"email\">Email</label><input type=\"email\" name=\"email\" ng-model=\"contact.data.email\" placeholder=\"Email\" required=\"required\"/></div><div class=\"imago-field\"><label for=\"message\">Message</label><textarea name=\"message\" ng-model=\"contact.data.message\" placeholder=\"Your message.\" required=\"required\"></textarea></div><div class=\"imago-checkbox\"><input type=\"checkbox\" name=\"subscribe\" ng-model=\"contact.data.subscribe\" checked=\"checked\"/><label for=\"subscribe\">Subscribe</label></div><div class=\"formcontrols\"><button type=\"submit\" ng-disabled=\"imagoContact.$invalid\" class=\"send\">Send</button></div></form><div ng-switch=\"contact.status\" class=\"messages\"><div ng-switch-when=\"true\" class=\"sucess\"><span>Thank You!</span></div><div ng-switch-when=\"false\" class=\"error\"><span>Error: {{contact.error}}</span></div></div></div>");}]);
 //# sourceMappingURL=maps/application.js.map

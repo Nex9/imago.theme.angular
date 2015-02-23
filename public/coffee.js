@@ -1,12 +1,12 @@
 var Load, Setup, app, data, debug, imagoSettings, tenant;
 
-tenant = 'TENANT';
+tenant = 'creativeandpartners';
 
 data = 'online';
 
 debug = true;
 
-app = angular.module('app', ['ngAnimate', 'ui.router', 'ngTouch', 'templatesApp', 'imago.widgets.angular', 'lodash']);
+app = angular.module('app', ['ngAnimate', 'ui.router', 'hmTouchEvents', 'templatesApp', 'angular-inview', 'imago', 'lodash']);
 
 imagoSettings = (function() {
   function imagoSettings() {
@@ -47,12 +47,13 @@ Setup = (function() {
 })();
 
 Load = (function() {
-  function Load($rootScope, $location, $timeout, $state, $urlRouter) {
+  function Load($rootScope, $location, $state, $urlRouter, $window) {
     $rootScope.js = true;
     $rootScope.$on('$stateChangeSuccess', function(evt) {
       var path, state;
       state = $state.current.name.split('.').join(' ');
       path = $location.path().split('/').join(' ');
+      $window.scrollTo(0, 0);
       $rootScope.state = state;
       return $rootScope.path = path;
     });
@@ -62,22 +63,29 @@ Load = (function() {
 
 })();
 
-angular.module('app').constant('imagoSettings', imagoSettings()).config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$location', '$timeout', '$state', '$urlRouter', Load]);
+angular.module('app').constant('imagoSettings', imagoSettings()).config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$location', '$state', '$urlRouter', '$window', Load]);
 
 var Blog;
 
 Blog = (function() {
-  function Blog($scope, $state) {
-    this.path = '/blog';
-    this.pageSize = 5;
+  function Blog($scope, $state, $location) {
+    this.path = $state.current.data.path || '/blog';
+    this.pageSize = 6;
     this.tags = $state.params.tag || '';
+    this.currentPage = $state.params.page || 1;
+    this.onNext = function() {
+      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) + 1));
+    };
+    this.onPrev = function() {
+      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) - 1));
+    };
   }
 
   return Blog;
 
 })();
 
-angular.module('app').controller('blog', ['$scope', '$state', Blog]);
+angular.module('app').controller('blog', ['$scope', '$state', '$location', Blog]);
 
 var Home;
 
@@ -103,14 +111,14 @@ imagoPage = (function() {
   function imagoPage($scope, $location, $state, imagoModel) {
     imagoModel.getData().then((function(_this) {
       return function(response) {
-        var data, _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = response.length; _i < _len; _i++) {
-          data = response[_i];
+        var data, i, len, results;
+        results = [];
+        for (i = 0, len = response.length; i < len; i++) {
+          data = response[i];
           _this.data = data;
           break;
         }
-        return _results;
+        return results;
       };
     })(this));
   }
@@ -134,19 +142,37 @@ Maintenance = (function() {
 
 angular.module('app').controller('maintenance', ['$scope', Maintenance]);
 
+var Footer;
+
+Footer = (function() {
+  function Footer() {
+    return {
+      restrict: 'AE',
+      templateUrl: '/app/directives/views/footer.html',
+      controller: function($scope) {}
+    };
+  }
+
+  return Footer;
+
+})();
+
+angular.module('app').directive('footer', [Footer]);
+
 var Header;
 
 Header = (function() {
-  function Header($location, $timeout, $urlRouter) {
+  function Header($location, $timeout, $rootScope, $urlRouter, imagoUtils) {
     return {
       templateUrl: '/app/directives/views/header.html',
       controller: function($scope, $element, $attrs) {
-        var currentLink, i, l, link, links, onClass, url, urlMap, _i, _len;
+        var currentLink, i, j, l, len, link, links, onClass, url, urlMap;
         links = $element.find("a");
         onClass = "active";
         currentLink = void 0;
         urlMap = {};
-        for (i = _i = 0, _len = links.length; _i < _len; i = ++_i) {
+        $rootScope.navActive = false;
+        for (i = j = 0, len = links.length; j < len; i = ++j) {
           l = links[i];
           link = angular.element(links[i]);
           url = link.attr("href");
@@ -160,6 +186,8 @@ Header = (function() {
           var path, pathLink;
           path = $location.path();
           pathLink = urlMap[$location.path()];
+          $scope.active = false;
+          $rootScope.navActive = false;
           if (pathLink) {
             if (currentLink) {
               currentLink.removeClass(onClass);
@@ -170,6 +198,13 @@ Header = (function() {
             return currentLink.removeClass(onClass);
           }
         });
+      },
+      link: function(scope, element, attrs) {
+        scope.active = false;
+        return scope.activate = function() {
+          scope.active = !scope.active;
+          return $rootScope.navActive = !$rootScope.navActive;
+        };
       }
     };
   }
@@ -178,4 +213,36 @@ Header = (function() {
 
 })();
 
-angular.module('app').directive('header', ['$location', '$timeout', '$urlRouter', Header]);
+angular.module('app').directive('header', ['$location', '$timeout', '$rootScope', '$urlRouter', 'imagoUtils', Header]);
+
+var imagoContact;
+
+imagoContact = (function() {
+  function imagoContact(imagoSubmit) {
+    return {
+      scope: {},
+      templateUrl: '/app/directives/views/imagoContact.html',
+      controllerAs: 'contact',
+      controller: function($scope) {
+        this.data = {
+          subscribe: true
+        };
+        return this.submitForm = (function(_this) {
+          return function(isValid) {
+            if (isValid) {
+              return imagoSubmit.send(_this.data).then(function(result) {
+                _this.status = result.status;
+                return _this.error = result.message || '';
+              });
+            }
+          };
+        })(this);
+      }
+    };
+  }
+
+  return imagoContact;
+
+})();
+
+angular.module('app').directive('imagoContact', ['imagoSubmit', imagoContact]);

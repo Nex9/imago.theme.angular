@@ -1,4 +1,4 @@
 gaeversion : default
-tenant     : TENANT
+tenant     : creativeandpartners
 debug      : False
-setdefault : True
+setdefault : False

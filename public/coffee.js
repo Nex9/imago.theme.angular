@@ -38,20 +38,7 @@ Setup = (function() {
     $stateProvider.state('home', {
       url: '/',
       templateUrl: '/app/views/home.html',
-      controller: 'home'
-    }).state('blog', {
-      url: '/blog',
-      templateUrl: '/app/views/blog.html',
-      controller: 'blog as blog',
-      data: {
-        path: '/blog'
-      }
-    }).state('blog.tags', {
-      url: '/tag/:tag'
-    }).state('post', {
-      url: '/blog/:name',
-      templateUrl: '/app/views/post.html',
-      controller: 'imagoPage as post'
+      controller: 'home as home'
     });
   }
 
@@ -104,10 +91,12 @@ var Home;
 
 Home = (function() {
   function Home($scope, imagoModel) {
-    imagoModel.getData('/home').then((function(_this) {
+    imagoModel.getData({
+      path: '/home',
+      recursive: true
+    }).then((function(_this) {
       return function(response) {
-        _this.assets = response[0].assets;
-        return console.log('@assets', _this.assets);
+        return _this.data = response[0];
       };
     })(this));
   }
@@ -184,10 +173,7 @@ Header = (function() {
         onClass = "active";
         currentLink = void 0;
         urlMap = {};
-<<<<<<< HEAD
         $rootScope.navActive = false;
-=======
->>>>>>> 8ab2186a846aa5fa55426db7b1702bcc506f1b67
         for (i = j = 0, len = links.length; j < len; i = ++j) {
           l = links[i];
           link = angular.element(links[i]);
@@ -229,11 +215,7 @@ Header = (function() {
 
 })();
 
-<<<<<<< HEAD
 angular.module('app').directive('header', ['$location', '$timeout', '$rootScope', '$urlRouter', 'imagoUtils', Header]);
-=======
-angular.module('app').directive('header', ['$location', '$timeout', '$urlRouter', Header]);
->>>>>>> 8ab2186a846aa5fa55426db7b1702bcc506f1b67
 
 var imagoContact;
 

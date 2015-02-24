@@ -2,6 +2,5 @@ class Home extends Controller
 
   constructor: ($scope, imagoModel) ->
 
-    imagoModel.getData('/home').then (response) =>
-      @assets = response[0].assets
-      console.log '@assets', @assets
+    imagoModel.getData({path: '/home', recursive: true}).then (response) =>
+      @data = response[0]

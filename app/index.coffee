@@ -47,7 +47,7 @@ class Setup extends Config
       .state 'home',
         url: '/'
         templateUrl: '/app/views/home.html'
-        controller: 'home'
+        controller: 'home as home'
 
 class Load extends Run
 

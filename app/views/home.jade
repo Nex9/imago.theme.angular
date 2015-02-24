@@ -1,4 +1,23 @@
 .home
 
-  h1.logo
-    a(href="mailto:info@creativeandpartners.com")
+  //- pre {{ home.data.assets }}
+  div(ng-repeat="asset in home.data.assets")
+
+    div(ng-switch="asset.metakind")
+      div.teaser(ng-switch-when="slider")
+        .slider(
+          imago-slider
+          animation="fade"
+          length="{{home.data.assets.length}}"
+          autoplay=5000
+        )
+          .slide(
+            ng-repeat="asset in home.data.assets"
+            ng-if="currentIndex === $index"
+            imago-image="asset"
+            )
+
+
+  include ./newsmock.jade
+
+  include ./socialmock.jade

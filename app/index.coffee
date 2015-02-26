@@ -1,4 +1,4 @@
-tenant     = 'creativeandpartners'
+tenant     = 'tenant'
 data       = 'online'
 debug      = true
 

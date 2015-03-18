@@ -1,6 +1,6 @@
 var Load, Setup, app, data, debug, imagoSettings, tenant;
 
-tenant = 'creativeandpartners';
+tenant = 'tenant';
 
 data = 'online';
 
@@ -29,7 +29,7 @@ imagoSettings = (function() {
 Setup = (function() {
   function Setup($httpProvider, $sceProvider, $locationProvider, $stateProvider, $urlRouterProvider) {
     $sceProvider.enabled(false);
-    $httpProvider.defaults.cache = true;
+    $httpProvider.defaults.cache = false;
     $httpProvider.defaults.headers.common['Content-Type'] = 'application/json';
     $httpProvider.defaults.headers.common['NexClient'] = 'public';
     $httpProvider.defaults.headers.common['NexTenant'] = "" + tenant;
@@ -64,85 +64,6 @@ Load = (function() {
 })();
 
 angular.module('app').constant('imagoSettings', imagoSettings()).config(['$httpProvider', '$sceProvider', '$locationProvider', '$stateProvider', '$urlRouterProvider', Setup]).run(['$rootScope', '$location', '$state', '$urlRouter', '$window', Load]);
-
-var Blog;
-
-Blog = (function() {
-  function Blog($scope, $state, $location) {
-    this.path = $state.current.data.path || '/blog';
-    this.pageSize = 6;
-    this.tags = $state.params.tag || '';
-    this.currentPage = $state.params.page || 1;
-    this.onNext = function() {
-      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) + 1));
-    };
-    this.onPrev = function() {
-      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) - 1));
-    };
-  }
-
-  return Blog;
-
-})();
-
-angular.module('app').controller('blog', ['$scope', '$state', '$location', Blog]);
-
-var Home;
-
-Home = (function() {
-  function Home($scope, imagoModel) {
-    imagoModel.getData({
-      path: '/home',
-      recursive: true
-    }).then((function(_this) {
-      return function(response) {
-        return _this.data = response[0];
-      };
-    })(this));
-  }
-
-  return Home;
-
-})();
-
-angular.module('app').controller('home', ['$scope', 'imagoModel', Home]);
-
-var imagoPage;
-
-imagoPage = (function() {
-  function imagoPage($scope, $location, $state, imagoModel) {
-    imagoModel.getData().then((function(_this) {
-      return function(response) {
-        var data, i, len, results;
-        results = [];
-        for (i = 0, len = response.length; i < len; i++) {
-          data = response[i];
-          _this.data = data;
-          break;
-        }
-        return results;
-      };
-    })(this));
-  }
-
-  return imagoPage;
-
-})();
-
-angular.module('app').controller('imagoPage', ['$scope', '$location', '$state', 'imagoModel', imagoPage]);
-
-var Maintenance;
-
-Maintenance = (function() {
-  function Maintenance($scope) {
-    $scope.tenant = tenant;
-  }
-
-  return Maintenance;
-
-})();
-
-angular.module('app').controller('maintenance', ['$scope', Maintenance]);
 
 var Footer;
 
@@ -248,3 +169,89 @@ imagoContact = (function() {
 })();
 
 angular.module('app').directive('imagoContact', ['imagoSubmit', imagoContact]);
+
+var Blog;
+
+Blog = (function() {
+  function Blog($scope, $state, $location) {
+    this.path = $state.current.data.path || '/blog';
+    this.pageSize = 6;
+    this.tags = $state.params.tag || '';
+    this.currentPage = $state.params.page || 1;
+    this.onNext = function() {
+      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) + 1));
+    };
+    this.onPrev = function() {
+      return $location.path(this.path + "/page/" + (parseInt(this.currentPage) - 1));
+    };
+  }
+
+  return Blog;
+
+})();
+
+angular.module('app').controller('blog', ['$scope', '$state', '$location', Blog]);
+
+var Home;
+
+Home = (function() {
+  function Home($scope, imagoModel) {
+    imagoModel.getData({
+      path: '/home',
+      recursive: true
+    }).then((function(_this) {
+      return function(response) {
+        var data, i, len, results;
+        results = [];
+        for (i = 0, len = response.length; i < len; i++) {
+          data = response[i];
+          _this.data = data;
+          break;
+        }
+        return results;
+      };
+    })(this));
+  }
+
+  return Home;
+
+})();
+
+angular.module('app').controller('home', ['$scope', 'imagoModel', Home]);
+
+var imagoPage;
+
+imagoPage = (function() {
+  function imagoPage($scope, $location, $state, imagoModel) {
+    imagoModel.getData().then((function(_this) {
+      return function(response) {
+        var data, i, len, results;
+        results = [];
+        for (i = 0, len = response.length; i < len; i++) {
+          data = response[i];
+          _this.data = data;
+          break;
+        }
+        return results;
+      };
+    })(this));
+  }
+
+  return imagoPage;
+
+})();
+
+angular.module('app').controller('imagoPage', ['$scope', '$location', '$state', 'imagoModel', imagoPage]);
+
+var Maintenance;
+
+Maintenance = (function() {
+  function Maintenance($scope) {
+    $scope.tenant = tenant;
+  }
+
+  return Maintenance;
+
+})();
+
+angular.module('app').controller('maintenance', ['$scope', Maintenance]);

@@ -33,7 +33,7 @@ class Setup extends Config
     $sceProvider.enabled false
 
     # http defaults config START
-    $httpProvider.defaults.cache = true
+    $httpProvider.defaults.cache = false
     $httpProvider.defaults.headers.common['Content-Type'] = 'application/json'
     $httpProvider.defaults.headers.common['NexClient']    = 'public'
     $httpProvider.defaults.headers.common['NexTenant']    = "#{tenant}"

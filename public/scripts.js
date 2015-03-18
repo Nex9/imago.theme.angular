@@ -47958,13 +47958,7 @@ imagoModel = (function() {
             assets: list
           });
         };
-      })(this),
-      download: function(ids, res) {
-        return this.$http.post("" + this.imagoSettings.host + "/api/assets/download", {
-          assets: ids,
-          resolution: res
-        });
-      }
+      })(this)
     };
   }
 

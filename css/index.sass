@@ -1,3 +1,5 @@
+$debug: true !default
+
 @import ../bower_components/imago/css/mixin
 @import ../bower_components/imago/css/reset
 @import ../bower_components/imago/css/imago
@@ -12,11 +14,13 @@
 @import ../bower_components/breakpoint-sass/stylesheets/_breakpoint
 @import ../bower_components/fake-breakpoint-slicer/stylesheets/_breakpoint-slicer
 
+
+
 // google font import
 // @import url(http://fonts.googleapis.com/css?family=Oswald:300,400,700)
 
 
-$slicer-breakpoints: (iphone5: 321px, iphone6: 376px, iphone6plus: 415px)
+$slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
 
 
 html
@@ -148,3 +152,9 @@ ul.list
 
 
 body .home
+
+
+
+
+
+@import debug

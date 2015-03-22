@@ -54,6 +54,8 @@ class Load extends Run
   constructor: ($rootScope, $location, $state, $urlRouter, $window) ->
     $rootScope.js = true
 
+    $rootScope.mobile = imagoUtils.isMobile()
+
     $rootScope.$on '$stateChangeSuccess', (evt) ->
       state = $state.current.name.split('.').join(' ')
       path  = $location.path().split('/').join(' ')

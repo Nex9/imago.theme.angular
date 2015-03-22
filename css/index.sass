@@ -23,6 +23,15 @@ $debug: true !default
 $slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
 
 
+::placeholder
+  color: black
+  padding-top: 3px
+
+input,textarea
+  &:focus::placeholder
+    color: transparent
+
+
 html
   box-sizing: border-box
 

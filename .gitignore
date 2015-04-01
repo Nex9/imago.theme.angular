@@ -8,3 +8,4 @@ public/templates.js
 public/application.js
 public/application.css
 public/maps/
+css/font-awesome/.*

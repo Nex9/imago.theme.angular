@@ -1,13 +1,20 @@
-button(
+.mobile(
   ng-show="mobile"
-  hm-tap="activate"
+  ng-class="{'active': active}"
   )
-  div
-  div
-  div
+  a.logo(ui-sref="home")
 
-h1.logo
-  a(href="/")
+  .burger(ng-click="activate()")
+    span.lines
 
-nav(ng-class="{'active': active}")
-  a.contact(href="/contact") Contact
+  nav
+    a.artists(ui-sref="artists") Artists
+
+
+.desktop(ng-show="!mobile" headroom)
+  h1.logo
+    a(ui-sref="home" ng-click="toTheTop()") Title
+
+  nav
+    a.artists(ui-sref="artists") Artists
+

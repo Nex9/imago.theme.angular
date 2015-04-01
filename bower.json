@@ -25,7 +25,9 @@
     "angular-bowser": "*",
     "lodash": "*",
     "breakpoint-sass": "~2.5.0",
-    "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer"
+    "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer",
+    "headroom.js": "~0.7.0",
+    "ngSticky": "~1.7.9"
   },
   "resolutions": {
     "angular": "~1.3"

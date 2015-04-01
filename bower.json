@@ -2,7 +2,7 @@
   "name": "angular-nex9-theme",
   "version": "0.0.1",
   "authors": [
-    "Sebastian Moreno <sebastian@nex9.com>"
+    "Nex9 LLC <mail@nex9.com>"
   ],
   "license": "MIT",
   "homepage": "http://nex9.com",
@@ -25,7 +25,10 @@
     "angular-bowser": "*",
     "lodash": "*",
     "breakpoint-sass": "~2.5.0",
-    "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer"
+    "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer",
+    "headroom.js": "~0.7.0",
+    "ngSticky": "~1.7.9",
+    "angular-elastic": "~2.4.2"
   },
   "resolutions": {
     "angular": "~1.3"

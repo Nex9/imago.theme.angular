@@ -13,18 +13,18 @@ class Header extends Directive
 
         for l, i in links
           link = angular.element(links[i])
-          url = link.attr("href")
+          url = link.attr("ui-sref")
           if $location.$$html5
             urlMap[url] = link
           else
             urlMap[url.replace("/^#[^/]*/", "")] = link
+        console.log 'urlMap', urlMap
 
         $scope.$on "$locationChangeSuccess", ->
           path = $location.path()
-          pathLink = urlMap[$location.path()]
+          pathLink = urlMap[$location.path().replace("/", "")]
           $scope.active = false
           $rootScope.navActive = false
-          # console.log pathLink[0]
           if pathLink
             currentLink.removeClass onClass  if currentLink
             currentLink = pathLink
@@ -36,7 +36,9 @@ class Header extends Directive
 
         scope.active = false
 
-        scope.activate = () ->
+        scope.activate = ->
           scope.active = !scope.active
           $rootScope.navActive = !$rootScope.navActive
+
     }
+

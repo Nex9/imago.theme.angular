@@ -1,6 +1,6 @@
 class Header extends Directive
 
-  constructor: ($location, $timeout, $rootScope, $urlRouter, imagoUtils) ->
+  constructor: ($location, $timeout, $rootScope) ->
 
     return {
       templateUrl: '/app/directives/views/header.html'

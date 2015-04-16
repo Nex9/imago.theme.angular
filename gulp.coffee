@@ -13,6 +13,7 @@ targets =
   modules : 'modules.js'
 
 paths =
+  sketch: 'css/*.sketch'
   sass: ['css/index.sass']
   coffee: [
     "#{src}/**/*.coffee"

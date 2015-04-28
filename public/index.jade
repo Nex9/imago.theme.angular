@@ -1,0 +1,18 @@
+doctype html
+html(ng-app="app"
+  xmlns:og="http://opengraphprotocol.org/schema/"
+  xmlns:fb="http://www.facebook.com/2008/fbml"
+  xmlns:website="http://ogp.me/ns/website"
+  lang="en-US"
+  itemscope itemtype="http://schema.org/WebPage")
+  head
+    include header
+
+  body(class="{{ state }} {{ path }}" ng-class="{'menu': showMenu}")
+    header
+    div(ui-view)
+
+    include backuptemplate
+
+    footer
+

@@ -16,7 +16,7 @@ class imagoSettings extends Constant
   constructor: ->
 
     if (data is 'online' and debug)
-      host = window.location.protocol + "//api.2.imagoapp.com"
+      host = window.location.protocol + "//api.imago.io"
     else
       host = window.location.protocol + "//localhost:8000"
 

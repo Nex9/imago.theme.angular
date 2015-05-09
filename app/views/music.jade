@@ -1,0 +1,17 @@
+.music
+  .text
+    h1(ng-bind="page.data | meta:'title'")
+
+
+    .albums
+      .album(ng-repeat="album in page.data.assets")
+
+        a(ng-href="{{album | meta:'itunes'}}" target="_blank")
+          .media(imago-image="album")
+
+        .info
+          h2(ng-bind="album | meta:'title'")
+          span.buy by from
+          a.itunes(ng-href="{{album | meta:'itunes'}}" target="_blank") iTunes
+          a.amazon(ng-href="{{album | meta:'amazon'}}" target="_blank") Amazon
+          a.google-play(ng-href="{{album | meta:'google-play'}}" target="_blank") Google play

@@ -183,6 +183,7 @@ header
 %section
   min-height: 100vh
   overflow-y: auto
+  position: relative
 
 // ng-scope ng-animate ng-enter ng-enter-active
 // ng-scope ng-animate ng-leave ng-leave-active
@@ -197,7 +198,7 @@ body
   > div.ng-leave
     display: none
   > div.ng-animate
-    transition: all 0.4s ease-out
+    transition: transform 0.4s ease-out
 
 body
   overflow: hidden
@@ -313,6 +314,7 @@ div.instagram
 div.pictures
   @extend %section
   background: #1E1C1F
+
   a.close
     background: url("i/x.png") no-repeat
     background-size: 100% auto

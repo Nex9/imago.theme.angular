@@ -79,6 +79,11 @@ class Setup extends Config
         templateUrl: '/app/views/page.html'
         controller: 'imagoPage as page'
 
+      .state 'music',
+        url: '/music'
+        templateUrl: '/app/views/music.html'
+        controller: 'imagoPage as page'
+
 
 
 class Load extends Run

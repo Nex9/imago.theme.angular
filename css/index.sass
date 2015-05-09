@@ -99,7 +99,7 @@ h1, h2, h3, h4, h5, h6, span, a, p
 
 a
   text-decoration: none
-  color: black
+  color: $rmColor
 
 img
   border: 0
@@ -112,9 +112,10 @@ h3,
 h4,
 h5,
 h6
-  color: #444
+  color: $rmColor
   font-weight: 200
   margin: 10px 0
+  text-transform: lowercase
 
 h1
   font-size: 36px
@@ -357,8 +358,56 @@ div.page
     margin-bottom: 100px
     max-width: 480px
 
-body.biography
-  overflow-y: auto
+body
+  &.biography,
+  &.music
+    overflow-y: auto
+
+
+div.music
+  @extend %section
+  text-align: center
+
+  .text
+    margin: 0 auto
+    margin-top:    200px
+    margin-bottom: 100px
+
+    .albums
+      overflow: hidden
+      .album
+        display: inline-block
+        vertical-align: top
+        margin: 0 10px
+        margin-bottom: 30px
+        .media
+          max-width:  300px
+          max-height: 300px
+          margin-bottom: 10px
+
+        .info
+          h2
+            margin: 0
+          .buy
+            margin-right: 5px
+            font-size: 13px
+          .itunes,
+          .amazon,
+          .google-play
+            font-size: 13px
+            font-weight: 300
+            margin-right: 5px
+            text-transform: lowercase
+
+      .album:first-child
+        margin-bottom: 50px
+        display: block
+        .media
+          max-width:  600px
+          max-height: 600px
+          margin-bottom: 10px
+
+
 
 // widgets
 

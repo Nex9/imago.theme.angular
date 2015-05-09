@@ -1,4 +1,4 @@
-tenant     = 'tenant'
+tenant     = 'roisinmurphy'
 data       = 'online'
 debug      = true
 
@@ -43,10 +43,26 @@ class Setup extends Config
     $urlRouterProvider.otherwise '/'
 
     $stateProvider
+
+      .state 'menu',
+        url: '/menu'
+        templateUrl: '/app/views/menu.html'
+        controller: ->
+
       .state 'home',
         url: '/'
         templateUrl: '/app/views/home.html'
         controller: 'home as home'
+
+      .state 'instagram',
+        url: '/instagram'
+        templateUrl: '/app/views/instagram.html'
+        controller: 'imagoPage as page'
+
+      .state 'subscribe',
+        url: '/subscribe'
+        templateUrl: '/app/views/subscribe.html'
+        controller: 'imagoPage as page'
 
 class Load extends Run
 

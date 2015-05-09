@@ -1,36 +1,28 @@
 <!DOCTYPE html>
-<html ng-app="app">
+<html ng-app="app" xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml" xmlns:website="http://ogp.me/ns/website" lang="en-US" itemscope itemtype="http://schema.org/WebPage">
   <head>
     <base href="/">
-    <link rel="stylesheet" href="/application.css">
-
+    <meta charset="utf-8">
+    <title></title>
+    <link rel="stylesheet" href="/application.css" type="text/css">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta http-equiv="X-UA-Compatible" content="IE=10,IE=9">
-
-    <!-- GSAP -->
-    <script src="//static.imagoapp.com/static/lib/greensock/1/TweenMax.min.js" type="text/javascript"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/gsap/latest/plugins/ScrollToPlugin.min.js"></script>
-
-    <!--[if IE 9]>
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta http-equiv="cleartype" content="on">
+    <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed">
+    <script src="//maps.googleapis.com/maps/api/js?sensor=false" type="text/javascript"></script>
+    <script src="/application.js" type="text/javascript"></script><!--[if IE 9]>
     <script src="/ie9.worker.js"></script>
-
-
     <script src="//cdn.rawgit.com/jpillora/xdomain/0.6.15/dist/0.6/xdomain.js"></script>
-
     <script>
-        xdomain.slaves({
-          "http://api.imago.io": "/api/ieproxy",
-          "https://api.imago.io": "/api/ieproxy"
+      xdomain.slaves({
+        "http://api.imago.io": "/api/ieproxy",
+        "https://api.imago.io": "/api/ieproxy"
         });
-    </script>
-
-    <![endif]-->
-    <script src="/application.js"></script>
+    </script><![endif]-->
   </head>
-  <body class="{{state}} {{path}}" ng-class="{'navigation': navActive, 'mobile': mobile}">
-      <header></header>
-      <div not-supported></div>
-      <div ui-view></div>
-      <footer></footer>
+  <body ng-class="{'menu': showMenu}" class="{{ state }} {{ path }}">
+    <header></header>
+    <div ui-view></div>
   </body>
 </html>

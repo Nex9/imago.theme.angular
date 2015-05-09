@@ -4,8 +4,8 @@ $debug: true !default
 @import ../bower_components/imago/css/reset
 @import ../bower_components/imago/css/imago
 @import ../bower_components/imago/css/slider
-@import ../bower_components/imago/css/buttons
-@import ../bower_components/imago/css/fields
+// @import ../bower_components/imago/css/buttons
+// @import ../bower_components/imago/css/fields
 @import ../bower_components/imago/css/nojs
 @import ../bower_components/imago/css/parallax
 @import ../bower_components/imago/css/not-supported
@@ -15,7 +15,8 @@ $debug: true !default
 @import ../bower_components/breakpoint-sass/stylesheets/_breakpoint
 @import ../bower_components/fake-breakpoint-slicer/stylesheets/_breakpoint-slicer
 
-
+@import fonts
+@import form
 
 // google font import
 // @import url(http://fonts.googleapis.com/css?family=Oswald:300,400,700)
@@ -23,6 +24,8 @@ $debug: true !default
 
 $slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
 
+
+$rmColor: #631421
 
 ::placeholder
   color: black
@@ -54,6 +57,10 @@ body
   -webkit-overflow-scrolling: touch
   font-style: normal
   font-stretch: normal
+  font-family: "L Futura W01"
+  font-weight: 100
+  color: $rmColor
+
 
 body
   overflow-y: auto
@@ -63,12 +70,28 @@ button
   font-family: inherit
   text-transform: uppercase
   background: none
-  border: none
   letter-spacing: 1px
-  &:hover
-    color: lighten(black, 30%)
-  &[disabled]
-    color: lighten(black, 80%)
+  border: 1px solid $rmColor
+  padding: 4px 12px
+  font-weight: 400
+  cursor: pointer
+  color: black
+  cursor: pointer
+
+  &:enabled:focus
+    outline: 0
+    // box-shadow: 0 0 5px 5px red
+  &:enabled:active
+    background: black !important
+    color: white !important
+  &:enabled:hover
+    // color: lighten(black, 30%)
+    background: darken(white, 5%)
+  &:disabled
+    // color: lighten(black, 80%)
+    opacity: 0.2
+    border: none
+
 
 
 h1, h2, h3, h4, h5, h6, span, a, p
@@ -133,6 +156,21 @@ ul.list
   .spin2
     border-top: 3px solid rgba(180,180,180,0.8)
 
+
+header
+  text-align: center
+  padding: 40px 0
+  position: absolute
+  left: 0
+  top: 0
+  right: 0
+  z-index: 100
+
+  .logo
+    width: 230px
+    position: relative
+    z-index: 100
+
 // widgets
 
 .imagoslider
@@ -159,12 +197,162 @@ ul.list
 
 // sections
 
+%section
+  min-height: 100vh
+
+// ng-scope ng-animate ng-enter ng-enter-active
+// ng-scope ng-animate ng-leave ng-leave-active
+body
+  > div.ng-enter
+    opacity: 0
+    transform: translateY(20px)
+  > div.ng-enter-active
+    opacity: 1
+    transform: translateY(0px)
+  > div.ng-leave
+    display: none
+  > div
+    transition: all 0.4s ease-out
+
 
 
 body .home
 
 
+div.menu
+  @extend %section
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  text-transform: lowercase
+  nav.main
+    text-align: center
+    a
+      display: block
+      font-size: 29px
+      margin: 20px 0
+      // &:hover
+      //   color: $green-light
+  .social
+    margin-top: 20px
+    a
+      font-size: 22px
+      margin: 0 10px
 
 
 
-@import debug
+div.subscribe
+  @extend %section
+  width: 320px
+  text-align: center
+  margin: 0 auto
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+
+
+div.instagram
+  width: 100vw
+  height: 100vh
+  position: relative
+  overflow: auto
+
+  .wrapper
+    width:  150vw
+    padding: 150px
+    // height: 3200px
+    overflow: hidden
+
+
+    li
+      width:  320px
+      height: 320px
+      position: relative
+      background-size: 100% auto
+      transition: all 0.25s ease
+      display: inline-block
+      vertical-align: top
+      &:hover
+        z-index: 1
+        transform: scale(1.2)
+        opacity: 1
+      .caption
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        transition: opacity 0.25s ease
+        opacity: 0
+        width: 100%
+        height: 100%
+        color: white
+        padding: 5px
+        .content
+          text-align: center
+          font-size: 16px
+          font-weight: 300
+          .hashtag,
+          a
+            border-bottom: 1px solid white
+            color: white
+
+      &:hover
+        .caption
+          background: rgba(0,0,0,0.6)
+          opacity: 1
+
+
+// form stuff
+.imago-checkbox
+  label
+    margin-left: 10px
+
+.imago-form
+  width: 320px
+  margin: 20px auto
+  text-align: center
+
+.imago-field
+  margin: 0
+  width: 100%
+
+  label
+    display: none
+
+  input,
+  textarea
+    width: 100%
+    font-family: inherit
+    font-weight: 400
+    border: none
+    text-align: center
+    font-size: 16px
+    padding: 0.6em
+    background: white
+    border: none
+    border: 1px solid white
+    margin: 2px 0
+    &.ng-invalid
+      border: 1px solid red
+    &.ng-pristine
+      border: 1px solid darken(white, 15%)
+
+    &::placeholder
+      color: inherit
+      font-size: 14px
+      text-transform: uppercase
+    &:focus
+      outline: 0
+      box-shadow: none
+      background-color: white
+      // border-bottom: 1px solid darken(white, 15%)
+      border: 1px solid black
+      &::placeholder
+        display: none
+        color: white
+
+
+
+// @import debug

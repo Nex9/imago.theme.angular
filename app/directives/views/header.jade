@@ -1,20 +1,2 @@
-.mobile(
-  ng-show="mobile"
-  ng-class="{'active': active}"
-  )
-  a.logo(ui-sref="home")
-
-  .burger(ng-click="activate()")
-    span.lines
-
-  nav
-    a.artists(ui-sref="artists") Artists
-
-
-.desktop(ng-show="!mobile" headroom)
-  h1.logo
-    a(ui-sref="home" ng-click="toTheTop()") Title
-
-  nav
-    a.artists(ui-sref="artists") Artists
-
+a(href="/menu")
+  img.logo(src="//roisinmurphy.imago.io/logo=s460")

@@ -2,13 +2,15 @@
 
   .text(ng-bind-html="page.data.fields.text.value")
 
-  form.imago-form(imago-subscribe="page.form" name="subscribe" ng-submit="imagosubscribe.submit(subscribe)" novalidate)
+  pre {{ subscribe.data | json }}
+
+  form.imago-form(imago-subscribe="subscribe.form" name="subscribe" ng-submit="imagosubscribe.submit(subscribe)" novalidate)
     div.imago-field
       label(for="name") Name
       input(
         type="text"
         name="name"
-        ng-model="page.form.name"
+        ng-model="subscribe.form.name"
         placeholder="Name"
         required
         )
@@ -18,7 +20,7 @@
       input(
         type="email"
         name="email"
-        ng-model="page.form.email"
+        ng-model="subscribe.form.email"
         placeholder="Email"
         required
         )

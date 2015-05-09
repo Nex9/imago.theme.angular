@@ -1,1 +1,66 @@
 
+.imago-checkbox
+  label
+    margin-left: 10px
+    text-transform: uppercase
+    font-size: 18px
+
+.imago-form
+  width: 320px
+  margin: 20px auto
+  text-align: center
+
+.imago-field
+  margin: 0
+  width: 100%
+
+  label
+    display: none
+
+  input,
+  textarea,
+  select
+    width: 100%
+    font-family: inherit
+    border: none
+    text-align: center
+    font-size: 16px
+    padding: 0.6em
+    background: white
+    margin: 2px 0
+    border: 1px solid lighten($rmColor, 15%)
+    font-weight: 200
+    letter-spacing: 1px
+    +font-smoothing()
+    &.ng-invalid
+      border: 1px solid darken(white, 25%)
+    &.ng-valid
+      border: 1px solid lighten($rmColor, 15%)
+    &.ng-pristine
+      border: 1px solid darken(white, 5%)
+
+    &::placeholder
+      color: lighten($rmColor, 5%)
+      font-size: 14px
+      letter-spacing: 1px
+      text-transform: uppercase
+    &:focus
+      outline: 0
+      box-shadow: none
+      background-color: white
+      &::placeholder
+        display: none
+        color: white
+  select
+    -webkit-appearance: none
+    -moz-appearance: none
+    border-radius: 0
+    option
+      display: block
+      text-align: center
+      background: red
+
+
+.formcontrols
+  margin: 30px 0
+  text-align: center

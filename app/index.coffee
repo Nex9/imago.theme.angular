@@ -64,6 +64,7 @@ class Setup extends Config
         templateUrl: '/app/views/subscribe.html'
         controller: 'imagoPage as page'
 
+
 class Load extends Run
 
   constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils) ->

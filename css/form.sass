@@ -2,7 +2,7 @@
 .imago-checkbox
   label
     margin-left: 10px
-    text-transform: uppercase
+    text-transform: lowercase
     font-size: 18px
 
 .imago-form
@@ -24,9 +24,9 @@
     font-family: inherit
     border: none
     text-align: center
-    font-size: 16px
+    font-size: 18px
     padding: 0.6em
-    background: white
+    background: transparent
     margin: 2px 0
     border: 1px solid lighten($rmColor, 15%)
     font-weight: 200
@@ -37,13 +37,13 @@
     &.ng-valid
       border: 1px solid lighten($rmColor, 15%)
     &.ng-pristine
-      border: 1px solid darken(white, 5%)
+      border: 1px solid lighten($rmColor, 15%)
 
     &::placeholder
       color: lighten($rmColor, 5%)
       font-size: 14px
       letter-spacing: 1px
-      text-transform: uppercase
+      text-transform: lowercase
     &:focus
       outline: 0
       box-shadow: none
@@ -60,6 +60,28 @@
       text-align: center
       background: red
 
+.imago-checkbox
+  border: 1px solid lighten($rmColor, 15%)
+  padding: 0.6em
+  label
+    font-size: 18px
+    font-weight: 200
+    vertical-align: middle
+  input
+    vertical-align: middle
+    border: none
+    -webkit-appearance: none
+    -moz-appearance: none
+    // background-color: red
+    border: 1px solid lighten($rmColor, 15%)
+    width:  12px
+    height: 12px
+    display: inline-block
+    margin-top: 2px
+    outline: none
+    cursor: pointer
+    &:checked
+      background: lighten($rmColor, 15%)
 
 .formcontrols
   margin: 30px 0

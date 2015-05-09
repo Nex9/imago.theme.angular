@@ -69,6 +69,17 @@ class Setup extends Config
         templateUrl: '/app/views/pictures.html'
         controller: 'imagoPage as page'
 
+      .state 'contact',
+        url: '/contact'
+        templateUrl: '/app/views/contact.html'
+        controller: 'imagoPage as page'
+
+      .state 'biography',
+        url: '/biography'
+        templateUrl: '/app/views/page.html'
+        controller: 'imagoPage as page'
+
+
 
 class Load extends Run
 

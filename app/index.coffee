@@ -64,6 +64,11 @@ class Setup extends Config
         templateUrl: '/app/views/subscribe.html'
         controller: 'imagoPage as page'
 
+      .state 'pictures',
+        url: '/pictures'
+        templateUrl: '/app/views/pictures.html'
+        controller: 'imagoPage as page'
+
 
 class Load extends Run
 

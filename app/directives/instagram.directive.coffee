@@ -12,6 +12,7 @@ class Instagram extends Directive
           options = $scope.$eval($attrs.instagram)
           $http.post("#{imagoSettings.host}/api/social/instagram/feed", options).then (response) =>
             @data = response.data
+            console.log '@data.length', @data.length
             for item in @data
               item.style =
                 'background-image' : "url(#{item.images.standard_resolution.url})"

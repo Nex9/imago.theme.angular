@@ -167,14 +167,19 @@ header
   right: 0
   z-index: 100
 
-  .logo
+  .logo,
+  .logo-menu
+    left: 50%
     width: 230px
     position: relative
     z-index: 100
     transition: transform 0.25s ease
-    margin: 0 20px
+    margin-left: -115px
+    position: absolute
     &:hover
       transform: scale(1.1)
+  .logo-menu
+    opacity: 0
 
 
 
@@ -212,13 +217,14 @@ body .home
 
 div.menu
   @extend %section
+  background-color: #1E1C1F
   display: flex
   flex-direction: column
   align-items: center
   justify-content: center
   text-transform: lowercase
   a
-    color: $rmColor
+    color: #8B8994
     font-weight: 200
   nav.main
     text-align: center
@@ -233,6 +239,15 @@ div.menu
     a
       font-size: 16px
       margin: 0 10px
+
+body.menu
+  background-color: #1E1C1F
+  header
+    .logo
+      opacity: 0
+    .logo-menu
+      opacity: 1
+
 
 div.subscribe
   @extend %section

@@ -1,7 +1,32 @@
 .post
-  h1 {{ post.data | meta:'title' }}
-  div(imago-image="post.data")
-  .text(ng-bind-html="post.data | meta:'text'")
-  ul.tags
-    li(ng-repeat="tag in post.data | meta:'tags'")
-      a(href="/blog/tag/{{tag}}" ng-click="blog.tags = tag") {{tag}}
+
+  .wrapper
+    .media(ng-switch="post.data.kind")
+      div(imago-video="post.data" ng-switch-when="video")
+      div(imago-image="post.data" ng-switch-default)
+      div(ng-switch-when="collection")
+        .slider(imago-slider
+          animation="fade"
+          loop="true"
+          autoplay="5000"
+          length="{{ post.data.assets.length }}"
+          )
+          .slide(ng-repeat="slide in post.data.assets"
+            ng-if="currentIndex === $index"
+            ng-switch="slide.kind")
+            .media(imago-video="slide" ng-switch-when="video")
+            .media(imago-image="slide" ng-switch-default)
+    //- .caption(ng-bind="post.data | meta:'title'")
+
+    h1 {{ post.data | meta:'title' }}
+
+    .text(ng-bind-html="post.data | meta:'text'")
+
+    ul.tags
+      li(ng-repeat="tag in post.data | meta:'tags'")
+        a(href="/blog/tag/{{tag}}" ng-click="blog.tags = tag") {{tag}}
+
+    div(imago-share="['all']"
+        asset="post.data")
+
+

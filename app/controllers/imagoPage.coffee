@@ -5,5 +5,4 @@ class imagoPage extends Controller
     imagoModel.getData().then (response) =>
       for data in response
         @data = data
-        console.log '@data', @data
         break

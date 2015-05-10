@@ -52,7 +52,12 @@ class Setup extends Config
       .state 'home',
         url: '/'
         templateUrl: '/app/views/home.html'
-        controller: 'home as home'
+        controller: 'home as page'
+
+      .state 'live',
+        url: '/live'
+        templateUrl: '/app/views/live.html'
+        controller: 'imagoPage as page'
 
       .state 'instagram',
         url: '/instagram'
@@ -83,6 +88,24 @@ class Setup extends Config
         url: '/music'
         templateUrl: '/app/views/music.html'
         controller: 'imagoPage as page'
+
+
+      .state 'blog',
+          url: '/news'
+          templateUrl: '/app/views/blog.html'
+          controller: 'blog as blog'
+          data:
+            path: '/news'
+
+      .state 'blog.tags',
+        url: '/news/tag/:tag'
+      .state 'blog.paged',
+        url: '/page/:page'
+
+      .state 'blog-post',
+        url: '/news/:name'
+        templateUrl: '/app/views/post.html'
+        controller: 'imagoPage as post'
 
 
 

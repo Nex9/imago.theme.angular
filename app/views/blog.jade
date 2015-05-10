@@ -1,19 +1,20 @@
 .blog
   .list
-    .post(ng-repeat="asset in blog.assets")
-      a(href="{{asset.path}}")
-        div(imago-image="asset")
-      .caption
+    .item.staggeranimation(ng-repeat="asset in blog.assets" ng-class="{ odd: $odd, even: $even }")
+      div.media(imago-image="asset" sizemode="crop")
+      a.caption(href="{{asset.path}}")
         h2 {{ asset | meta:'title' }}
-        ul.tags
-          li(ng-repeat="tag in asset | meta:'tags'")
-            a(href="/blog/tag/{{tag}}" ng-click="blog.tags = tag") {{tag}}
+        //- ul.tags
+        //-   li(ng-repeat="tag in asset | meta:'tags'")
+        //-     a(href="/blog/tag/{{tag}}" ng-click="blog.tags = tag") {{tag}}
 
-    div(imago-pager
-      posts="blog.assets"
-      next="blog.onNext()"
-      prev="blog.onPrev()"
-      path="{{ blog.path }}"
-      page-size="{{ blog.pageSize }}"
-      tags="blog.tags"
-      )
+  div(imago-pager
+    posts="blog.assets"
+    next="blog.onNext()"
+    prev="blog.onPrev()"
+    path="{{ blog.path }}"
+    page-size="{{ blog.pageSize }}"
+    shuffle="{{ blog.shuffle }}"
+    tags="blog.tags"
+    current-page="blog.currentPage"
+    )

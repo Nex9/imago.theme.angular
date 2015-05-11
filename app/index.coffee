@@ -1,4 +1,4 @@
-tenant     = 'roisinmurphy'
+tenant     = 'tenant'
 data       = 'online'
 debug      = true
 

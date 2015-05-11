@@ -1,4 +1,4 @@
 gaeversion : default
-tenant     : roisinmurphy
+tenant     : tenant
 debug      : False
 setdefault : True

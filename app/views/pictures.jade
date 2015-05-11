@@ -12,5 +12,4 @@
       ng-switch="asset.kind")
       .media(imago-video="asset" ng-switch-when="video")
       .media(imago-image="asset" ng-switch-default)
-      .caption(ng-if="currentIndex === $index")
-        {{ page.data | meta: 'title' }} {{currentIndex + 1}}/{{page.data.assets.length}}
+      .caption(ng-if="currentIndex === $index") {{ page.data | meta: 'title' }} {{currentIndex + 1}}/{{page.data.assets.length}}

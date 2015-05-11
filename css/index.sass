@@ -176,6 +176,7 @@ header
     transition: transform 0.25s ease
     margin-left: -115px
     position: absolute
+    cursor: pointer
     &:hover
       transform: scale(1.1)
   .logo-menu
@@ -369,11 +370,6 @@ div.contact
 
 div.page
   @extend %section
-  // display: flex
-  // flex-direction: column
-  // align-items: center
-  // justify-content: center
-  // height: 100vh
   .text
     margin: 0 auto
     margin-top:    200px
@@ -384,7 +380,8 @@ div.page
 body
   &.biography,
   &.music,
-  &.news
+  &.news,
+  &.music
     overflow-y: auto
 
 
@@ -537,6 +534,17 @@ div.live
   flex-direction: column
   align-items: center
   justify-content: center
+  text-align: center
+
+  .text
+    max-width: 420px
+    margin-top:    200px
+    margin-bottom: 100px
+
+    li
+      margin-bottom: 40px
+      p
+        margin: 0
 
 div.home
   @extend %section

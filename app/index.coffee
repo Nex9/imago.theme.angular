@@ -27,7 +27,7 @@ class imagoSettings extends Constant
 
 class Setup extends Config
 
-  constructor: ($httpProvider, $sceProvider, $locationProvider, $stateProvider, $urlRouterProvider) ->
+  constructor: ($httpProvider, $sceProvider, $locationProvider, $compileProvider, $stateProvider, $urlRouterProvider) ->
 
     $sceProvider.enabled false
 
@@ -37,6 +37,9 @@ class Setup extends Config
     $httpProvider.defaults.headers.common['NexClient']    = 'public'
     $httpProvider.defaults.headers.common['NexTenant']    = "#{tenant}"
     # http defaults config ENDS
+
+    unless document.location.hostname is 'localhost'
+      $compileProvider.debugInfoEnabled(false)
 
     $locationProvider.html5Mode true
 

@@ -6,7 +6,6 @@ class Blog extends Controller
     @tags = $state.params.tag or ''
     @currentPage = $state.params.pageNo or 1
     @shuffle = true
-    console.log '@shufflePosts', @shufflePosts
 
     @onNext = ->
       if $state.params.tag

@@ -1,7 +1,11 @@
 class Footer extends Directive
-  constructor: () ->
+
+  constructor: ->
+
     return {
+
       restrict: 'AE'
       templateUrl: '/app/directives/views/footer.html'
       controller: ($scope) ->
+
       }

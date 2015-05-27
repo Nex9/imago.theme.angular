@@ -46,69 +46,10 @@ class Setup extends Config
     $urlRouterProvider.otherwise '/'
 
     $stateProvider
-
-      .state 'menu',
-        url: '/menu'
-        templateUrl: '/app/views/menu.html'
-        controller: ->
-
       .state 'home',
         url: '/'
         templateUrl: '/app/views/home.html'
         controller: 'home as page'
-
-      .state 'live',
-        url: '/live'
-        templateUrl: '/app/views/live.html'
-        controller: 'imagoPage as page'
-
-      .state 'instagram',
-        url: '/instagram'
-        templateUrl: '/app/views/instagram.html'
-        controller: 'imagoPage as page'
-
-      .state 'subscribe',
-        url: '/subscribe'
-        templateUrl: '/app/views/subscribe.html'
-        controller: 'imagoPage as page'
-
-      .state 'pictures',
-        url: '/pictures'
-        templateUrl: '/app/views/pictures.html'
-        controller: 'imagoPage as page'
-
-      .state 'contact',
-        url: '/contact'
-        templateUrl: '/app/views/contact.html'
-        controller: 'imagoPage as page'
-
-      .state 'biography',
-        url: '/biography'
-        templateUrl: '/app/views/page.html'
-        controller: 'imagoPage as page'
-
-      .state 'music',
-        url: '/music'
-        templateUrl: '/app/views/music.html'
-        controller: 'imagoPage as page'
-
-
-      .state 'blog',
-          url: '/news'
-          templateUrl: '/app/views/blog.html'
-          controller: 'blog as blog'
-          data:
-            path: '/news'
-
-      .state 'blog.tags',
-        url: '/news/tag/:tag'
-      .state 'blog.paged',
-        url: '/page/:page'
-
-      .state 'blog-post',
-        url: '/news/:name'
-        templateUrl: '/app/views/post.html'
-        controller: 'imagoPage as post'
 
 
 

@@ -10,7 +10,6 @@ class Header extends Directive
         # scope.active = false
 
         @activate = ->
-          console.log 'passed'
           $rootScope.navActive = !$rootScope.navActive
           # console.log '$rootScope.navActive', $rootScope.navActive
 

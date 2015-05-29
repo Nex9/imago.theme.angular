@@ -5,6 +5,4 @@ class Home extends Controller
     imagoModel.getData({path: '/home'}).then (response) =>
       for data in response
         @data = data
-        @data.assets = _.shuffle @data.assets
-
         break

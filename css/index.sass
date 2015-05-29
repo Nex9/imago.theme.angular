@@ -15,14 +15,7 @@ $debug: true !default
 @import ../bower_components/breakpoint-sass/stylesheets/_breakpoint
 @import ../bower_components/fake-breakpoint-slicer/stylesheets/_breakpoint-slicer
 
-
-
-// google font import
-// @import url(http://fonts.googleapis.com/css?family=Oswald:300,400,700)
-
-
 $slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
-
 
 $rmColor: #631421
 $rmBgColor: #F1F1F1
@@ -37,7 +30,6 @@ $rmBgColor: #F1F1F1
 input,textarea
   &:focus::placeholder
     color: transparent
-
 
 html
   box-sizing: border-box
@@ -58,12 +50,7 @@ body
   -webkit-text-size-adjust: 100%
   -ms-text-size-adjust: 100%
   -webkit-overflow-scrolling: touch
-  font-style: normal
-  font-stretch: normal
-  font-family: "L Futura W01"
-  font-weight: 100
   color: $rmColor
-
 
 body
   overflow-y: auto
@@ -92,9 +79,15 @@ button
     opacity: 0.2
     border: none
 
-
-
-h1, h2, h3, h4, h5, h6, span, a, p
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+a,
+p
   user-select: auto
 
 a
@@ -126,14 +119,15 @@ h3
   font-size: 15px
 h4
   font-size: 13px
-  // color: lighten(black, 60%)
 
 p,
 li
   line-height: 1.25em
-  // color: lighten(black, 50%)
 
-p,li,a,span
+p,
+li,
+a,
+span
   font-weight: 200px
 
 
@@ -160,6 +154,5 @@ ul.list
 
 // sections
 
-
-
 // @import debug
+

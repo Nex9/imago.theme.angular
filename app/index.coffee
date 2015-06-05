@@ -27,7 +27,7 @@ class imagoSettings extends Constant
 
 class Setup extends Config
 
-  constructor: ($httpProvider, $sceProvider, $locationProvider, $compileProvider, $stateProvider, $urlRouterProvider) ->
+  constructor: ($httpProvider, $provide, $sceProvider, $locationProvider, $compileProvider, $stateProvider, $urlRouterProvider) ->
 
     $sceProvider.enabled false
 
@@ -37,6 +37,16 @@ class Setup extends Config
     $httpProvider.defaults.headers.common['NexClient']    = 'public'
     $httpProvider.defaults.headers.common['NexTenant']    = "#{tenant}"
     # http defaults config ENDS
+
+    $provide.decorator '$exceptionHandler', [
+      '$delegate'
+      '$window'
+      ($delegate, $window) ->
+        (exception, cause) ->
+          if $window.trackJs
+            $window.trackJs.track exception
+          $delegate exception, cause
+    ]
 
     unless document.location.hostname is 'localhost'
       $compileProvider.debugInfoEnabled(false)

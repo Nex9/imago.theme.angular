@@ -1,11 +1,14 @@
 node_modules/
 bower_components/
 src/\.tmp*
+.idea/
 /.sass-cache/
+public/maps/
 public/coffee.js
 public/scripts.js
 public/templates.js
 public/application.js
 public/application.css
-public/maps/
+public/application.min.js
+public/application.min.css
 css/font-awesome/.*

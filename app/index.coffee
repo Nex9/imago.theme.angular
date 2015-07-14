@@ -3,6 +3,8 @@ data       = 'online'
 debug      = true
 
 angular.module 'app', [
+  'angulartics'
+  'angulartics.google.analytics'
   'ngAnimate'
   'ngTouch'
   'ui.router'
@@ -27,7 +29,7 @@ class imagoSettings extends Constant
 
 class Setup extends Config
 
-  constructor: ($httpProvider, $provide, $sceProvider, $locationProvider, $compileProvider, $stateProvider, $urlRouterProvider) ->
+  constructor: ($httpProvider, $provide, $sceProvider, $locationProvider, $compileProvider, $stateProvider, $urlRouterProvider, $analyticsProvider) ->
 
     $sceProvider.enabled false
 
@@ -48,11 +50,13 @@ class Setup extends Config
           $delegate exception, cause
     ]
 
-    unless document.location.hostname is 'localhost'
+    if document.location.hostname is 'localhost'
+      $analyticsProvider.developerMode(true)
+    else
       $compileProvider.debugInfoEnabled(false)
 
+    $analyticsProvider.firstPageview(true)
     $locationProvider.html5Mode true
-
     $urlRouterProvider.otherwise '/'
 
     $stateProvider

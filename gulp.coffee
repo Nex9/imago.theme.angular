@@ -30,6 +30,8 @@ paths =
     "bower_components/angular-animate/angular-animate.js"
     "bower_components/angular-touch/angular-touch.js"
     "bower_components/angular-ui-router/release/angular-ui-router.js"
+    "bower_components/angulartics/dist/angulartics.min.js"
+    "bower_components/angulartics/dist/angulartics-ga.min.js"
     "bower_components/angular-elastic/elastic.js"
     "bower_components/angular-inview/angular-inview.js"
     "bower_components/imago/dist/core.js"

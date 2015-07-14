@@ -26,7 +26,8 @@
     "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer",
     "headroom.js": "~0.7.0",
     "angular-elastic": "~2.4.2",
-    "angular-scroll": "~0.6.5"
+    "angular-scroll": "~0.6.5",
+    "angulartics": "~0.18.0"
   },
   "resolutions": {
     "angular": "~1.4"

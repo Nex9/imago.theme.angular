@@ -65,8 +65,6 @@ class Setup extends Config
         templateUrl: '/app/views/home.html'
         controller: 'home as page'
 
-
-
 class Load extends Run
 
   constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils) ->

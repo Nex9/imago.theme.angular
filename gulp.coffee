@@ -15,7 +15,7 @@ targets =
 paths =
   index: 'public/index.jade'
   sketch: 'css/*.sketch'
-  sass: ['css/index.sass']
+  sass: ['app/index.sass']
   coffee: [
     "#{src}/**/*.coffee"
   ]

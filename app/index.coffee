@@ -66,11 +66,6 @@ class Setup extends Config
         templateUrl: '/app/home/home.html'
         controller: 'imagePage as page'
 
-      .state 'artists',
-        url: '/'
-        templateUrl: '/app/artists/artists.html'
-        controller: 'imagePage as page'
-
 class Load extends Run
 
   constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils) ->

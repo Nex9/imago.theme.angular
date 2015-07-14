@@ -1,0 +1,14 @@
+.shop
+  .padding
+    .grid
+      .item(ng-repeat="item in shop.data.assets" ng-class="item.kind")
+        a(ng-href="{{item.path}}")
+          .media
+            div(imago-image="item.assets[0]" sizemode="crop")
+            div(imago-image="item.assets[1]" sizemode="crop")
+
+        .caption
+          a.title(ng-href="{{item.path}}" ng-bind="item | meta:'title'")
+          .price(find-price variants="item.variants")
+          .options(find-options variants="item.variants" options="['color']")
+

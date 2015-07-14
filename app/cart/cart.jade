@@ -1,0 +1,8 @@
+div(imago-cart)
+  .item(ng-repeat="item in cart.imagoCart.cart.items")
+    img(ng-if="item.serving_url" ng-src="{{item.serving_url}}=s100-c")
+    button.remove(ng-click="cart.imagoCart.remove(item)")
+
+    span.title(ng-bind="item.name")
+    span.qty qty: {{item.qty}}
+    span.color color: {{ item | meta: 'color' }}

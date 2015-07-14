@@ -15,6 +15,7 @@ angular.module 'app', [
 ]
 
 class imagoSettings extends Constant
+
   constructor: ->
 
     if (data is 'online' and debug)

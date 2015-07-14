@@ -5,7 +5,7 @@ class Header extends Directive
     return {
 
       templateUrl: '/app/header/header.html'
-      controller: 'HeaderController as header'
+      controller: 'headerController as header'
 
     }
 

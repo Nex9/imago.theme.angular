@@ -5,7 +5,7 @@ class Footer extends Directive
     return {
 
       restrict: 'E'
-      templateUrl: '/app/directives/views/footer.html'
+      templateUrl: '/app/footer/footer.html'
       controller: 'footerController as footer'
 
       }

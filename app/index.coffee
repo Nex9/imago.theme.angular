@@ -64,7 +64,7 @@ class Setup extends Config
       .state 'home',
         url: '/'
         templateUrl: '/app/home/home.html'
-        controller: 'imagePage as page'
+        controller: 'imagoPage as page'
 
 class Load extends Run
 

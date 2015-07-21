@@ -1,20 +1,27 @@
-.blog
-  .list
-    .item.staggeranimation(ng-repeat="asset in blog.assets" ng-class="{ odd: $odd, even: $even }")
-      div.media(imago-image="asset" sizemode="crop")
-      a.caption(href="{{asset.path}}")
-        h2 {{ asset | meta:'title' }}
-        //- ul.tags
-        //-   li(ng-repeat="tag in asset | meta:'tags'")
-        //-     a(href="/blog/tag/{{tag}}" ng-click="blog.tags = tag") {{tag}}
+section(deckgrid source="blog.assets")
+  article(ng-repeat="asset in blog.assets track by asset._id")
+    a.link.fa.fa-link.fa-2x(
+      ng-href="{{asset.fields.link.value}}"
+      ng-show="asset.fields.link.value"
+      target="_blank")
 
-  div(imago-pager
-    posts="blog.assets"
-    next="blog.onNext()"
-    prev="blog.onPrev()"
-    path="{{ blog.path }}"
-    page-size="{{ blog.pageSize }}"
-    shuffle="{{ blog.shuffle }}"
-    tags="blog.tags"
-    current-page="blog.currentPage"
-    )
+    div.media(imago-image="asset" lazy="false")
+    h2 {{ asset.fields.title.value }}
+
+    div.tags
+      a(ng-repeat="tag in asset.fields.tags"
+        ui-sref="blog({tag:tag})") {{tag}}
+    div(
+      imago-share="['facebook', 'twitter']"
+      asset="asset"
+      )
+
+nav(
+  imago-pager
+  state="blog"
+  posts="blog.assets"
+  path="/blog"
+  page-size="50"
+  tags="blog.tags"
+  current-page="blog.currentPage"
+  )

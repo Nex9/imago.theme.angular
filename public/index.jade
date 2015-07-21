@@ -10,7 +10,8 @@ html(ng-app="app"
 
   body(class="{{ state }} {{ path }}" ng-class="{'menu': showMenu}" responsive-events)
     header
-    div(ui-view)
+    div(not-supported)
+    main(ui-view class="{{ state }}")
 
     include backuptemplate
 

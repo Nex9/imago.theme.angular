@@ -14,7 +14,7 @@ targets =
 
 paths =
   index: 'public/index.jade'
-  sketch: 'css/*.sketch'
+  sketch: 'app/*.sketch'
   sass: ['app/index.sass']
   coffee: [
     "#{src}/**/*.coffee"
@@ -45,6 +45,7 @@ paths =
     "bower_components/imago/dist/imago-submit.js"
     "bower_components/imago/dist/imago-form.js"
     "bower_components/imago/dist/imago-ecommerce.js"
+    "bower_components/imago/dist/imago-contact.js"
     "bower_components/headroom.js/dist/headroom.js"
     "bower_components/headroom.js/dist/angular.headroom.js"
     "bower_components/angular-scroll/angular-scroll.js"

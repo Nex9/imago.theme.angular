@@ -1,4 +1,4 @@
-tenant     = 'tenant'
+tenant     = 'ellenvonunwerth'
 data       = 'online'
 debug      = true
 
@@ -65,6 +65,15 @@ class Setup extends Config
         url: '/'
         templateUrl: '/app/home/home.html'
         controller: 'imagePage as page'
+
+      .state 'blog',
+        url: '/blog'
+        templateUrl: '/app/blog/blog.html'
+        controller: 'blog as blog'
+      .state 'blog.tags',
+        url: '/tag/:tag'
+      .state 'blog.paged',
+        url: '/page/:page'
 
 class Load extends Run
 

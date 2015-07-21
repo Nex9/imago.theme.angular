@@ -1,5 +1,12 @@
 $debug: true !default
 
+
+$slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
+$default-font-size: 16
+$color: black
+$header-height: 7.1em
+$footer-height: 5.8em
+
 @import ../bower_components/imago/css/mixin
 @import ../bower_components/imago/css/reset
 @import ../bower_components/imago/css/imago
@@ -16,12 +23,14 @@ $debug: true !default
 @import ../bower_components/fake-breakpoint-slicer/stylesheets/_breakpoint-slicer
 
 
+@import header/header
+@import footer/footer
 @import base/fonts
 @import base/base
 
+@import contact/contact
+@import blog/blog
 
-$slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
-$color: black
 
 
 // sections
@@ -29,10 +38,23 @@ $color: black
 body
   text-align: center
   color: $color
+  font-size: $default-font-size + px
+  // @include at(iphone6plus)
+  //   font-size: 18px
 
 a
   color: $color
+  &:hover,
+  &:visited,
+  &:active,
+  &:focus
+    border: none
+    outline: none
 
+main
+  min-height: 100vh
+  padding-top: $header-height
+  padding-bottom: $footer-height
 
 
 @import app/base/debug

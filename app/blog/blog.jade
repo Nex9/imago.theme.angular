@@ -9,10 +9,9 @@ section(deckgrid source="blog.assets")
     h2 {{ asset.fields.title.value }}
 
     div.tags
-      a(ng-repeat="tag in asset.fields.tags"
-        ui-sref="blog({tag:tag})") {{tag}}
+      a(ng-repeat="tag in asset.fields.tags.value"
+        ui-sref="blog.tags({tag:tag})") {{tag}}
     div(
-      imago-share="['facebook', 'twitter']"
       asset="asset"
       )
 

@@ -11,4 +11,6 @@ public/application.js
 public/application.css
 public/application.min.js
 public/application.min.css
+public/application.min.js.gz
+public/application.min.css.gz
 css/font-awesome/.*

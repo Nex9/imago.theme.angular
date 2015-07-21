@@ -1,4 +1,4 @@
-tenant     = 'ellenvonunwerth'
+tenant     = 'tenant'
 data       = 'online'
 debug      = true
 
@@ -64,7 +64,7 @@ class Setup extends Config
       .state 'home',
         url: '/'
         templateUrl: '/app/home/home.html'
-        controller: 'imagePage as page'
+        controller: 'imagoPage as page'
 
       .state 'blog',
         url: '/blog'

@@ -68,7 +68,7 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils) ->
+  constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils, tenantSettings) ->
     $rootScope.js = true
 
     $rootScope.mobile = imagoUtils.isMobile()

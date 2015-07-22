@@ -66,6 +66,15 @@ class Setup extends Config
         templateUrl: '/app/home/home.html'
         controller: 'imagoPage as page'
 
+      .state 'blog',
+        url: '/blog'
+        templateUrl: '/app/blog/blog.html'
+        controller: 'blog as blog'
+      .state 'blog.tags',
+        url: '/tag/:tag'
+      .state 'blog.paged',
+        url: '/page/:page'
+
 class Load extends Run
 
   constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils, tenantSettings) ->

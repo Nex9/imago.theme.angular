@@ -23,7 +23,8 @@
   </head>
   <body ng-class="{'menu': showMenu}" responsive-events class="{{ state }} {{ path }}">
     <header></header>
-    <div ui-view></div>
+    <div not-supported></div>
+    <main ui-view class="{{ state }}"></main>
     <footer></footer>
   </body>
 </html>

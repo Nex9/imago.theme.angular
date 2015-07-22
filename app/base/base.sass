@@ -31,17 +31,14 @@ body
   -webkit-overflow-scrolling: touch
 
 html
-  height: 100%
 
 body
-  overflow-y: auto
-  overflow-x: hidden
-  min-height: 100%
-  font-family: "Caslon 540 LT W01 Roman"
+  min-height: 100vh
+  position: relative
 
 
 h1, h2, h3, h4, h5, h6, span, a, p
-  user-select: auto
+  user-select: text
 
 a
   text-decoration: none
@@ -54,7 +51,6 @@ img
 h1, h2, h3, h4, h5, h6
   font-weight: 200
   margin: 10px 0
-  text-transform: lowercase
 
 h1
   font-size: 2.25rem
@@ -91,3 +87,27 @@ ul.list
   .spin
     border-top: 6px solid rgba(180,180,180,0.2)
   .spin2
+
+
+.imagoslider
+  +pos()
+  > .next,
+  > .prev
+    position: absolute
+    z-index: 5
+    top:    60px
+    bottom: 60px
+    width: 30%
+  > .next
+    right: 0
+    &:hover
+      cursor: url("i/next.png"), e-resize
+  > .prev
+    left: 0
+    &:hover
+      cursor: url("i/prev.png"), w-resize
+  .slide,
+  .imagoimage,
+  .imagovideo,
+  .media
+    +pos()

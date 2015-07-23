@@ -52,11 +52,11 @@ class Setup extends Config
     ]
 
     if document.location.hostname is 'localhost'
-      $analyticsProvider.developerMode(true)
+      $analyticsProvider.developerMode true
     else
-      $compileProvider.debugInfoEnabled(false)
+      $compileProvider.debugInfoEnabled false
 
-    $analyticsProvider.firstPageview(true)
+    $analyticsProvider.firstPageview true
     $locationProvider.html5Mode true
     $urlRouterProvider.otherwise '/'
 
@@ -78,6 +78,7 @@ class Setup extends Config
 class Load extends Run
 
   constructor: ($rootScope, $location, $state, $urlRouter, $window, imagoUtils, tenantSettings) ->
+
     $rootScope.js = true
 
     $rootScope.mobile = imagoUtils.isMobile()

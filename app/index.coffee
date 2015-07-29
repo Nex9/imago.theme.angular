@@ -1,6 +1,5 @@
 tenant     = 'tenant'
 data       = 'online'
-debug      = true
 
 angular.module 'app', [
   'angulartics'
@@ -18,7 +17,7 @@ class imagoSettings extends Constant
 
   constructor: ->
 
-    if (data is 'online' and debug)
+    if data is 'online'
       host = window.location.protocol + "//api.imago.io"
     else
       host = window.location.protocol + "//localhost:8000"

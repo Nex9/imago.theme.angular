@@ -12,6 +12,6 @@
     "coffee-script": "*",
     "gulp": "*",
     "gulp-sketch": "*",
-    "imago-gulp-angular": "git+ssh://git@github.com:Nex9/imago.gulp.angular.git"
+    "imago-gulp-angular": "nex9/imago.gulp.angular"
   }
 }

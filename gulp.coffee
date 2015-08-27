@@ -3,19 +3,17 @@ src  = 'app'
 
 targets =
   css     : 'application.css'
-  cssMin  : 'application.min.css'
+  customCss : 'custom.css'
   js      : 'application.js'
-  jsMin   : 'application.min.js'
   jade    : 'templates.js'
-  lib     : 'libs.js'
   scripts : 'scripts.js'
   coffee  : 'coffee.js'
-  modules : 'modules.js'
 
 paths =
   index: 'public/index.jade'
   sketch: 'app/*.sketch'
   sass: ['app/index.sass']
+  customSass : 'app/custom.sass'
   coffee: [
     "#{src}/**/*.coffee"
   ]

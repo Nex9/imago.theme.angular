@@ -68,7 +68,7 @@ class Setup extends Config
       .state 'blog',
         url: '/blog'
         templateUrl: '/app/blog/blog.html'
-        controller: 'blog as blog'
+        controller: 'blog as page'
       .state 'blog.tags',
         url: '/tag/:tag'
       .state 'blog.paged',
@@ -76,10 +76,14 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $location, $state, $window, imagoUtils, tenantSettings) ->
+  constructor: ($rootScope, $location, $state, $window, imagoUtils) ->
 
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()
+
+    $rootScope.hideMenu = ->
+      return unless $rootScope.navActive
+      $rootScope.navActive = false
 
     $rootScope.$on '$stateChangeSuccess', (evt) ->
       state = $state.current.name.split('.').join(' ')
@@ -88,3 +92,7 @@ class Load extends Run
       $window.scrollTo(0,0)
       $rootScope.state = state
       $rootScope.path  = path
+
+      $rootScope.cssClasses = "#{state} #{path} #{if imagoUtils.isMobile() then 'mobile' else 'desktop'}"
+      $rootScope.hideMenu()
+

@@ -17,17 +17,18 @@
   "dependencies": {
     "angular": "~1.4",
     "angular-animate": "~1.4",
+    "angular-elastic": "~2.4.2",
+    "angular-scroll": "~0.6.5",
     "angular-touch": "~1.4",
-    "imago": "master",
     "angular-ui-router": "*",
-    "lodash": "*",
+    "angulartics": "~0.18.0",
     "breakpoint-sass": "~2.5.0",
     "fake-breakpoint-slicer": "douglasduteil/breakpoint-slicer",
     "headroom.js": "~0.7.0",
-    "angular-elastic": "~2.4.2",
-    "angular-scroll": "~0.6.5",
-    "angulartics": "~0.18.0",
-    "normalize.css": "~3.0.3"
+    "imago": "master",
+    "lodash": "*",
+    "normalize.css": "~3.0.3",
+    "sass-mediaqueries": "~1.5.1"
   },
   "resolutions": {
     "angular": "~1.4"

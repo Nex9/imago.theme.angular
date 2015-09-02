@@ -1,63 +1,37 @@
-$debug: true !default
-
-
-$slicer-breakpoints: (iphone: 320px, iphone6: 375px, iphone6plus: 414px, m: 1024px, l: 1200px, xl: 1600px)
-$default-font-size: 16
-$color: black
-$header-height: 7.1em
-$footer-height: 5.8em
-
-
-@import base/fonts
-
-@import ../bower_components/imago/css/mixin
+@import base/variables
 @import ../bower_components/normalize.css/normalize
+
+// imago imports
+@import ../bower_components/imago/css/mixin
 @import ../bower_components/imago/css/imago
 @import ../bower_components/imago/css/slider
-// @import ../bower_components/imago/css/buttons
-// @import ../bower_components/imago/css/fields
 @import ../bower_components/imago/css/nojs
 @import ../bower_components/imago/css/not-supported
 @import ../bower_components/imago/css/font-awesome/scss/font-awesome
-// @import ../bower_components/imago/css/imago-icons/imago-icons
 
 
-@import ../bower_components/breakpoint-sass/stylesheets/_breakpoint
-@import ../bower_components/fake-breakpoint-slicer/stylesheets/_breakpoint-slicer
-
-
-@import base/base
-@import header/header
-@import footer/footer
-@import contact/contact
-@import blog/blog
-
+// theme imports
+@import base/fonts
+@import base/typography
+@import base/buttons
+@import base/forms
+@import base/imago
+@import base/grid
+@import base/icons
+@import base/layout
 
 
 
 // sections
-
-body
-  text-align: center
-  color: $color
-  font-size: $default-font-size + px
-
-a
-  color: $color
-  &:hover,
-  &:visited,
-  &:active,
-  &:focus
-    border: none
-    outline: none
-
-main
-  min-height: 100vh
-  padding-top: $header-height
-  padding-bottom: $footer-height
+@import header/header
+@import footer/footer
+// @import contact/contact
+// @import blog/blog
 
 
-@import app/base/debug
+
+
+
 
 
 

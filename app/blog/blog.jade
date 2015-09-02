@@ -1,5 +1,5 @@
-section(deckgrid source="blog.assets")
-  article(ng-repeat="asset in blog.assets track by asset._id")
+section(deckgrid source="page.assets")
+  article(ng-repeat="asset in page.assets track by asset._id")
     a.link.fa.fa-link.fa-2x(
       ng-href="{{asset.fields.link.value}}"
       ng-show="asset.fields.link.value"
@@ -10,7 +10,7 @@ section(deckgrid source="blog.assets")
 
     div.tags
       a(ng-repeat="tag in asset.fields.tags.value"
-        ui-sref="blog.tags({tag:tag})") {{tag}}
+        ui-sref="page.tags({tag:tag})") {{tag}}
     div(
       asset="asset"
       )
@@ -18,9 +18,9 @@ section(deckgrid source="blog.assets")
 nav(
   imago-pager
   state="blog"
-  posts="blog.assets"
+  posts="page.assets"
   path="/blog"
   page-size="50"
-  tags="blog.tags"
-  current-page="blog.currentPage"
+  tags="page.tags"
+  current-page="page.currentPage"
   )

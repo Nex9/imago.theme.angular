@@ -4,6 +4,7 @@ src/\.tmp*
 .idea/
 /.sass-cache/
 public/maps/
+public/index.html
 public/coffee.js
 public/scripts.js
 public/templates.js

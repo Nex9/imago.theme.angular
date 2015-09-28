@@ -80,6 +80,7 @@ class Load extends Run
 
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()
+    FastClick.attach(document.body)
 
     $rootScope.hideMenu = ->
       return unless $rootScope.navActive

@@ -27,7 +27,8 @@
     "imago": "master",
     "normalize.css": "~3",
     "sass-mediaqueries": "~1",
-    "headroom.js": "*"
+    "headroom.js": "*",
+    "fastclick": "~1.0.6"
   },
   "resolutions": {
     "angular": "~1.4"

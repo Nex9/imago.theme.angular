@@ -49,7 +49,9 @@ paths =
     "bower_components/imago/dist/imago-ecommerce.js"
     "bower_components/imago/dist/imago-contact.js"
 
-     # cutsom
+    # cutsom
+    "bower_components/moment/moment.js"
+    "bower_components/angular-moment/angular-moment.js"
     "bower_components/headroom.js/dist/headroom.js"
     "bower_components/headroom.js/dist/angular.headroom.js"
     "bower_components/angular-scroll/angular-scroll.js"

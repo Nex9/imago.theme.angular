@@ -17,6 +17,7 @@
   "dependencies": {
     "lodash": "*",
     "angular": "~1.4",
+    "angular-moment": "~1",
     "angular-animate": "~1.4",
     "angular-elastic": "~2",
     "angular-scroll": "*",
@@ -28,9 +29,10 @@
     "normalize.css": "~3",
     "sass-mediaqueries": "~1",
     "headroom.js": "*",
-    "fastclick": "~1.0.6"
+    "fastclick": "~1"
   },
   "resolutions": {
-    "angular": "~1.4"
+    "angular": "~1.4",
+    "angular-moment": "~1"
   }
 }

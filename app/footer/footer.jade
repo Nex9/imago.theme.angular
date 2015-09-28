@@ -1,5 +1,12 @@
-span copyright © #{ new Date().getFullYear() } tenant
-a(target="_blank" ng-href="http://twitter.com/HomeAgencyReal") Twitter
-a(target="_blank" ng-href="http://www.facebook.com/homeagencyco") Facebook
-a(target="_blank" ng-href="http://homeagency.tumblr.com") Tumblr
-a(target="_blank" ng-href="http://instagram.com/homeagency") Instagram
+span Copyright © #{ new Date().getFullYear() } tenant
+//- a(target="_blank" ng-href="http://twitter.com/xxx") Twitter
+//- a(target="_blank" ng-href="http://www.facebook.com/xxx") Facebook
+//- a(target="_blank" ng-href="http://xxx.tumblr.com") Tumblr
+//- a(target="_blank" ng-href="http://instagram.com/xxx") Instagram
+
+a(ng-href="{{tenantSettings.sociallinks.instagram}}" ng-show="tenantSettings.sociallinks.instagram" target="_blank" title="Instagram").fa.fa-instagram
+a(ng-href="{{tenantSettings.sociallinks.facebook}}" ng-show="tenantSettings.sociallinks.facebook" target="_blank" title="Facebook").fa.fa-facebook
+a(ng-href="https://plus.google.com/xx" target="_blank" title="Google +").fa.fa-google-plus
+a(ng-href="{{tenantSettings.sociallinks.twitter}}" ng-show="tenantSettings.sociallinks.twitter" target="_blank" title="Twitter").fa.fa-twitter
+a(ng-href="https://www.youtube.com/channel/UCTrVEEiQw-89YPl2tMgv6qg" target="_blank" title="Youtube").fa.fa-youtube
+a(ng-href="{{tenantSettings.sociallinks.tumblr}}" ng-show="tenantSettings.sociallinks.tumblr" target="_blank" title="Twitter").fa.fa-tumblr

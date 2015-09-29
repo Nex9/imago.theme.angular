@@ -23,6 +23,7 @@ paths =
   ]
   libs: [
     # required
+    "bower_components/fastclick/lib/fastclick.js"
     "bower_components/polyfill-Number.toLocaleString-with-Locales/polyfill.number.toLocaleString.js"
     "bower_components/lodash/lodash.js"
     "bower_components/bowser/bowser.js"

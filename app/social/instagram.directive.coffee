@@ -3,16 +3,14 @@ class Instagram extends Directive
   constructor: ->
 
     return {
-
-      templateUrl: '/app/directives/views/instagram.html'
+      templateUrl: '/app/social/instagram.html'
       controllerAs: 'instagram'
       controller: 'instagramController'
-
     }
 
-class InstagramController extends Directive
+class InstagramController extends Controller
 
-  constructor: ($http, $parse, imagoSettings) ->
+  constructor: ($http, $scope, $attrs, imagoSettings) ->
 
     request = =>
       options = $scope.$eval($attrs.instagram)

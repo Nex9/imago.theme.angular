@@ -4,8 +4,7 @@ class Instagram extends Directive
 
     return {
       templateUrl: '/app/social/instagram.html'
-      controllerAs: 'instagram'
-      controller: 'instagramController'
+      controller: 'instagramController as instagram'
     }
 
 class InstagramController extends Controller

@@ -46,6 +46,7 @@ paths =
     "bower_components/imago/dist/imago-social.js"
     "bower_components/imago/dist/imago-filters.js"
     "bower_components/imago/dist/imago-submit.js"
+    "bower_components/imago/dist/imago-subscribe.js"
     "bower_components/imago/dist/imago-form.js"
     "bower_components/imago/dist/imago-ecommerce.js"
     "bower_components/imago/dist/imago-contact.js"

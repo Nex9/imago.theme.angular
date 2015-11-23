@@ -77,11 +77,22 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $location, $state, $window, imagoUtils) ->
+  constructor: ($rootScope, $location, $state, $window, $anchorScroll, imagoUtils) ->
 
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()
     FastClick.attach(document.body)
+
+    wrap = (method) ->
+      orig = $window.window.history[method]
+
+      $window.window.history[method] = ->
+        retval = orig.apply(this, Array::slice.call(arguments))
+        $anchorScroll()
+        return retval
+
+    wrap 'pushState'
+    wrap 'replaceState'
 
     $rootScope.hideMenu = ->
       return unless $rootScope.navActive

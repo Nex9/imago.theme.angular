@@ -8,12 +8,13 @@ html(ng-app="app"
   head
     include header
 
-  body(class="{{ cssClasses }}" ng-class="{'navActive': navActive}" responsive-events)
+  body(
+    ng-class="[mobileClass, state, path, {'navActive': navActive}]"
+    responsive-events)
+
     header
     div(not-supported)
-    main(ui-view class="{{ state }}")
-
-    include backuptemplate
-
+    main(ui-view ng-class="[state, path]")
     footer
 
+    include backuptemplate

@@ -64,7 +64,24 @@ class Setup extends Config
       .state 'home',
         url: '/'
         templateUrl: '/app/home/home.html'
-        controller: 'imagoPage as page'
+        controller: 'simplePage as page'
+        resolve:
+          promiseData: ($q, $stateParams, imagoModel) ->
+            defer = $q.defer()
+            imagoModel.getData('/home').then (response) ->
+                defer.resolve(response)
+            defer.promise
+
+      .state 'shop',
+        url: '/shop'
+        templateUrl: '/app/shop/shop.html'
+        controller: 'shop as page'
+        resolve:
+          promiseData: ($q, $stateParams, imagoModel) ->
+            defer = $q.defer()
+            imagoModel.getData({path: '/shop', recursive: true}).then (response) ->
+              defer.resolve(response)
+            defer.promise
 
       .state 'blog',
         url: '/blog'
@@ -77,22 +94,13 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $location, $state, $window, $anchorScroll, imagoUtils) ->
+  constructor: ($rootScope, $location, $state, $window, $timeout, $anchorScroll, imagoUtils) ->
 
-    $rootScope.js = true
-    $rootScope.mobile = imagoUtils.isMobile()
-    FastClick.attach(document.body)
-
-    wrap = (method) ->
-      orig = $window.window.history[method]
-
-      $window.window.history[method] = ->
-        retval = orig.apply(this, Array::slice.call(arguments))
-        $anchorScroll()
-        return retval
-
-    wrap 'pushState'
-    wrap 'replaceState'
+    $timeout ->
+      $rootScope.js = true
+      $rootScope.mobile = imagoUtils.isMobile()
+      $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
+      FastClick.attach(document.body)
 
     $rootScope.hideMenu = ->
       return unless $rootScope.navActive
@@ -102,10 +110,8 @@ class Load extends Run
       state = $state.current.name.split('.').join(' ')
       path  = $location.path().split('/').join(' ')
       path = 'home' if path is ' '
-      $window.scrollTo(0,0)
+      # $window.scrollTo(0,0)
       $rootScope.state = state
       $rootScope.path  = path
-
-      $rootScope.cssClasses = "#{state} #{path} #{if imagoUtils.isMobile() then 'mobile' else 'desktop'}"
       $rootScope.hideMenu()
 

@@ -9,31 +9,43 @@ class FindPrice extends Directive
       bindToController:
         options: '=variants'
         product: '='
+        attributes: '@'
       templateUrl: '/app/shop/find-price.html'
 
     }
 
 class FindPriceController extends Controller
 
-  constructor: ($scope, @imagoCart) ->
+  constructor: ($scope, $parse, @imagoCart) ->
+    return unless @attributes
+    @attrs = $parse(@attributes)()
 
-    calculate = =>
-      return unless @imagoCart.currency and @options?.length and $scope.findprice.product
-      @variants = _.clone @options
+    initWatcher = =>
+      toWatchProperties = ['findprice.imagoCart.currency', 'findprice.options']
+      createWatchFunc = (name) =>
+        toWatchProperties.push(=> @product[name])
 
-      if $scope.findprice.product.lensTechnology or $scope.findprice.product.frameColor
-        @variants = _.filter @variants, (item) =>
-          if $scope.findprice.product.lensTechnology and $scope.findprice.product.frameColor
-            return $scope.findprice.product.lensTechnology is item.fields?.lensTechnology?.value and $scope.findprice.product.frameColor is item.fields?.frameColor?.value
-          else if $scope.findprice.product.frameColor
-            return $scope.findprice.product.frameColor is item.fields?.frameColor?.value
-          else if $scope.findprice.product.lensTechnology
-            return $scope.findprice.product.lensTechnology is item.fields?.lensTechnology?.value
+      for name in @attrs
+        createWatchFunc(name)
 
-      @findPrice()
+      $scope.$watchGroup toWatchProperties, =>
+        @findOpts()
 
-    $scope.$watchGroup ['findprice.imagoCart.currency', 'findprice.options', 'findprice.product.frameColor', 'findprice.product.lensTechnology'], =>
-      calculate()
+    watch = $scope.$watch 'findprice.product', (value) ->
+      return unless value
+      watch()
+      initWatcher()
+
+  findOpts: ->
+    return unless @imagoCart.currency and @options?.length and @product
+    @variants = _.clone @options
+
+    for name in @attrs
+      continue unless @product[name]
+      @variants = _.filter @variants, (item) =>
+        return @product[name] is item.fields?[name]?.value
+
+    @findPrice()
 
   findPrice: ->
     @prices = []

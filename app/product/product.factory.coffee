@@ -57,11 +57,21 @@ class Product extends Factory
         @[attr] = value
         @selectVariant()
 
-      findVariant: (color, size) ->
-        return true unless color and size
+      findVariant: (field, value) ->
+        opts = []
 
-        item = _.find @variants, (variant) =>
-          return true if _.kebabCase(variant.fields?.size?.value) is size and _.kebabCase(variant.fields?.color?.value) is color
+        for opt in @optionsWhitelist
+          obj =
+            name: opt.name
+          obj.value = if obj.name is field then value else @[opt.name]
+          return true unless obj.value
+          opts.push obj
+
+        item = _.find @variants, (variant) ->
+          valid = true
+          for opt in opts
+            valid = false if _.kebabCase(variant.fields?[opt.name]?.value) isnt _.kebabCase(opt.value)
+          return true if valid
 
         if item?.stock or item?.presale
           return true
@@ -94,8 +104,8 @@ class Product extends Factory
 
       addToCart: (product, options, fields) ->
         unless product
-          return @error = true
-
-        @error = false
-        product.qty or= 1
-        imagoCart.add product, options, fields
+          @error = true
+        else
+          @error = false
+          product.qty = 1
+          imagoCart.add product, options, fields

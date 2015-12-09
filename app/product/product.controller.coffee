@@ -1,6 +1,6 @@
 class ProductController extends Controller
 
-  constructor: (@$state, $rootScope, @$scope, @product, @promiseData, imagoCart) ->
+  constructor: (@$state, $rootScope, @$scope, @imagoProduct, @promiseData, imagoCart) ->
 
     # set default tab
     @tab = 'information'
@@ -30,7 +30,7 @@ class ProductController extends Controller
 
     for item in @promiseData
       @data = item
-      @productItem = new @product(item.variants, optionsProduct)
+      @productItem = new @imagoProduct(item.variants, optionsProduct)
       break
 
     toWatchProperties = []

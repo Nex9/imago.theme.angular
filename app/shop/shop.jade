@@ -14,6 +14,6 @@
 
         .caption
           a.title(ng-href="{{::item.path}}" ng-bind="::item | meta:'title'")
-          .price(find-price variants="item.variants")
+          .price(imago-find-price variants="item.variants")
           .options(find-options variants="item.variants" options="['color']")
 

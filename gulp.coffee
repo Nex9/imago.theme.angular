@@ -51,6 +51,7 @@ paths =
     'bower_components/imago/dist/imago-form.js'
     'bower_components/imago/dist/imago-ecommerce.js'
     'bower_components/imago/dist/imago-contact.js'
+    'bower_components/imago/dist/imago-shop.js'
 
     # custom
     'bower_components/moment/moment.js'

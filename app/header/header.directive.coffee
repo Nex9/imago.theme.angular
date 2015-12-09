@@ -11,8 +11,7 @@ class Header extends Directive
 
 class HeaderController extends Controller
 
-  constructor: (imagoUtils, @$rootScope) ->
-    @utils  = imagoCart
+  constructor: (@$rootScope) ->
 
   activate: ->
     @$rootScope.navActive = !@$rootScope.navActive

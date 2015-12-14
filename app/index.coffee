@@ -66,22 +66,16 @@ class Setup extends Config
         templateUrl: '/app/home/home.html'
         controller: 'simplePage as page'
         resolve:
-          promiseData: ($q, $stateParams, imagoModel) ->
-            defer = $q.defer()
-            imagoModel.getData('/home').then (response) ->
-                defer.resolve(response)
-            defer.promise
+          promiseData: (imagoModel) ->
+            imagoModel.getData('/home')
 
       .state 'shop',
         url: '/shop'
         templateUrl: '/app/shop/shop.html'
         controller: 'shop as page'
         resolve:
-          promiseData: ($q, $stateParams, imagoModel) ->
-            defer = $q.defer()
-            imagoModel.getData({path: '/shop', recursive: true}).then (response) ->
-              defer.resolve(response)
-            defer.promise
+          promiseData: (imagoModel) ->
+            imagoModel.getData({path: '/shop', recursive: true})
 
       .state 'blog',
         url: '/blog'

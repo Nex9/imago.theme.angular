@@ -1,7 +1,7 @@
 .shop
   .padding
     .grid
-      .item(ng-repeat="item in ::shop.data.assets track by item._id" ng-class="item.kind")
+      .item(ng-repeat="item in ::page.data.assets track by item._id" ng-class="item.kind")
         a(ng-href="{{::item.path}}")
           .media
             div(

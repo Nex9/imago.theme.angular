@@ -86,6 +86,14 @@ class Setup extends Config
       .state 'blog.paged',
         url: '/page/:page'
 
+      .state 'share',
+        url: '/public/*parameter'
+        templateUrl: '/app/share/share.html'
+        controller: 'share as page'
+        resolve:
+          promiseData: (imagoModel, $stateParams) ->
+            imagoModel.getData({path: '/public/' + $stateParams.parameter})
+
 class Load extends Run
 
   constructor: ($rootScope, $location, $state, $window, $timeout, $anchorScroll, imagoUtils) ->

@@ -1,0 +1,63 @@
+.padding
+  .info
+    h1(ng-bind="::page.data | meta:'title'")
+    p(ng-bind="::page.data | meta:'description'")
+    p(ng-bind-html="::page.data | meta:'text'")
+
+  .actions
+    button(ng-click="page.togglePrompt()") download assets
+
+  //- .bradcrumb
+  //-   //- pre {{page.breadcrumb}}
+  //-   span(ng-repeat="item in page.breadcrumb")
+  //-     span /
+  //-     a(ng-href="{{item.path}}") {{item.name}}
+
+
+  .asset(ng-repeat="asset in ::page.data.assets track by asset._id" ng-class="::{shadow: asset.count > 0}")
+    .wrapper
+      div(ng-click="page.clickOnAsset(asset)")
+        .media(imago-image="asset")
+
+
+    .caption
+      span.count(ng-bind="::asset.count")
+      span.title(ng-bind="::asset | meta:'title'" ng-show="::asset.fields.title.value")
+      span.title(ng-bind="::asset.name" ng-show="::!asset.fields.title.value && asset.count")
+
+  div(
+    fullsize-slider
+    trigger="page.fullsizeslider.show"
+    selected="page.fullsizeslider.asset"
+    assets="page.data.assets")
+
+  .prompt(ng-if="page.downloadPrompt")
+    .inner(ng-class="page.status")
+      button.close(ng-click="page.togglePrompt()")
+
+      h2 Download
+
+      form(name="page.downloadForm" ng-submit="page.download(page.downloadForm.$valid)" novalidate)
+
+        .field
+          input(
+            name="email"
+            type="email"
+            ng-model="page.downloadFormData.email"
+            placeholder="email"
+            required)
+
+        .field
+          select(
+            name="resolution"
+            ng-model="page.downloadFormData.resolution"
+            ng-options="res.resolution as res.name for res in ::page.resolutions"
+            required)
+
+        .formcontrols
+          button(type="submit" ng-disabled="page.downloadForm.$invalid") Request Assets
+
+      p.message you will receive a email with a download link shortly.
+        br
+        | if you have issues please
+        a(ui-sref="contact") contact us.

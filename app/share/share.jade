@@ -1,8 +1,8 @@
 .padding
   .info
-    h1(ng-bind="::page.data | meta:'title'")
-    p(ng-bind="::page.data | meta:'description'")
-    p(ng-bind-html="::page.data | meta:'text'")
+    h1(ng-bind="::page.data.title.value")
+    p(ng-bind="::page.data.fields.description.value")
+    p(ng-bind-html="::page.data.fields.text.value")
 
   .actions
     button(ng-click="page.togglePrompt()") download assets
@@ -22,7 +22,7 @@
 
     .caption
       span.count(ng-bind="::asset.count")
-      span.title(ng-bind="::asset | meta:'title'" ng-show="::asset.fields.title.value")
+      span.title(ng-bind="::asset.fields.title.value" ng-show="::asset.fields.title.value")
       span.title(ng-bind="::asset.name" ng-show="::!asset.fields.title.value && asset.count")
 
   div(

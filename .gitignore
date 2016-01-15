@@ -2,9 +2,9 @@ node_modules/
 bower_components/
 src/\.tmp*
 .idea/
+tmp
 /.sass-cache/
 public/maps/
-public/index.html
 public/coffee.js
 public/scripts.js
 public/templates.js
@@ -14,6 +14,8 @@ public/application.min.js
 public/application.min.css
 public/application.min.js.gz
 public/application.min.css.gz
-public/custom.css
-public/custom.min.css.gz
 css/font-awesome/.*
+public/index.html
+public/i/*\ copy.*
+public/rev-manifest.json
+**/*.min.*

@@ -22,6 +22,12 @@ paths =
   jade: [
     "#{src}/**/*.jade"
   ]
+  tests:
+    tmpFolder: 'tmp'
+    unit : ["#{src}/**/*.unit-test.coffee"]
+    e2e  : ["#{src}/**/*.e2e-test.coffee"]
+    karmaConf: 'tests/karma.conf.coffee'
+    protractorConf: 'tests/protractor.conf.coffee'
   libs: [
     # required
     'bower_components/fastclick/lib/fastclick.js'

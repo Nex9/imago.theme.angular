@@ -2,6 +2,9 @@ class Share extends Controller
 
   constructor: (@$http, @$location, $state, @imagoSettings, promiseData) ->
 
+    unless $state.params.parameter
+      return @$location.path('/')
+
     @status = 'pristine'
     @showfullsize = {}
 

@@ -6,8 +6,9 @@ html(ng-app="app"
   lang="en-US"
   itemscope itemtype="http://schema.org/WebPage")
   head
+    link(rel="stylesheet" href="maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
     include header
-    //- link(rel='stylesheet' href='//maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css')
+
   body(
     ng-class="[mobileClass, state, path, {'navActive': navActive}]"
     responsive-events)

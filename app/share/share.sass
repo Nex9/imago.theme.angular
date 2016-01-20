@@ -1,5 +1,4 @@
 main.share
-  justify-content: flex-start
   h1
     text-transform: uppercase
     font-size: em(24)
@@ -58,7 +57,14 @@ main.share
       .count
         display: inline
 
-
+  .actions
+    position: fixed
+    z-index: 100
+    right: 1em
+    bottom: 1em
+    button
+      background: white
+      outline: none
 .prompt
   +pos(fixed)
   display: flex
@@ -79,6 +85,10 @@ main.share
     flex-direction: column
     position: relative
 
+    h2
+      text-transform: uppercase
+      font-weight: bold
+
     button.close
       position: absolute
       z-index: 1000
@@ -90,6 +100,7 @@ main.share
       height: 20px
       cursor: pointer
       transition: transform 0.25s ease
+      border: none
       &:hover
         transform: rotate(90deg)
         background-position: 0px -20px

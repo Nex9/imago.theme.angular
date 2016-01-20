@@ -4,15 +4,15 @@
     p(ng-bind="::page.data.fields.description.value")
     p(ng-bind-html="::page.data.fields.text.value")
 
+  .breadcrumb
+    //- pre {{page.breadcrumb}}
+
+    span(ng-repeat="item in page.breadcrumb")
+      span /
+      a(ng-href="{{item.path}}") {{item.name}}
+
   .actions
-    button(ng-click="page.togglePrompt()") download assets
-
-  //- .bradcrumb
-  //-   //- pre {{page.breadcrumb}}
-  //-   span(ng-repeat="item in page.breadcrumb")
-  //-     span /
-  //-     a(ng-href="{{item.path}}") {{item.name}}
-
+    button(ng-click="page.togglePrompt()") Download
 
   .asset(ng-repeat="asset in ::page.data.assets track by asset._id" ng-class="::{shadow: asset.count > 0}")
     .wrapper
@@ -55,7 +55,7 @@
             required)
 
         .formcontrols
-          button(type="submit" ng-disabled="page.downloadForm.$invalid") Request Assets
+          button(type="submit" ng-disabled="page.downloadForm.$invalid") Download
 
       p.message you will receive a email with a download link shortly.
         br

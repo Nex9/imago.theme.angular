@@ -11,6 +11,11 @@ angular.module 'app', [
   'angular-inview'
   'imago'
   'lodash'
+  'ngSanitize'
+  'com.2fdevs.videogular'
+  'com.2fdevs.videogular.plugins.controls'
+  'com.2fdevs.videogular.plugins.overlayplay'
+  'com.2fdevs.videogular.plugins.poster'
 ]
 
 class imagoSettings extends Constant
@@ -96,7 +101,7 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $location, $state, $window, $timeout, $anchorScroll, imagoUtils) ->
+  constructor: ($rootScope, $state, $location, $timeout, imagoUtils) ->
 
     $timeout ->
       $rootScope.js = true
@@ -105,14 +110,32 @@ class Load extends Run
       FastClick.attach(document.body)
 
     $rootScope.hideMenu = ->
-      return unless $rootScope.navActive
       $rootScope.navActive = false
 
+    # fix adding class to late to main
+    # $rootScope.$on '$stateChangeSuccess', (evt, toState) ->
+    #   path  = toState.url.split('/').join(' ').trim()
+    #   path = 'home' if path is ''
+    #   $rootScope.state = toState.name.split('.').join(' ')
+    #   $rootScope.path  = path
+    #   $rootScope.hideMenu()
+
+    # $rootScope.$on '$viewContentLoaded', (evt, viewConfig) ->
+    #   notLoadedMain = document.querySelector('main:not(.loaded)')
+    #   if $rootScope.state and $rootScope.path
+    #     state = $rootScope.state?.split(' ')
+    #     path = $rootScope.path?.split(' ')
+    #     for item in path
+    #       notLoadedMain.classList.add(item)
+    #     for item in state
+    #       notLoadedMain.classList.add(item)
+    #   notLoadedMain.classList.add('loaded')
+
+    # general code
     $rootScope.$on '$stateChangeSuccess', (evt) ->
       state = $state.current.name.split('.').join(' ')
       path  = $location.path().split('/').join(' ')
       path = 'home' if path is ' '
-      # $window.scrollTo(0,0)
       $rootScope.state = state
       $rootScope.path  = path
       $rootScope.hideMenu()

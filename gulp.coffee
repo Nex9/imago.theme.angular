@@ -43,6 +43,13 @@ paths =
     'bower_components/angular-elastic/elastic.js'
     'bower_components/angular-inview/angular-inview.js'
 
+    'bower_components/angular-sanitize/angular-sanitize.min.js'
+    'bower_components/videogular-controls/vg-controls.js'
+    'bower_components/videogular-overlay-play/vg-overlay-play.js'
+    'bower_components/videogular-poster/vg-poster.js'
+    'bower_components/videogular-buffering/vg-buffering.js'
+    'bower_components/videogular/videogular.js'
+
     # imago
     'bower_components/imago/dist/core.js'
     'bower_components/imago/dist/events.js'

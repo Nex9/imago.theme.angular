@@ -6,7 +6,6 @@ html(ng-app="app"
   lang="en-US"
   itemscope itemtype="http://schema.org/WebPage")
   head
-    link(rel="stylesheet" href="maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css")
     include header
 
   body(
@@ -15,7 +14,7 @@ html(ng-app="app"
 
     header
     div(not-supported)
-    main(ui-view ng-class="[state, path]")
+    imago-main(ui-view ng-class="[state, path]")
     footer
 
     include backuptemplate

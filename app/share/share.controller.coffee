@@ -1,6 +1,6 @@
 class Share extends Controller
 
-  constructor: (@$http, @$location, $state, @imagoSettings, promiseData) ->
+  constructor: (@$http, @$location, $state, @imagoModel, promiseData) ->
 
     unless $state.params.parameter
       return @$location.path('/')
@@ -48,7 +48,7 @@ class Share extends Controller
 
     @status = 'requested'
 
-    @$http.post("#{@imagoSettings.host}/api/assets/download", toDownload)
+    @$http.post("#{@imagoModel.host}/api/assets/download", toDownload)
 
   clickOnAsset: (asset) ->
     if asset.count

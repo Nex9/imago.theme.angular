@@ -9,11 +9,11 @@ class Instagram extends Directive
 
 class InstagramController extends Controller
 
-  constructor: ($http, $scope, $attrs, imagoSettings) ->
+  constructor: ($http, $scope, $attrs, imagoModel) ->
 
     request = =>
       options = $scope.$eval($attrs.instagram)
-      $http.post("#{imagoSettings.host}/api/social/instagram/feed", options).then (response) =>
+      $http.post("#{imagoModel.host}/api/social/instagram/feed", options).then (response) =>
         @data = response.data
         # console.log '@data.length', @data.length
         for item in @data

@@ -1,4 +1,5 @@
-tenant     = 'tenant'
+tenant     = 'freudnyc'
+data       = 'online'
 
 angular.module 'app', [
   'angulartics'
@@ -11,11 +12,26 @@ angular.module 'app', [
   'imago'
   'lodash'
   'ngSanitize'
+  'headroom'
   'com.2fdevs.videogular'
   'com.2fdevs.videogular.plugins.controls'
   'com.2fdevs.videogular.plugins.overlayplay'
   'com.2fdevs.videogular.plugins.poster'
 ]
+
+class imagoSettings extends Constant
+
+  constructor: ->
+
+    if data is 'online'
+      host = window.location.protocol + "//api.imago.io"
+    else
+      host = window.location.protocol + "//localhost:8000"
+
+    return {
+      sort_worker : 'sort.worker.js'
+      host        : host
+    }
 
 class Setup extends Config
 
@@ -59,32 +75,35 @@ class Setup extends Config
         controller: 'simplePage as page'
         resolve:
           promiseData: (imagoModel) ->
-            imagoModel.getData('/home')
+            imagoModel.getData
+              path: '/home'
+              recursive: true
 
-      .state 'shop',
-        url: '/shop'
-        templateUrl: '/app/shop/shop.html'
-        controller: 'shop as page'
-        resolve:
-          promiseData: (imagoModel) ->
-            imagoModel.getData({path: '/shop', recursive: true})
 
-      .state 'blog',
-        url: '/blog'
-        templateUrl: '/app/blog/blog.html'
-        controller: 'blog as page'
-      .state 'blog.tags',
-        url: '/tag/:tag'
-      .state 'blog.paged',
-        url: '/page/:page'
+      # .state 'shop',
+      #   url: '/shop'
+      #   templateUrl: '/app/shop/shop.html'
+      #   controller: 'shop as page'
+      #   resolve:
+      #     promiseData: (imagoModel) ->
+      #       imagoModel.getData({path: '/shop', recursive: true})
 
-      .state 'share',
-        url: '/public/*parameter'
-        templateUrl: '/app/share/share.html'
-        controller: 'share as page'
-        resolve:
-          promiseData: (imagoModel, $stateParams) ->
-            imagoModel.getData({path: '/public/' + $stateParams.parameter})
+      # .state 'blog',
+      #   url: '/blog'
+      #   templateUrl: '/app/blog/blog.html'
+      #   controller: 'blog as page'
+      # .state 'blog.tags',
+      #   url: '/tag/:tag'
+      # .state 'blog.paged',
+      #   url: '/page/:page'
+
+      # .state 'share',
+      #   url: '/public/*parameter'
+      #   templateUrl: '/app/share/share.html'
+      #   controller: 'share as page'
+      #   resolve:
+      #     promiseData: (imagoModel, $stateParams) ->
+      #       imagoModel.getData({path: '/public/' + $stateParams.parameter})
 
 class Load extends Run
 

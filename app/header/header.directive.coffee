@@ -1,11 +1,18 @@
 class Header extends Directive
 
-  constructor: ->
+  constructor: ($rootScope) ->
 
     return {
 
       templateUrl: '/app/header/header.html'
       controller: 'headerController as header'
+      link: (scope) ->
+
+        watcher = $rootScope.$on 'settings:loaded', (evt, data) ->
+          scope.tenantSettings = data
+          watcher()
+
+        console.log 'settings loaded'
 
     }
 

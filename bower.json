@@ -28,11 +28,11 @@
     "imago": "~2",
     "normalize.css": "~3",
     "sass-mediaqueries": "~1",
-    "headroom.js": "*",
+    "headroom.js": "^0.7.0",
     "fastclick": "~1"
   },
   "resolutions": {
     "angular": "~1.5",
-    "angular-moment": "~1"
+    "angulartics": "~1"
   }
 }

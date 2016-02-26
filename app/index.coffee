@@ -1,4 +1,4 @@
-tenant     = 'freudnyc'
+tenant     = 'tenant'
 data       = 'online'
 
 angular.module 'app', [

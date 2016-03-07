@@ -1,20 +1,16 @@
 node_modules/
 bower_components/
 src/\.tmp*
-.idea/
+.*
+!/.gitignore
+!/.editorconfig
+!/.bowerrc
 tmp
-/.sass-cache/
 public/maps/
 public/coffee.js
 public/scripts.js
 public/templates.js
-public/application.js
-public/application.css
-public/application.min.js
-public/application.min.css
-public/application.min.js.gz
-public/application.min.css.gz
-css/font-awesome/.*
+public/application.*
 public/index.html
 public/i/*\ copy.*
 public/rev-manifest.json

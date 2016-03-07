@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 tenant     = 'sabinaschreder'
+=======
+tenant     = 'tenant'
+>>>>>>> e1d73dc22b4c044b79f4ceb48da119f5e497ac38
 data       = 'online'
 
 angular.module 'app', [

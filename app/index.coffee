@@ -1,4 +1,4 @@
-tenant     = 'freudnyc'
+tenant     = 'sabinaschreder'
 data       = 'online'
 
 angular.module 'app', [
@@ -107,8 +107,8 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $state, $location, $timeout, imagoUtils) ->
-
+  constructor: ($rootScope, $state, $location, $timeout, tenantSettings, imagoUtils) ->
+    document.documentElement.classList.remove('nojs')
     $timeout ->
       $rootScope.js = true
       $rootScope.mobile = imagoUtils.isMobile()

@@ -1,10 +1,4 @@
-//- span Freud NYC
-//- {{tenantSettings.settings.name}}
-//- a(target="_blank" ng-href="http://twitter.com/xxx") Twitter
-//- a(target="_blank" ng-href="http://www.facebook.com/xxx") Facebook
-//- a(target="_blank" ng-href="http://xxx.tumblr.com") Tumblr
-
-a.fa.fa-instagram.fa-2x(target="_blank" ng-href="http://instagram.com/freudnyc")
+span © #{ new Date().getFullYear() } {{tenantSettings.settings.name}}
 
 a(
   ng-href="{{tenantSettings.sociallinks.instagram}}"
@@ -23,4 +17,5 @@ a(
   ng-href="{{tenantSettings.sociallinks.tumblr}}"
   ng-show="tenantSettings.sociallinks.tumblr"
   target="_blank").fa.fa-tumblr
+
 //- a(ng-href="https://www.youtube.com/channel/UCTrVEEiQw-89YPl2tMgv6qg" target="_blank" title="Youtube").fa.fa-youtube

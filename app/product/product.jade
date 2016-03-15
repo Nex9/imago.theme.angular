@@ -3,8 +3,8 @@
 
   .item(ng-repeat="asset in page.filteredImages track by asset._id" id="{{asset._id}}")
     div(ng-switch="page.productItem.type" fullsize-image)
-      div(imago-video="asset" ng-switch-when="video")
-      div(imago-image="asset" ng-switch-default lazy="false" align="left center")
+      imago-video(data="asset" ng-switch-when="video")
+      imago-image(data="asset" ng-switch-default lazy="false" align="left center")
 
 .info(stop-scroll)
 
@@ -80,4 +80,4 @@
 
 .images
   .item
-    div(imago-image="page.extraImages[1]" lazy="false")
+    imago-image(data="page.extraImages[1]" lazy="false")

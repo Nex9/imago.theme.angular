@@ -9,9 +9,8 @@
     .slide(
       ng-repeat="asset in imagoslider.assets track by asset._id"
       ng-switch="asset.type"
-      ng-if="currentIndex === $index"
-    )
-      div(imago-video="asset" sizemode="fit" ng-switch-when="video")
-      div(imago-image="asset" sizemode="fit" ng-switch-default)
+      ng-if="currentIndex === $index")
+      imago-video(data="asset" sizemode="fit" ng-switch-when="video")
+      imago-image(data="asset" sizemode="fit" ng-switch-default)
 
     button.close(ng-click="fullsize.close($event)")

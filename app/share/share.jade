@@ -17,7 +17,7 @@
   .asset(ng-repeat="asset in ::page.data.assets track by asset._id" ng-class="::{shadow: asset.count > 0}")
     .wrapper
       div(ng-click="page.clickOnAsset(asset)")
-        .media(imago-image="asset")
+        imago-image(data="asset")
 
 
     .caption

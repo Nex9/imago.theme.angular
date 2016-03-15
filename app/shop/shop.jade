@@ -4,9 +4,9 @@
       .item(ng-repeat="item in ::page.data.assets track by item._id" ng-class="item.kind")
         a(ng-href="{{::item.path}}")
           .media
-            div(
+            imago-image(
               ng-repeat="image in ::item.assets | limitTo: 2"
-              imago-image="image"
+              data="image"
               sizemode="crop"
               )
 

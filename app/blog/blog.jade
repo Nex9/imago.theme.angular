@@ -5,7 +5,7 @@ section(deckgrid source="page.assets")
       ng-show="asset.fields.link.value"
       target="_blank")
 
-    div.media(imago-image="asset" lazy="false")
+    div.imago-image(data="asset" lazy="false")
     h2 {{ asset.fields.title.value }}
 
     div.tags

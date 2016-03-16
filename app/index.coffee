@@ -1,5 +1,4 @@
 tenant     = 'tenant'
-data       = 'online'
 
 angular.module 'app', [
   'angulartics'
@@ -18,20 +17,6 @@ angular.module 'app', [
   'com.2fdevs.videogular.plugins.overlayplay'
   'com.2fdevs.videogular.plugins.poster'
 ]
-
-class imagoSettings extends Constant
-
-  constructor: ->
-
-    if data is 'online'
-      host = window.location.protocol + "//api.imago.io"
-    else
-      host = window.location.protocol + "//localhost:8000"
-
-    return {
-      sort_worker : 'sort.worker.js'
-      host        : host
-    }
 
 class Setup extends Config
 

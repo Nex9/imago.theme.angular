@@ -55,7 +55,7 @@ class Setup extends Config
       .state 'home',
         url: '/'
         templateUrl: '/app/home/home.html'
-        controller: 'simplePage as page'
+        controller: 'page as page'
         resolve:
           promiseData: (imagoModel) ->
             imagoModel.getData

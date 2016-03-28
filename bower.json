@@ -25,7 +25,7 @@
     "angular-ui-router": "*",
     "angulartics": "*",
     "angulartics-google-analytics": "*",
-    "imago": "v2.x",
+    "imago": "Nex9/imago.angular#master",
     "normalize.css": "~4",
     "sass-mediaqueries": "~1",
     "headroom.js": "^0.7.0",

@@ -1,8 +1,8 @@
 .fullsize-slider(ng-show="fullsize.trigger")
   div(ng-transclude)
-  .slider(
+  imago-slider(
     ng-if="fullsize.trigger"
-    imago-slider="fullsize.assets"
+    data="fullsize.assets"
     namespace="fullsize-slider"
     length="{{fullsize.assets.length}}"
     )

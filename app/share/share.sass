@@ -2,60 +2,64 @@ main.share
   h1
     text-transform: uppercase
     font-size: em(24)
-  .asset
-    margin: em(25)
-    display: inline-block
-    vertical-align: top
-    position: relative
-    z-index: 10
 
-    .wrapper
+
+  .assets
+    display: flex
+    flex-direction: row
+    justify-content: center
+    flex-wrap: wrap
+    margin: 0 auto
+
+    .asset
       width:  300px
       height: 260px
+      margin: 1em
+      margin-bottom: 3em
       position: relative
-
-      .media
+      .no-thumb
+        background: darken(white, 5%)
+        +pos(absolute, 20px, 0px, 20px, 0px)
+        box-shadow: 0 1px 5px rgba(0,0,0,0.3)
+        border: 10px solid white
+      .imago-image-content
+        background: white
+        overflow: visible
         cursor: pointer
         transition: transform 0.25s ease
-        width:  300px
-        height: 260px
 
-        .imago-image,
-        .imagovideo
-          +pos()
-
-        .imago-image
-          overflow: visible
-          img
-            box-shadow: 0 1px 5px rgba(0,0,0,0.3)
-
-
+        +pos()
 
         &:hover
-          transform: scale(1.05)
+          transform: scale(1.03)
 
-    .caption
-      margin-top: 10px
-      span
-        display: inline-block
-        vertical-align: baseline
+        img
+          box-shadow: 0 1px 5px rgba(0,0,0,0.3)
+      .caption
+        position: absolute
+        padding-top: .5em
+        top: 100%
+        left: 0
+        right: 0
 
-      .count
-        font-size: em(13)
-        margin-right: .5em
-        border: 1px solid lighten(black, 50%)
-        border-radius: 1em
-        padding: .35em .5em 0em .5em
-        min-width: 30px
-        display: none
+        .count
+          font-size: em(13)
+          margin-right: .5em
+          border: 1px solid lighten(black, 50%)
+          border-radius: 1em
+          padding: .35em .5em 0em .5em
+          min-width: 30px
+          display: none
 
 
-    &.shadow
-      .imago-image img
-        box-shadow: 0 1px 10px rgba(0,0,0,0.3)
-        border: 10px solid white
-      .count
-        display: inline
+      &.collection
+        .imago-image-content img
+          box-shadow: 0 1px 10px rgba(0,0,0,0.3)
+          border: 10px solid white
+        .count
+          display: inline
+
+
 
   .actions
     position: fixed
@@ -144,17 +148,13 @@ main.share
   +pos(fixed, 0,0,0,0)
   background: white
   z-index: 200
-  .slider
+  .imago-slider-content
     +pos()
-    .slide
-      .imago-image
-        +pos(absolute, 20px, 20px, 20px, 20px)
-      .caption
-        position: absolute
-        left:  200px
-        right: 200px
-        bottom: -28px
-        text-align: center
+    .imago-image-content
+      +pos(absolute, 20px, 20px, 20px, 20px)
+
+
+
   button.close
     position: absolute
     z-index: 1000

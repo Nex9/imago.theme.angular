@@ -43,16 +43,19 @@ class Share extends Controller
     return unless validForm
     toDownload =
       assets      :  (asset._id for asset in @data.assets)
-      email       :  @downloadForm.data.email
-      resolution  :  @downloadForm.data.resolution
+      email       :  @downloadFormData.email
+      resolution  :  @downloadFormData.resolution
 
     @status = 'requested'
 
     @$http.post("#{@imagoModel.host}/api/assets/download", toDownload)
 
   clickOnAsset: (asset) ->
+    console.log asset.type, asset.count, asset.name
     if asset.count
       return @$location.path(asset.path)
+
+    # return unless asset.count > 0
 
     @fullsizeslider or= {}
     @fullsizeslider.show  = true

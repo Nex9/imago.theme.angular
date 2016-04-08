@@ -1,3 +1,7 @@
+tenant     = 'tenant'
+setdefault = true
+apikey     = 'apikey'
+
 dest = 'public'
 src  = 'app'
 
@@ -76,6 +80,10 @@ paths =
   ]
 
 configGulp =
+  setup:
+    apikey      : apikey
+    setdefault  : setdefault
+    tenant      : tenant
   src     : src
   dest    : dest
   targets : targets

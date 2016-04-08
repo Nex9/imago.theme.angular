@@ -122,8 +122,9 @@ class Load extends Run
 
     # general code
     $rootScope.$on '$stateChangeSuccess', (evt) ->
+      $rootScope.urlPath = $location.path()
       state = $state.current.name.split('.').join(' ')
-      path  = $location.path().split('/').join(' ')
+      path  = $rootScope.urlPath.split('/').join(' ')
       path = 'home' if path is ' '
       $rootScope.state = state
       $rootScope.path  = path

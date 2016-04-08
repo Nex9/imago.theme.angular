@@ -1,7 +1,15 @@
 a(ui-sref="home") {{tenantSettings.settings.name}}
 
-nav
-  a(ui-sref="shop" ui-sref-active="active") Shop
-  a(ui-sref="about" ui-sref-active="active") About
-  a(ui-sref="blog" ui-sref-active="active") Blog
-  a(ui-sref="contact" ui-sref-active="active") Contact
+//- nav
+//-   a(ui-sref="shop" ui-sref-active="active") Shop
+//-   a(ui-sref="about" ui-sref-active="active") About
+//-   a(ui-sref="blog" ui-sref-active="active") Blog
+//-   a(ui-sref="contact" ui-sref-active="active") Contact
+
+
+imago-fetch(query="/")
+  nav
+    a(
+      ng-href="{{::item.path}}"
+      ng-class="{active: item.path === urlPath}"
+      ng-repeat="item in ::imagofetch.result.assets") {{::item.fields.title.value || item.name}}

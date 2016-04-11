@@ -1,20 +1,37 @@
+imago-contact
+  width: 100%
+  display: block
+  .imago-actions
+    margin-top: 2em
+
 form
   .imago-field
     margin-bottom: 1em
+    position: relative
     label
       display: block
-      margin-bottom: .5em
-      font-weight: bold
+      position: absolute
+      color: darken(white, 50%)
+      text-transform: uppercase
+      letter-spacing: .1em
+      font-weight: 300
+      padding: 0
+      margin: 0
+      transition: all 0.1s ease
     input:not([class^="btn"]),
     textarea
+      padding: 1.5em .75em .5em .75em
+      width: 100%
       border: 1px solid $field-border-color
-      padding: .75em
+      &::placeholder
+        opacity: 0
       &:focus,
       &:hover
         border-color: darken($field-border-color, 15%)
         outline: none
       &.field-fw
         width: 100%
+
     .help
       @extend small
       margin: .5em 0 0
@@ -67,8 +84,21 @@ form
     text-align: center
   input[type="radio"]:checked + label:before
     content: "\2022"
-  input,textarea
-    &::placeholder
-      color: $field-placeholder-color
-    &:focus::placeholder
-      opacity: 0
+  input:not([type="radio"]):not([type="checkbox"]),
+  textarea
+    + label
+     font-size: .65em
+     top: .15em
+     left: 1.2em
+    &.ng-empty
+      + label
+        top: 1em
+        left: .75em
+        font-size: 1em
+    &:focus
+      + label
+       font-size: .65em
+       top: .15em
+       left: 1.2em
+       text-transform: uppercase
+

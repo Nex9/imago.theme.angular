@@ -1,6 +1,6 @@
 {
   "name": "angular-nex9-theme",
-  "version": "0.0.6",
+  "version": "1.0.0",
   "description": "Angular theme for NEX9 LLC",
   "main": "gulpfile.js",
   "scripts": {

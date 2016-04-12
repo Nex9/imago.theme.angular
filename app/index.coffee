@@ -1,5 +1,3 @@
-tenant     = 'tenant'
-
 angular.module 'app', [
   'angulartics'
   'angulartics.google.analytics'
@@ -22,15 +20,8 @@ class Setup extends Config
 
   constructor: ($httpProvider, $provide, $sceProvider, $locationProvider, $compileProvider, $stateProvider, $urlRouterProvider, $analyticsProvider, imagoModelProvider) ->
 
-    # imagoModelProvider.setHost '//localhost:8000'
-
     $sceProvider.enabled false
-
-    # http defaults config START
     $httpProvider.useApplyAsync true
-    $httpProvider.defaults.headers.common['NexClient']    = 'public'
-    $httpProvider.defaults.headers.common['NexTenant']    = "#{tenant}"
-    # http defaults config ENDS
 
     $provide.decorator '$exceptionHandler', [
       '$delegate'
@@ -61,7 +52,6 @@ class Setup extends Config
             imagoModel.getData
               path: '/home'
               recursive: true
-
 
       # .state 'shop',
       #   url: '/shop'

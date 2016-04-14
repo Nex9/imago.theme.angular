@@ -1,4 +1,3 @@
-tenant     = 'tenant'
 setdefault = true
 apikey     = 'apikey'
 
@@ -83,7 +82,6 @@ configGulp =
   setup:
     apikey      : apikey
     setdefault  : setdefault
-    tenant      : tenant
   src     : src
   dest    : dest
   targets : targets

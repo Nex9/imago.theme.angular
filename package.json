@@ -8,10 +8,8 @@
   },
   "author": "Nex9 LLC",
   "license": "ISC",
-  "dependencies": {
-    "coffee-script": "*",
-    "gulp": "*",
-    "gulp-sketch": "*",
-    "imago-gulp-angular": "nex9/imago.gulp.angular"
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "imago-gulp-angular": "*"
   }
 }

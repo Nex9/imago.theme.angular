@@ -1,5 +1,5 @@
-div(imago-cart)
-  .item(ng-repeat="item in cart.imagoCart.cart.items")
+imago-cart
+  .item(ng-repeat="item in cart.imagoCart.cart.items track by item._id")
     img(ng-if="item.serving_url" ng-src="{{item.serving_url}}=s100-c")
     button.remove(ng-click="cart.imagoCart.remove(item)")
 

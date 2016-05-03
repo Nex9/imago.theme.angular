@@ -28,7 +28,7 @@
     "imago": "Imago-io/imago.angular#master",
     "normalize.css": "~4",
     "sass-mediaqueries": "~1",
-    "headroom.js": "^0.7.0",
+    "headroom.js": "https://npmcdn.com/headroom.js/bower.zip",
     "fastclick": "~1"
   },
   "resolutions": {

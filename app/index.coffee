@@ -53,6 +53,28 @@ class Setup extends Config
               path: '/home'
               recursive: true
 
+      .state 'blog',
+        url: '/blog'
+        templateUrl: '/app/blog/blog.html'
+        data:
+          pageSize: 50
+          query: '/blog'
+      .state 'blog.paged',
+        url: '/page/:page'
+      .state 'blog.filtered',
+        url: '/tags/:tag'
+      .state 'blog.filtered.paged',
+        url: '/page/:page'
+
+      .state 'contact',
+        url: '/contact'
+        templateUrl: '/app/page/page.html'
+        controller: 'page as page'
+        resolve:
+          promiseData: (imagoModel) ->
+            imagoModel.getData '/contact'
+
+
       # .state 'shop',
       #   url: '/shop'
       #   templateUrl: '/app/shop/shop.html'

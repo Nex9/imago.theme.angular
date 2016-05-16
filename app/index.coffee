@@ -1,6 +1,7 @@
 angular.module 'app', [
   'angulartics'
   'angulartics.google.analytics'
+  'angulartics.facebook.pixel'
   'ngAnimate'
   'ngTouch'
   'ui.router'

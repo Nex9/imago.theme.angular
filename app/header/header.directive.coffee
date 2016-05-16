@@ -6,19 +6,18 @@ class Header extends Directive
 
       templateUrl: '/app/header/header.html'
       controller: 'headerController as header'
-      link: (scope) ->
-
-        watcher = $rootScope.$on 'settings:loaded', (evt, data) ->
-          scope.tenantSettings = data
-          watcher()
-
-        console.log 'settings loaded'
 
     }
 
 class HeaderController extends Controller
 
-  constructor: (@$rootScope) ->
+  constructor: (imagoCart, @$rootScope) ->
+    @utils  = imagoCart
 
-  activate: ->
-    @$rootScope.navActive = !@$rootScope.navActive
+  activate: (state) ->
+    if state is 'show'
+      @$rootScope.navActive = true
+    else if state is 'hide'
+      @$rootScope.navActive = false
+    else
+      @$rootScope.navActive = !@$rootScope.navActive

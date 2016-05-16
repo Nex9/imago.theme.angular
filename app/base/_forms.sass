@@ -1,3 +1,5 @@
+$form-field-font-size: 1.5em !default
+
 imago-contact
   width: 100%
   display: block
@@ -8,12 +10,11 @@ form
   .imago-field
     margin-bottom: 1em
     position: relative
+    font-size: $form-field-font-size
     label
       display: block
       position: absolute
       color: darken(white, 50%)
-      text-transform: uppercase
-      letter-spacing: .1em
       font-weight: 300
       padding: 0
       margin: 0
@@ -31,6 +32,8 @@ form
         outline: none
       &.field-fw
         width: 100%
+    textarea
+      resize: vertical
 
     .help
       @extend small
@@ -84,21 +87,27 @@ form
     text-align: center
   input[type="radio"]:checked + label:before
     content: "\2022"
+
+  .imago-field
+    border-bottom: 1px solid darken(white,10%)
+    border-top: 1px solid darken(white,10%)
   input:not([type="radio"]):not([type="checkbox"]),
   textarea
+    font-weight: 300
+    text-align: center
     + label
-     font-size: .65em
-     top: .15em
-     left: 1.2em
+     font-size: 1.25em
+     font-weight: 200
+     letter-spacing: 0.05em
+     top: 0
+     left: 50%
+     transform: translateX(-50%)
     &.ng-empty
       + label
         top: 1em
-        left: .75em
-        font-size: 1em
-    &:focus
+    &:focus,
+    &.ng-not-empty
       + label
        font-size: .65em
        top: .15em
-       left: 1.2em
-       text-transform: uppercase
 

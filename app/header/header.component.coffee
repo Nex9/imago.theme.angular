@@ -1,4 +1,4 @@
-class Header extends Directive
+class Header extends Component
 
   constructor: ($rootScope) ->
 
@@ -6,13 +6,6 @@ class Header extends Directive
 
       templateUrl: '/app/header/header.html'
       controller: 'headerController as header'
-      link: (scope) ->
-
-        watcher = $rootScope.$on 'settings:loaded', (evt, data) ->
-          scope.tenantSettings = data
-          watcher()
-
-        console.log 'settings loaded'
 
     }
 

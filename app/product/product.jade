@@ -48,7 +48,7 @@
 
   button.addToCart(
     type="button"
-    ng-click="page.productItem.addToCart(page.productItem.selected, ['size'], ['title', 'description'])"
+    ng-click="page.imagoCart.add(page.productItem.selected, ['size'], ['title', 'description'])"
     ng-disabled="(page.productItem.selected.stock <= 0 || !page.productItem.selected.stock) && !page.productItem.selected.presale"
     analytics-on="click"
     analytics-if="page.productItem.selected.stock > 0 || page.productItem.selected.presale"

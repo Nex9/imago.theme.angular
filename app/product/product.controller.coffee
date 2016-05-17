@@ -1,11 +1,11 @@
 class ProductController extends Controller
 
-  constructor: (@$state, $rootScope, @$scope, @imagoProduct, @promiseData, imagoCart) ->
+  constructor: (@$state, $rootScope, @$scope, @imagoProduct, @promiseData, @imagoCart) ->
 
     # set default tab
     @tab = 'information'
 
-    if imagoCart.currency
+    if @imagoCart.currency
       return @getProduct()
 
     watcher = $rootScope.$on 'imagocart:currencyloaded', (evt, data) =>

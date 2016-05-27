@@ -26,6 +26,7 @@
     "angulartics": "*",
     "angulartics-google-analytics": "*",
     "imago": "Imago-io/imago.angular#master",
+    "angulartics-facebook-pixel": "^0.2.0",
     "normalize.css": "~4",
     "sass-mediaqueries": "~1",
     "headroom.js": "https://npmcdn.com/headroom.js/bower.zip",

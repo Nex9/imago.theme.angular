@@ -1,4 +1,4 @@
-class Header extends Component
+class Header extends Directive
 
   constructor: ($rootScope) ->
 

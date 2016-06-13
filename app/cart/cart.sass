@@ -1,0 +1,68 @@
+.bag
+  text-transform: uppercase
+  text-align: right
+  user-select: none
+  cursor: pointer
+  line-height: 1em
+
+.background
+  padding: 1em
+  // transition: background 1s ease
+  &.active
+    background: white
+
+.imago-cart-content
+  border-right: 1px solid black
+
+  // .imago-cart-items
+  //   margin-right: -1.5em
+  //   padding-right: 2.5em
+
+.imago-cart-content,
+.imago-cart-checkout
+  user-select: none
+  text-align: right
+  font-weight: 400
+  text-transform: uppercase
+
+
+  span.currency
+    margin-right: .125em
+
+  span
+    font-size: 1em
+
+
+
+  .imago-cart-items
+    margin-top: 1em
+    .item
+      margin-top: 2em
+      button.remove
+        float: left
+        padding: 0
+        font-weight: 500
+        margin-right: 1em
+        cursor: pointer
+
+      .qty
+        margin-right: 1em
+      .qty,.price
+        display: inline-block
+      .title
+       font-weight: 500
+    max-height: calc(100vh - 25em)
+    overflow-y: auto
+    padding-right: 1em
+
+
+  // .imago-cart-messages
+
+  .imago-cart-summery
+    border: 1px solid black
+    padding: 1em 3em
+    margin-top: 1em
+    button
+      cursor: pointer
+      span.checkout
+        // margin-left: .5em

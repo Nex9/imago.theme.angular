@@ -1,4 +1,4 @@
-class Footer extends Component
+class Footer extends Directive
 
   constructor: ->
 

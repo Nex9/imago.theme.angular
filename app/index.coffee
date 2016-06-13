@@ -10,7 +10,7 @@ angular.module 'app', [
   'imago'
   'lodash'
   'ngSanitize'
-  'headroom'
+  # 'headroom'
   'com.2fdevs.videogular'
   'com.2fdevs.videogular.plugins.controls'
   'com.2fdevs.videogular.plugins.overlayplay'
@@ -93,13 +93,13 @@ class Setup extends Config
       # .state 'blog.paged',
       #   url: '/page/:page'
 
-      # .state 'share',
-      #   url: '/public/*parameter'
-      #   templateUrl: '/app/share/share.html'
-      #   controller: 'share as page'
-      #   resolve:
-      #     promiseData: (imagoModel, $stateParams) ->
-      #       imagoModel.getData({path: '/public/' + $stateParams.parameter})
+      .state 'share',
+        url: '/public/*parameter'
+        templateUrl: '/app/share/share.html'
+        controller: 'share as page'
+        resolve:
+          promiseData: (imagoModel, $stateParams) ->
+            imagoModel.getData({path: '/public/' + $stateParams.parameter})
 
 class Load extends Run
 
@@ -111,8 +111,14 @@ class Load extends Run
       $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
       FastClick.attach(document.body)
 
-    $rootScope.hideMenu = ->
-      $rootScope.navActive = false
+    $rootScope.toggleMenu = (status) ->
+      if _.isUndefined status
+        $rootScope.navActive = !$rootScope.navActive
+      else
+        $rootScope.navActive =  status
+
+    $rootScope.$on '$stateChangeStart', (evt) ->
+      ngProgress.start()
 
     # fix adding class to late to main
     # $rootScope.$on '$stateChangeSuccess', (evt, toState) ->
@@ -141,5 +147,6 @@ class Load extends Run
       path = 'home' if path is ' '
       $rootScope.state = state
       $rootScope.path  = path
-      $rootScope.hideMenu()
+      $rootScope.toggleMenu(false)
+      ngProgress.done()
 

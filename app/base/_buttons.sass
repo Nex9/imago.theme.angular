@@ -2,8 +2,9 @@ a,
 button,
 .btn
   touch-action: manipulation
+  cursor: pointer
 
-button,
+
 .btn,
 a.btn
   border: 0
@@ -25,6 +26,14 @@ a.btn
     background-color: lighten($text-color, 10%)
   &:focus
     outline: none
+  &.active
+    background-color: $text-color
+    color: #fff
+
+
+
+button:disabled
+  opacity: 0.3
 
 .btn-primary
   @extend .btn

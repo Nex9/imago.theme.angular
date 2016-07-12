@@ -10,6 +10,7 @@ angular.module 'app', [
   'imago'
   'lodash'
   'ngSanitize'
+  'monospaced.elastic'
   # 'headroom'
   'com.2fdevs.videogular'
   'com.2fdevs.videogular.plugins.controls'

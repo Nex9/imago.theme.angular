@@ -104,7 +104,7 @@ class Setup extends Config
 
 class Load extends Run
 
-  constructor: ($rootScope, $state, $location, $timeout, tenantSettings, imagoUtils. ngProgress) ->
+  constructor: ($rootScope, $state, $location, $timeout, tenantSettings, imagoUtils, ngProgress) ->
     document.documentElement.classList.remove('nojs')
     $timeout ->
       $rootScope.js = true

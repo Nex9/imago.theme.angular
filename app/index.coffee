@@ -58,6 +58,7 @@ class Setup extends Config
       .state 'blog',
         url: '/blog'
         templateUrl: '/app/blog/blog.html'
+        reload: true
         data:
           pageSize: 50
           query: '/blog'

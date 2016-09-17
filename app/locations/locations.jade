@@ -1,0 +1,38 @@
+main.locations
+
+  section.map
+
+
+    //- h2.section-heading Amika Salons
+
+    //- pre {{page.markers|json}}
+
+    ui-gmap-google-map(
+      center="page.mapCenter"
+      zoom="13"
+      draggable="true"
+      options="{styles: gmapstyle}"
+      ng-if="page.loaded"
+      )
+      ui-gmap-search-box(
+        options="searchbox.options"
+        template="searchbox.template"
+        events="searchbox.events"
+        position="searchbox.position"
+        ng-model="searchModel.searchTerm")
+
+      ui-gmap-markers(
+        models="page.markers"
+        coords="'coords'"
+        options="page.markerOptions"
+        )
+        //- type="cluster"
+        //- doCluster="true"
+      ui-gmap-window(
+        coords="::page.data.fields.address.value.latlng"
+        show="page.showMapWindow"
+        closeClick="page.showMapWindow = false"
+        )
+        h2 Hey foo
+
+

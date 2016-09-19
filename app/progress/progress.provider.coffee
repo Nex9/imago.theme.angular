@@ -9,7 +9,7 @@ class ngProgress extends Provider
       ease: 'ease'
       trickleRate: 0.02
       trickleSpeed: 500
-      template: '<div class="ngProgressLite"><div class="ngProgressLiteBdar"><div class="ngProgressLiteBarShadow"></div></div></div>'
+      template: '<div class="ngProgressLite"><div class="ngProgressLiteBar"><div class="ngProgressLiteBarShadow"></div></div></div>'
 
     @$get = ->
       $progressBarEl = undefined

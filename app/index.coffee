@@ -113,6 +113,8 @@ class Load extends Run
       $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
       FastClick.attach(document.body)
 
+    $rootScope.videoTheme = 'https://storage.googleapis.com/videoangular-imago-theme/videoangular-imago-theme.min.css'
+
     $rootScope.toggleMenu = (status) ->
       if _.isUndefined status
         $rootScope.navActive = !$rootScope.navActive

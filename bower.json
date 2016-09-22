@@ -30,7 +30,7 @@
     "normalize.css": "~4",
     "sass-mediaqueries": "~1",
     "headroom.js": "https://npmcdn.com/headroom.js/bower.zip",
-    "fastclick": "~1",
+    "fastclick": "~1"
   },
   "resolutions": {
     "angular": "~1.5",

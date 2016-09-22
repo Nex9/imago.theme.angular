@@ -7,7 +7,7 @@
     ) Bag: {{cart.imagoCart.itemsLength}}
 
   div
-    .imago-cart-content(ng-show="cart.imagoCart.show")
+    .imago-cart-content(ng-if="cart.imagoCart.show")
       .imago-cart-items
         .item(ng-repeat="item in cart.imagoCart.cart.items track by item._id")
           button.remove(ng-click="cart.imagoCart.remove(item)" stop-propagation) X

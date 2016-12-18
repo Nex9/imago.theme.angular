@@ -107,11 +107,10 @@ class Load extends Run
 
   constructor: ($rootScope, $state, $location, $timeout, tenantSettings, imagoUtils, ngProgress) ->
     document.documentElement.classList.remove('nojs')
-    $timeout ->
-      $rootScope.js = true
-      $rootScope.mobile = imagoUtils.isMobile()
-      $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
-      FastClick.attach(document.body)
+    $rootScope.js = true
+    $rootScope.mobile = imagoUtils.isMobile()
+    $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
+    FastClick.attach(document.body)
 
     $rootScope.videoTheme = 'https://storage.googleapis.com/videoangular-imago-theme/videoangular-imago-theme.min.css'
 
@@ -146,6 +145,7 @@ class Load extends Run
     # general code
     $rootScope.$on '$stateChangeSuccess', (evt) ->
       $rootScope.urlPath = $location.path()
+      controller =  _.last $state.current.controller.split(' ')
       state = $state.current.name.split('.').join(' ')
       path  = $rootScope.urlPath.split('/').join(' ')
       path = 'home' if path is ' '

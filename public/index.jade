@@ -10,7 +10,7 @@ html(ng-app="app"
     include header
 
   body(
-    ng-class="[mobileClass, state, path, {'navActive': navActive}]"
+    ng-class="[mobileClass, state, controller, path, {'navActive': navActive}]"
     responsive-events imago-save-scroll)
 
     header(headroom)

@@ -70,6 +70,7 @@ h6
 ul,
 ol
   margin: 0 0 $baseline $baseline
+  padding: 0
 
 blockquote
   color: $text-color-muted
@@ -78,3 +79,21 @@ blockquote
   footer
     @extend small
     font-style: normal
+
+.text
+  > *
+    margin-top: 1em
+  ul,
+  ol
+    list-style-type: none
+    padding: 0
+    padding-left: 1.6em
+    li
+      @extend %futuraLight
+      &:before
+        width: 1.6em
+        display: inline-block
+        margin-left: -1.6em
+        content: '—'
+      p
+        margin: 0

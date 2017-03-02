@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "lodash": "*",
-    "angular": "~1.5",
+    "angular": "~1.6",
     "angular-moment": "*",
     "angular-animate": "*",
     "angular-elastic": "*",
@@ -33,7 +33,7 @@
     "fastclick": "~1"
   },
   "resolutions": {
-    "angular": "~1.5",
+    "angular": "~1.6",
     "angulartics": "~1"
   }
 }

@@ -17,13 +17,20 @@
   > .next
     right: 0
     &:hover
-      cursor: url("i/next.png") 40 40, auto
+      cursor: url("i/next.png"), e-resize
   > .prev
     left: 0
     &:hover
-      cursor: url("i/prev.png") 40 40, auto
+      cursor: url("i/prev.png"), w-resize
   .slide,
   .imago-image-content,
   .imago-video-content,
   .media
     +pos()
+
+
+
+// prevent flickering in safari with ng-hide ng-show
+.ng-hide-add
+.ng-hide-remove
+  display: none !important

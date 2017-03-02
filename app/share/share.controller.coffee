@@ -1,6 +1,6 @@
 class Share extends Controller
 
-  constructor: (@$http, @$location, $state, @imagoModel, promiseData) ->
+  constructor: (@$http, @$scope, @$location, $state, @imagoModel, promiseData) ->
 
     unless $state.params.parameter
       return @$location.path('/')
@@ -27,11 +27,17 @@ class Share extends Controller
       return $state.go 'contact'
 
     @breadcrumb = []
+
     path = ''
     for item, i in @data.path.split('/')
       continue if item is ''
       path = path + '/' + item
       @breadcrumb.push {name: item, path: path} unless item in ['','public']
+
+    if @data.fields.location
+      @data.fields.location.latlng =
+        latitude: @data.fields.location.value.lat
+        longitude: @data.fields.location.value.lng
 
   togglePrompt: ->
     @downloadPrompt = !@downloadPrompt
@@ -43,19 +49,16 @@ class Share extends Controller
     return unless validForm
     toDownload =
       assets      :  (asset._id for asset in @data.assets)
-      email       :  @downloadFormData.email
-      resolution  :  @downloadFormData.resolution
+      email       :  @downloadForm.data.email
+      resolution  :  @downloadForm.data.resolution
 
     @status = 'requested'
 
     @$http.post("#{@imagoModel.host}/api/assets/download", toDownload)
 
   clickOnAsset: (asset) ->
-    console.log asset.type, asset.count, asset.name
     if asset.count
       return @$location.path(asset.path)
-
-    # return unless asset.count > 0
 
     @fullsizeslider or= {}
     @fullsizeslider.show  = true
@@ -64,3 +67,8 @@ class Share extends Controller
   escWatch: (e) ->
     return unless e.which is 27
     @showfullsize.show = false
+
+  eventsMarker:
+    click: (evt) ->
+      window.open evt.map.mapUrl, '_blank'
+

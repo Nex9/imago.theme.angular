@@ -107,12 +107,17 @@ class Load extends Run
 
   constructor: ($rootScope, $state, $location, $timeout, tenantSettings, imagoUtils, ngProgress) ->
     document.documentElement.classList.remove('nojs')
+
+    # imago image enable blury preview
+    $rootScope.imagePlaceholder = true
+    # imago video theme
+    $rootScope.videoTheme = 'https://storage.googleapis.com/videoangular-imago-theme/videoangular-imago-theme.min.css'
+
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()
     $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
     FastClick.attach(document.body)
 
-    $rootScope.videoTheme = 'https://storage.googleapis.com/videoangular-imago-theme/videoangular-imago-theme.min.css'
 
     $rootScope.toggleMenu = (status) ->
       if _.isUndefined status
@@ -123,29 +128,12 @@ class Load extends Run
     $rootScope.$on '$stateChangeStart', (evt) ->
       ngProgress.start()
 
-    # fix adding class to late to main
-    # $rootScope.$on '$stateChangeSuccess', (evt, toState) ->
-    #   path  = toState.url.split('/').join(' ').trim()
-    #   path = 'home' if path is ''
-    #   $rootScope.state = toState.name.split('.').join(' ')
-    #   $rootScope.path  = path
-    #   $rootScope.hideMenu()
-
-    # $rootScope.$on '$viewContentLoaded', (evt, viewConfig) ->
-    #   notLoadedMain = document.querySelector('main:not(.loaded)')
-    #   if $rootScope.state and $rootScope.path
-    #     state = $rootScope.state?.split(' ')
-    #     path = $rootScope.path?.split(' ')
-    #     for item in path
-    #       notLoadedMain.classList.add(item)
-    #     for item in state
-    #       notLoadedMain.classList.add(item)
-    #   notLoadedMain.classList.add('loaded')
 
     # general code
     $rootScope.$on '$stateChangeSuccess', (evt) ->
       $rootScope.urlPath = $location.path()
-      controller =  _.last $state.current.controller.split(' ')
+      # blog has no controller
+      $rootScope.controller =  _.last $state.current.controller?.split(' ') or ''
       state = $state.current.name.split('.').join(' ')
       path  = $rootScope.urlPath.split('/').join(' ')
       path = 'home' if path is ' '

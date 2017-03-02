@@ -29,3 +29,4 @@ class InstagramController extends Controller
         return if angular.equals news, old
         request()
         watcher()
+

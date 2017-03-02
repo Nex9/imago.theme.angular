@@ -9,13 +9,15 @@ html(ng-app="app"
   head
     include header
 
+    //- script(src="//maps.googleapis.com/maps/api/js?key=AIzaSyBlLsv3TLIQBYhJU6z8vbAOsjJoHEnaDNo&callback=initMap" type="text/javascript")
+
   body(
     ng-class="[mobileClass, state, controller, path, {'navActive': navActive}]"
     responsive-events imago-save-scroll)
 
     header(headroom)
     not-supported
-    imago-main(ui-view ng-class="[state, path]")
+    imago-main(ui-view)
     footer
 
     include backuptemplate

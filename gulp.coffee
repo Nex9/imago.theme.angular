@@ -73,6 +73,7 @@ paths =
     'bower_components/imago/dist/imago-shop.js'
     'bower_components/imago/dist/imago-fetch.js'
     'bower_components/imago/dist/imago-modal.js'
+    'bower_components/imago/dist/imago-fields.js'
 
     # custom
     # 'bower_components/moment/moment.js'

@@ -2,8 +2,6 @@ class ProductController extends Controller
 
   constructor: (@$state, $rootScope, @$scope, @imagoProduct, @promiseData, @imagoCart) ->
 
-    # set default tab
-    @tab = 'information'
 
     if @imagoCart.currency
       return @getProduct()
@@ -24,15 +22,18 @@ class ProductController extends Controller
       optionsWhitelist : @optionsWhitelist
       lowStock  : 3
 
+    # set variant form url
     for item in @optionsWhitelist
       continue unless @$state.params[item.name]
       optionsProduct[item.name] = @$state.params[item.name]
 
+    # setup data
     for item in @promiseData
       @data = item
       @productItem = new @imagoProduct(item.variants, optionsProduct)
       break
 
+    # watch product options
     toWatchProperties = []
     createWatchFunc = (name) =>
       toWatchProperties.push(=> @productItem[name])
@@ -52,6 +53,14 @@ class ProductController extends Controller
 
     return unless changed
 
+
+    # change url
     @$state.go 'product', parameters,
-      'notify': false
-      'location': 'replace'
+      location: 'replace'
+      notify: false
+
+    # set selected variant
+    for item in @optionsWhitelist
+      @productItem.setOption item.name, parameters[item.name]
+
+

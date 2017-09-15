@@ -36,8 +36,8 @@ class Share extends Controller
 
     if @data.fields.location
       @data.fields.location.latlng =
-        latitude: @data.fields.location.value.lat
-        longitude: @data.fields.location.value.lng
+        latitude: @data.fields.location.value?.lat
+        longitude: @data.fields.location.value?.lng
 
   togglePrompt: ->
     @downloadPrompt = !@downloadPrompt

@@ -71,11 +71,20 @@ class Setup extends Config
 
       .state 'contact',
         url: '/contact'
-        templateUrl: '/app/page/page.html'
+        templateUrl: '/app/contact/contact.html'
         controller: 'page as page'
         resolve:
           promiseData: (imagoModel) ->
             imagoModel.getData '/contact'
+
+      .state 'subscribe',
+        url: '/subscribe'
+        templateUrl: '/app/subscribe/subscribe.html'
+        controller: 'page as page'
+        resolve:
+          promiseData: (imagoModel) ->
+            imagoModel.getData
+              path: '/subscribe'
 
 
       # .state 'shop',

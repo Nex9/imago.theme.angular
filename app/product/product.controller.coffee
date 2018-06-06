@@ -1,14 +1,26 @@
-class ProductController extends Controller
+class Controller extends Controller
 
   constructor: (@$state, $rootScope, @$scope, @imagoProduct, @promiseData, @imagoCart) ->
 
 
-    if @imagoCart.currency
-      return @getProduct()
+    for item in @promiseData
+      @data = item
+      for col in item.assets
+        norname = @imagoUtils.normalize(col.name)
+        if norname is 'product-images'
+          @productAssets = col.assets
+        else
+          @[norname] = col
 
-    watcher = $rootScope.$on 'imagocart:currencyloaded', (evt, data) =>
+      break
+
+    # wait if in case cart settings not loaded yet
+    if @imagoCart.currency
       @getProduct()
-      watcher()
+    else
+      watcher = @$rootScope.$on 'imagocart:currencyloaded', (evt, data) =>
+        @getProduct()
+        watcher()
 
   getProduct: ->
     @optionsWhitelist = [

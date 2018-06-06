@@ -10,7 +10,7 @@ main.subscribe
     )
 
     .imago-field
-      label(for="name") Name
+
       input(
         type="text"
         name="name"
@@ -18,9 +18,9 @@ main.subscribe
         placeholder="Name"
         required
         )
+      label(for="name") Name
 
     .imago-field
-      label(for="email") Email
       input(
         type="email"
         name="email"
@@ -28,5 +28,46 @@ main.subscribe
         placeholder="Email"
         required
         )
+      label(for="email") Email
+
+
+    .legal
+
+      h2 Legal
+
+      p {{tenantSettings.settings.name}} will use the information you provide on this form to be in touch with you and to provide updates and marketing. By selecting the boxes below you confirm your acceptance to receive marketing communications from {{tenantSettings.settings.name}}
+
+      .imago-field
+        input(
+          type="checkbox"
+          name="personalDataStore"
+          id="personalDataStore"
+          ng-model="contact.data.personalDataStore"
+          required
+          )
+        label(for="personalDataStore") I agree to my personal data being stored and used to receive the newsletter
+
+      .imago-field
+        input(
+          type="checkbox"
+          name="agreeReceive"
+          id="agreeReceive"
+          ng-model="contact.data.agreeReceive"
+          required
+          )
+        label(for="agreeReceive") I agree to receive information and commercial offers about {{tenantSettings.settings.name}}, eg. updates, new themes...
+
+      p(ng-show="tenantSettings.createsend.status === 'green' || tenantSettings.mailchimp.status === 'green'") We use
+        span(ng-show="tenantSettings.createsend.status === 'green'")  Campaign Monitor
+        span(ng-show="tenantSettings.createsend.status === 'green' && tenantSettings.mailchimp.status === 'green'")  and
+        span(ng-show="tenantSettings.mailchimp.status === 'green'")  Mailchimp
+         |  as our marketing automation platform. By clicking below to submit this form, you acknowledge that the information you provide will be transferred to these 3rd parties for processing in accordance with their Privacy Policy and Terms.&nbsp;
+        a(href="https://www.campaignmonitor.com/policies/" target="_blank"
+          ng-show="tenantSettings.createsend.status === 'green'") Campaignmonitor
+        | &nbsp;
+        a(href="https://mailchimp.com/legal/" target="_blank"
+          ng-show="tenantSettings.mailchimp.status === 'green'") Mailchimp
+
     .formcontrols
-      button.btn.send(type="submit") Subscribe
+      button.btn-primary(type="submit") Subscribe
+

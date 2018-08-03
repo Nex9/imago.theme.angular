@@ -121,6 +121,8 @@ class Load extends Run
     $rootScope.imagePlaceholder = true
     # imago video theme
     $rootScope.videoTheme = 'https://storage.googleapis.com/videoangular-imago-theme/videoangular-imago-theme.min.css'
+    # detect webp compartibility
+    $rootScope.webp = document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') == 0
 
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()

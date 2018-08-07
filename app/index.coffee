@@ -24,6 +24,7 @@ class Setup extends Config
 
     $sceProvider.enabled false
     $httpProvider.useApplyAsync true
+    $httpProvider.interceptors.push 'httpInterceptor'
 
     $provide.decorator '$exceptionHandler', [
       '$delegate'
@@ -42,9 +43,15 @@ class Setup extends Config
 
     $analyticsProvider.firstPageview true
     $locationProvider.html5Mode true
-    $urlRouterProvider.otherwise '/'
+    $urlRouterProvider.otherwise '/page-not-found'
 
     $stateProvider
+      # theme routes
+      .state 'page-not-found',
+        url: '/page-not-found'
+        templateUrl: '/app/page-not-found/page-not-found.html'
+
+      # custom routes
       .state 'home',
         url: '/'
         templateUrl: '/app/home/home.html'
@@ -120,7 +127,7 @@ class Load extends Run
     # imago image enable blury preview
     $rootScope.imagePlaceholder = true
     # imago video theme
-    $rootScope.videoTheme = 'https://storage.googleapis.com/videoangular-imago-theme/videoangular-imago-theme.min.css'
+    $rootScope.videoTheme = '//themes.imago.io/videoangular-imago-theme/videoangular-imago-theme.min.css'
     # detect webp compartibility
     $rootScope.webp = document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') == 0
 

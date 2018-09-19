@@ -30,7 +30,7 @@
     "normalize.css": "~4",
     "sass-mediaqueries": "~1",
     "headroom.js": "https://github.com/WickyNilliams/headroom.js/files/950268/bower.zip",
-    "fastclick": "~1"
+    "fastclick": "~1",
     "angulartics-google-tag-manager": "^0.0.1"
   },
   "resolutions": {

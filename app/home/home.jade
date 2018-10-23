@@ -1,3 +1,158 @@
 main.home
-  h1 Home
-  pre in page.data.assets {{page.data.assets}}
+  section(ng-repeat="item in ::page.data.assets track by item._id"
+    class="{{item.fields.layout.value || 'fullScreen'|normalize}}" ng-style="{backgroundColor: item.fields.color.value || 'white'}")
+
+    div(ng-switch="item.type")
+
+      //- heading start
+      .heading(ng-switch-when="heading" ng-class="item.fields.layout.value"
+        ng-style="{backgroundColor: item.fields.color.value}")
+        div(ng-switch="item.fields.size.value")
+          div(ng-switch-when="1")
+            h1 {{::item.fields.title.value}}
+          div(ng-switch-default)
+            h2 {{::item.fields.title.value}}
+          div(ng-switch-when="3")
+            h3 {{::item.fields.title.value}}
+
+
+      //- imageContent start
+      .imageContent(ng-switch-when="imageContent")
+        p {{::item.fields.description.value}}
+        .media
+          imago-video(data="::item" ng-if="::item.fields.formats"
+            controls="{{::!!item.fields.controls.value}}" stop-event="click")
+          imago-image(ng-if="::(!item.fields.formats && item.serving_url)" data="::item")
+
+      //- blocklist start
+      .blockList(ng-class="item.fields.layout.value" ng-switch-when="blockList")
+        .block
+          h2 {{::item.fields.title.value}}
+        .block
+        .block(ng-repeat="block in ::item.assets track by block._id")
+          h3 {{::block.fields.title.value}}
+        .block.learnmore(ng-show="::page.data.path ==='/home'")
+          a(href="/services")
+            h3 +
+              br
+              | Learn More
+
+      //- text
+      .textContent.padding(ng-class="[{indent:item.fields.indent.value},item.fields.align.value]" ng-style="{backgroundColor: item.fields.color.value}" ng-switch-when="text")
+        .text(ng-bind-html="item.fields.text.value" ng-show="item.fields.text.value")
+        .media
+          imago-video(data="::item" ng-if="::item.fields.formats"
+            controls="{{::!!item.fields.controls.value}}" stop-event="click")
+          imago-image(ng-if="::(!item.fields.formats && item.serving_url)" data="::item")
+
+
+      //- image
+      .image(ng-class="item.fields.size.value" ng-switch-when="image")
+        imago-image(ng-if="::item.serving_url" data="::item")
+
+      //- video
+      .video(ng-switch-when="video")
+        imago-video(data="::item" ng-if="::item.fields.formats"
+          controls="{{::!!item.fields.controls.value}}" stop-event="click")
+
+      .mapWidget.padding(ng-class="::item.fields.align.value" ng-switch-when="map")
+          ui-gmap-google-map(
+            ng-if="::item.fields.address.latlng"
+            center="::item.fields.address.center"
+            zoom="14"
+            draggable="true"
+            options="{styles: gmapstyle}"
+            )
+            div(ng-init="opts = {animation:1}")
+              ui-gmap-marker(
+                idKey="::item._id"
+                coords="::item.fields.address.latlng"
+                events="page.eventsMarker"
+                dragable="true"
+                options="{animation:4}"
+                icon="{url:'https://jce.imago.io/jce/latest/i/mapicon.png'}"
+              )
+
+      .galleryWidget(ng-switch-when="gallery")
+
+  section.contentFooter
+    .background
+    .row.padding
+      p Headquaters
+      p 185 Madison Avenue, Suite
+        br
+        | 600 New York, New York 10016
+        br
+        | USA
+        br
+        br
+        | Telephone&nbsp;
+        a(href="tel:+12122689009") (212) 268-9009
+        br
+        | Fax&nbsp;
+        a(href="tel:+12122685698") (212) 268-5698
+        br
+        br
+        a(href="mailto:info@JCEdwardCorp.com") info@JCEdwardCorp.com
+      p 3F, A3 Building
+        br
+        | Animation City, Xi Ping 3rd Road
+        br
+        | Nancheng District, Dongguan City,
+        br
+        | Guangdong Province, China
+        br
+        | 523079
+        br
+        br
+        | 电话: +86 (769) 2280-4009
+        br
+        | 电话: +86 (769) 2202-0780
+        br
+        | 传真: +86 (769) 2280-4001
+        br
+        br
+        a(href="mailto:info@JCEdwardChina.com") info@JCEdwardChina.com
+
+    .row.padding
+      p Careers
+      p USA
+        br
+        a(href="mailto:USCareers@JCEdwardCorp.com") USCareers@JCEdwardCorp.com
+        | Asia
+        br
+        br
+        | Pacific
+        br
+        | APACCareers@JCEdwardCorp.com
+      p &nbsp;
+
+    .row.padding
+      form.subscribe.imago-form(
+        imago-subscribe="subscribe"
+        data="page.form"
+        name="subscribe"
+        ng-submit="imagosubscribe.submit(subscribe)"
+        )
+
+        .imago-field
+          input(
+            type="email"
+            name="email"
+            ng-model="page.form.email"
+            placeholder="Enter email address to sign-up"
+            required
+            )
+
+
+
+
+
+
+    //- imago-video(data="::item" ng-if="::item.fields.formats"
+    //-   controls="{{::!!item.fields.controls.value}}" stop-event="click")
+    //- imago-image(ng-if="::!item.fields.formats && ::item.serving_url" data="::item")
+
+    //- .caption(ng-class="[{text: item.type === 'text'},{center: !item.fields.text.value}]" ng-style="{color: item.fields.textColor.value || 'black'}")
+    //-   h2 {{::item.fields.title.value}}
+    //-   .text(ng-bind-html="::item.fields.text.value" ng-show="item.fields.text.value")

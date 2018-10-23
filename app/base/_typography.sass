@@ -14,6 +14,7 @@ input,
 button,
 textarea
   +font-smoothing(antialiased)
+
   text-rendering: optimizeLegibility
 
 body
@@ -29,6 +30,7 @@ a:visited
   color: $link-color
   text-decoration: none
   cursor: pointer
+
   &:hover
     color: $text-color
 
@@ -47,7 +49,7 @@ h6
   margin: 0 0 $baseline
   line-height: 1.2
   user-select: text
-
+  font-weight: 400
 
 h1
   font-size: $h1-size
@@ -76,23 +78,28 @@ blockquote
   color: $text-color-muted
   font-style: italic
   margin-left: $baseline
+
   footer
     @extend small
+
     font-style: normal
 
 .text
   > *
     margin-top: 1em
+
   ul,
   ol
     list-style-type: none
     padding: 0
     padding-left: 1.6em
+
     li
       &:before
         width: 1.6em
         display: inline-block
         margin-left: -1.6em
-        content: '—'
+        content: "—"
+
       p
         margin: 0

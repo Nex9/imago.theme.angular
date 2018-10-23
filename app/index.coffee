@@ -16,6 +16,7 @@ angular.module 'app', [
   'com.2fdevs.videogular.plugins.controls'
   'com.2fdevs.videogular.plugins.overlayplay'
   'com.2fdevs.videogular.plugins.poster'
+  'uiGmapgoogle-maps'
 ]
 
 class Setup extends Config
@@ -52,29 +53,20 @@ class Setup extends Config
         templateUrl: '/app/page-not-found/page-not-found.html'
 
       # custom routes
-      .state 'home',
-        url: '/'
-        templateUrl: '/app/home/home.html'
-        controller: 'page as page'
-        resolve:
-          promiseData: (imagoModel) ->
-            imagoModel.getData
-              path: '/home'
-              recursive: true
 
-      .state 'blog',
-        url: '/blog'
-        templateUrl: '/app/blog/blog.html'
-        reload: true
-        data:
-          pageSize: 50
-          query: '/blog'
-      .state 'blog.paged',
-        url: '/page/:page'
-      .state 'blog.filtered',
-        url: '/tags/:tag'
-      .state 'blog.filtered.paged',
-        url: '/page/:page'
+      # .state 'blog',
+      #   url: '/blog'
+      #   templateUrl: '/app/blog/blog.html'
+      #   reload: true
+      #   data:
+      #     pageSize: 50
+      #     query: '/blog'
+      # .state 'blog.paged',
+      #   url: '/page/:page'
+      # .state 'blog.filtered',
+      #   url: '/tags/:tag'
+      # .state 'blog.filtered.paged',
+      #   url: '/page/:page'
 
       .state 'contact',
         url: '/contact'
@@ -119,6 +111,17 @@ class Setup extends Config
           promiseData: (imagoModel, $stateParams) ->
             imagoModel.getData({path: '/public/' + $stateParams.parameter})
 
+
+      .state 'home',
+        url: '/:url'
+        templateUrl: '/app/home/home.html'
+        controller: 'home as page'
+        resolve:
+          promiseData: (imagoModel, $stateParams) ->
+            imagoModel.getData
+              path: if $stateParams.url then "/#{$stateParams.url}" else '/home'
+              recursive: true
+
 class Load extends Run
 
   constructor: ($rootScope, $state, $location, $timeout, tenantSettings, imagoUtils, ngProgress) ->
@@ -130,6 +133,8 @@ class Load extends Run
     $rootScope.videoTheme = '//themes.imago.io/videoangular-imago-theme/videoangular-imago-theme.min.css'
     # detect webp compartibility
     $rootScope.webp = document.createElement('canvas').toDataURL('image/webp').indexOf('data:image/webp') == 0
+
+    $rootScope.gmapstyle = [{"featureType":"water","elementType":"geometry","stylers":[{"color":"#e9e9e9"},{"lightness":17}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":20}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#ffffff"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#ffffff"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#ffffff"},{"lightness":16}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#f5f5f5"},{"lightness":21}]},{"featureType":"poi.park","elementType":"geometry","stylers":[{"color":"#dedede"},{"lightness":21}]},{"elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#ffffff"},{"lightness":16}]},{"elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#333333"},{"lightness":40}]},{"elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#f2f2f2"},{"lightness":19}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#fefefe"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#fefefe"},{"lightness":17},{"weight":1.2}]}]
 
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()

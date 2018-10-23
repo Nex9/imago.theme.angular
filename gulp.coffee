@@ -1,5 +1,5 @@
 setdefault = true
-apikey     = 'T76VhWjDXbfuZJz6LQ8HD6oPC'
+apikey     = 'yHRfNqSlkI0L7WRijCJ2f4Kke'
 
 dest = 'public'
 src  = 'app'
@@ -81,6 +81,9 @@ paths =
     'bower_components/headroom.js/dist/headroom.js'
     'bower_components/headroom.js/dist/angular.headroom.js'
     'bower_components/angular-scroll/angular-scroll.js'
+
+    'bower_components/angular-simple-logger/dist/angular-simple-logger.js'
+    'bower_components/angular-google-maps/dist/angular-google-maps.js'
   ]
 
 configGulp =

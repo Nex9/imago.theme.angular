@@ -31,7 +31,8 @@
     "sass-mediaqueries": "~1",
     "headroom.js": "https://github.com/WickyNilliams/headroom.js/files/950268/bower.zip",
     "fastclick": "~1",
-    "angulartics-google-tag-manager": "^0.0.1"
+    "angulartics-google-tag-manager": "^0.0.1",
+    "angular-google-maps": "^2.4.1"
   },
   "resolutions": {
     "angular": "~1.5",

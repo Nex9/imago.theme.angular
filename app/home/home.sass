@@ -1,5 +1,235 @@
+$blockSpacing: 3em
+
 main.home
   // general styles
+  .heading
+    height: 70vw
+    position: relative
+    overflow: hidden
+    display: flex
+    flex-direction: column
+    justify-content: center
+
+    h1
+      position: relative
+      z-index: 2
+      font-family: "AustinWeb"
+      font-size: 10vw
+      margin: 0 70px
+      line-height: 1em
+
+    h2
+      position: relative
+      z-index: 2
+      font-size: 10vw
+      margin: 0 70px
+      line-height: 1em
+      font-weight: 300
+
+    h3
+      position: relative
+      z-index: 2
+      font-size: 5vw
+      margin: 0 70px
+      line-height: 1em
+      font-weight: 300
+
+    &.Padding.Left
+      margin-left: 65px
+
+  .imageContent
+    height: 50vw
+    display: flex
+    justify-content: space-between
+
+    // margin-bottom: $blockSpacing
+
+    p
+      align-self: flex-end
+      margin: 0
+      text-align: left
+      font-size: 1.5em
+      line-height: 1.2em
+      text-indent: 1em
+      position: relative
+      left: 40px
+      padding-left: 10vw
+      padding-bottom: 5vw
+      z-index: 2
+
+    .media
+      position: relative
+
+      .imago-image-content,
+      .imago-video-content
+        position: absolute
+        top: 0
+        right: 0
+        bottom: 0
+        left: 0
+
+    p, .media
+      width: 50%
+
+  .textContent
+    text-align: left
+    font-size: 1.5em
+    line-height: 1.2em
+    display: flex
+    justify-content: space-between
+
+    // margin-bottom: $blockSpacing
+
+    .text,
+    .media
+      width: calc(50% - 35px)
+
+    &.right
+      flex-direction: row-reverse
+
+    &.indent
+      text-indent: 2em
+
+    &.wide
+      .media
+        display: none
+
+      .text
+        width: 70%
+
+  .blockList
+    display: flex
+    justify-content: center
+    flex-wrap: wrap
+    margin-top: $blockSpacing
+
+    // margin-bottom: $blockSpacing
+
+    .block
+      overflow: hidden
+      font-size: 0.75em
+      font-weight: 300
+      width: 44vw
+      height: 44vw * 0.5
+      padding: 1em
+
+      &:first-child
+        color: #E15543
+
+      &:nth-child(2)
+        display: none
+
+      +min-screen($xsmall)
+        width: 44vw
+        height: 44vw * 0.5
+        font-size: 1em
+
+
+      +min-screen($small)
+        width: 30vw
+        height: 30vw * 0.75
+        font-size: 1em
+
+        &:nth-child(2)
+          display: block
+
+
+      +min-screen($medium)
+        width: 22vw
+        height: 22vw * 0.75
+        font-size: 1.05em
+
+
+      +min-screen($large)
+        width: 18vw
+        height: 18vw * 0.75
+        font-size: 1.1em
+
+
+      +min-screen($xlarge)
+        width: 12vw
+        height: 12vw * 0.75
+        font-size: 1.125em
+
+    &.Header.Center
+      .block:first-child
+        width: 100%
+        color: red
+
+      .block:nth-child(2)
+        display: none
+
+  .image
+    // margin-bottom: $blockSpacing
+
+    &.small .imago-image-content
+      height: 30vw
+
+    &.medium .imago-image-content
+      height: 50vw
+
+    &.large .imago-image-content
+      height: 80vw
+
+  .contentFooter
+    text-align: left
+    padding-top: $blockSpacing
+    margin: 0
+    margin-right: 65px
+    position: relative
+    overflow: hidden
+    background: #F9F9F9
+
+    .background
+      display: none
+      background: #F9F9F9
+      position: absolute
+      top: 0
+      right: 65px
+      bottom: 0
+      left: 0
+      z-index: 0
+
+    .row
+      display: flex
+      justify-content: center
+      align-content: center
+      margin-bottom: $blockSpacing
+      position: relative
+      z-index: 1
+
+      p
+        width: 18em
+        font-size: 1.25em
+        line-height: 1.25em
+
+        &:first-child
+          width: 10em
+
+      +max-screen($small)
+        flex-direction: column
+        display: flex
+        padding: 0 10vw
+
+  .mapWidget
+    // border: 1px solid red
+    // max-width: 500px
+    text-align: left
+
+    .angular-google-map
+      height: 500px
+      max-width: 500px
+
+      +max-screen($small)
+        height: 300px
+
+
+      .angular-google-map-container
+        width: inherit
+        height: inherit
+
+    &.Right .angular-google-map
+      margin-left: auto
 
 body.desktop main.home
   // desktop styles

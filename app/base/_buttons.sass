@@ -4,10 +4,9 @@ button,
   touch-action: manipulation
   cursor: pointer
 
-
 .btn,
 a.btn
-  border: 0
+  border: 1px
   border-radius: $btn-roundness
   background-color: $btn-default-bg
   color: $btn-default-text-color
@@ -17,34 +16,39 @@ a.btn
   font-size: inherit
   text-decoration: none
   display: inline-block
-  padding: .75em 1.5em
+  padding: 0.75em 1.5em
   user-select: none
+
   &:hover
     background-color: $text-color
     color: #fff
+
   &:active
     background-color: lighten($text-color, 10%)
+
   &:focus
     outline: none
+
   &.active
     background-color: $text-color
     color: #fff
-
-
 
 button:disabled
   opacity: 0.3
 
 .btn-primary
   @extend .btn
+
   background-color: $btn-primary-bg
   color: $btn-primary-text-color
 
 .btn-small
   @extend .btn
+
   font-size: $btn-small-font-size
 
 .btn-large
   @extend .btn
+
   font-size: $btn-large-font-size
   font-weight: bold

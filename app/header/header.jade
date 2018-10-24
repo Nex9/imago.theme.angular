@@ -1,8 +1,16 @@
 
+
+button.menu(ng-click="header.activate()") Menu
+
+a.logo(href="/") {{tenantSettings.settings.name}}
+
 imago-fetch(query="/")
-  nav
+  nav(ng-class="{active: navActive}")
     a(
+      ng-hide="item.path === '/'"
       ng-href="{{::item.path}}"
       ng-class="[{active: item.path === urlPath},item.name.toLowerCase()]"
       ng-repeat="item in ::imagofetch.result.assets"
       ui-sref-active="active") {{::item.fields.title.value || item.name}}
+
+

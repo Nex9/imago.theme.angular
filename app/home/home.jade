@@ -7,22 +7,40 @@ main.home
       //- heading start
       .heading(ng-switch-when="heading" ng-class="item.fields.layout.value"
         ng-style="{backgroundColor: item.fields.color.value}")
-        div(ng-switch="item.fields.size.value")
+        div(ng-switch="::item.fields.size.value")
           div(ng-switch-when="1")
-            h1 {{::item.fields.title.value}}
+            h1(ng-bind-html="::item.fields.title.value | newlineToBr")
           div(ng-switch-default)
-            h2 {{::item.fields.title.value}}
+            h2(ng-bind-html="::item.fields.title.value | newlineToBr")
           div(ng-switch-when="3")
-            h3 {{::item.fields.title.value}}
+            h3(ng-bind-html="::item.fields.title.value | newlineToBr")
 
 
       //- imageContent start
       .imageContent(ng-switch-when="imageContent")
         p {{::item.fields.description.value}}
-        .media
+        .media(ng-if="::!item.assets.length")
           imago-video(data="::item" ng-if="::item.fields.formats"
             controls="{{::!!item.fields.controls.value}}" stop-event="click")
           imago-image(ng-if="::(!item.fields.formats && item.serving_url)" data="::item")
+        .media(ng-if="::item.assets.length")
+          h4 Gallery:
+            br
+            | {{item.fields.title.value}}
+          imago-slider(
+            data="item.assets"
+            animation="fade"
+            loop="true"
+            )
+            .slide(ng-repeat="asset in imagoslider.assets track by asset._id"
+              ng-if="currentIndex === $index")
+              imago-video(ng-if="asset.fields.formats" data="asset")
+              imago-image(ng-if="!asset.fields.formats" data="asset")
+            //- .slider-index
+            //-   a(ng-repeat="asset in imagoslider.assets track by asset._id"
+            //-     ng-class="{ 'active': currentIndex === $index }"
+            //-     ng-click="imagoslider.setCurrent($index)"
+            //-     ng-if="currentIndex === $index") {{$index + 1}} / {{imagoslider.assets.length}}
 
       //- blocklist start
       .blockList(ng-class="item.fields.layout.value" ng-switch-when="blockList")
@@ -47,7 +65,7 @@ main.home
 
 
       //- image
-      .image(ng-class="item.fields.size.value" ng-switch-when="image")
+      .image(ng-class="::item.fields.size.value" ng-switch-when="image")
         imago-image(ng-if="::item.serving_url" data="::item")
 
       //- video
@@ -56,24 +74,39 @@ main.home
           controls="{{::!!item.fields.controls.value}}" stop-event="click")
 
       .mapWidget.padding(ng-class="::item.fields.align.value" ng-switch-when="map")
-          ui-gmap-google-map(
-            ng-if="::item.fields.address.latlng"
-            center="::item.fields.address.center"
-            zoom="14"
-            draggable="true"
-            options="{styles: gmapstyle}"
+        h3(ng-bind-html="item.fields.title.value")
+        ui-gmap-google-map(
+          ng-if="::item.fields.address.latlng"
+          center="::item.fields.address.center"
+          zoom="14"
+          draggable="true"
+          options="{styles: gmapstyle}"
+          )
+          div(ng-init="opts = {animation:1}")
+            ui-gmap-marker(
+              idKey="::item._id"
+              coords="::item.fields.address.latlng"
+              events="page.eventsMarker"
+              dragable="true"
+              options="{animation:4}"
+              icon="{url:'https://jce.imago.io/jce/latest/i/mapicon.png'}"
             )
-            div(ng-init="opts = {animation:1}")
-              ui-gmap-marker(
-                idKey="::item._id"
-                coords="::item.fields.address.latlng"
-                events="page.eventsMarker"
-                dragable="true"
-                options="{animation:4}"
-                icon="{url:'https://jce.imago.io/jce/latest/i/mapicon.png'}"
-              )
 
-      .galleryWidget(ng-switch-when="gallery")
+      .galleryWidget(ng-class="::item.fields.size.value" ng-switch-when="gallery")
+        h4 Gallery:
+            br
+            | {{item.fields.title.value}}
+        imago-slider(
+          data="::item.assets"
+          animation="fade"
+          loop="true"
+          )
+          .slide(ng-repeat="asset in imagoslider.assets track by asset._id"
+            ng-if="currentIndex === $index")
+            imago-video(ng-if="asset.fields.formats" data="asset")
+            imago-image(ng-if="!asset.fields.formats" data="asset")
+
+
 
   section.contentFooter
     .background

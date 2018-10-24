@@ -52,7 +52,7 @@ main.home
       line-height: 1.2em
       text-indent: 1em
       position: relative
-      left: 40px
+      left: 100px
       padding-left: 10vw
       padding-bottom: 5vw
       z-index: 2
@@ -61,12 +61,20 @@ main.home
       position: relative
 
       .imago-image-content,
-      .imago-video-content
+      .imago-video-content,
+      .iamgo-slider-content
         position: absolute
         top: 0
         right: 0
         bottom: 0
         left: 0
+
+      h4
+        position: absolute
+        margin: 0.5em 0.75em
+        top: 0
+        left: 0
+        z-index: 100
 
     p, .media
       width: 50%
@@ -230,6 +238,31 @@ main.home
 
     &.Right .angular-google-map
       margin-left: auto
+
+  .galleryWidget
+    height: 100vh
+    position: relative
+    overflow: hidden
+
+    h4
+      position: absolute
+      margin: 0.5em 0.75em
+      top: 0
+      left: 0
+      z-index: 100
+
+    &.small .imago-slider-content
+      height: 30vw
+
+    &.medium .imago-slider-content
+      height: 50vw
+
+    &.large .imago-slider-content
+      height: 80vw
+
+body.company
+  section
+    margin-bottom: $blockSpacing * 2
 
 body.desktop main.home
   // desktop styles

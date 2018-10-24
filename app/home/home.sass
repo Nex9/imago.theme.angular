@@ -85,8 +85,10 @@ main.home
     line-height: 1.2em
     display: flex
     justify-content: space-between
+    font-weight: 300
 
-    // margin-bottom: $blockSpacing
+    &.large
+      font-size: 2em
 
     .text,
     .media
@@ -220,13 +222,15 @@ main.home
         padding: 0 10vw
 
   .mapWidget
-    // border: 1px solid red
-    // max-width: 500px
-    text-align: left
+    text-align: center
+
+    h3
+      max-width: 500px
 
     .angular-google-map
-      height: 500px
-      max-width: 500px
+      height: 600px
+
+      // max-width: 600px
 
       +max-screen($small)
         height: 300px
@@ -236,8 +240,21 @@ main.home
         width: inherit
         height: inherit
 
-    &.Right .angular-google-map
-      margin-left: auto
+    &.Right
+      h3,
+      .angular-google-map
+        margin-left: auto
+
+      .angular-google-map
+        max-width: 600px
+
+    &.Left
+      h3,
+      .angular-google-map
+        margin-right: auto
+
+      .angular-google-map
+        max-width: 600px
 
   .galleryWidget
     height: 100vh

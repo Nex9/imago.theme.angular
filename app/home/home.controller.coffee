@@ -1,18 +1,21 @@
 class Home extends Controller
 
   constructor: (promiseData) ->
-    for asset in promiseData
-      @data = asset
-      for asset in @data.assets
-        if asset.types[0] is 'map'
-          if asset.fields.address
-            console.log 'asset.fields.address', asset.fields.address
-            asset.fields.address.latlng =
-              latitude:  asset.fields.address.value.lat
-              longitude: asset.fields.address.value.lng
-            asset.fields.address.center = _.clone asset.fields.address.latlng
+    return unless promiseData
+    if promiseData.length == 1
+      for asset in promiseData
+        @data = asset
+    else
+      @data = promiseData
+    # calc lat lng cause needs to be assignable on map drag    for asset in @data.asset
+    for asset in @data.assets
+      if asset.types[0] is 'map'
+        if asset.fields.address
+          asset.fields.address.latlng =
+            latitude:  asset.fields.address.value.lat
+            longitude: asset.fields.address.value.lng
 
-      break
+
 
 
   eventsMarker:

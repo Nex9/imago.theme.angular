@@ -1,37 +1,42 @@
 .imago-image-content,
 .imago-video-content
   .spin
-    border-top: 6px solid rgba(180,180,180,0.2)
+    border-top: 6px solid rgba(180, 180, 180, 0.2)
+
   .spin2
 
-
 .imago-slider-content
-  +pos()
+  +pos
+
   > .next,
   > .prev
     position: absolute
     z-index: 5
-    top:    60px
+    top: 60px
     bottom: 60px
     width: 30%
+
   > .next
     right: 0
+
     &:hover
-      cursor: url("i/next.png"), e-resize
+      cursor: url("i/next.svg"), e-resize
+
   > .prev
     left: 0
+
     &:hover
-      cursor: url("i/prev.png"), w-resize
+      cursor: url("i/prev.svg"), w-resize
+
   .slide,
   .imago-image-content,
   .imago-video-content,
   .media
-    +pos()
-
-
+    +pos
 
 // prevent flickering in safari with ng-hide ng-show
 // this can break ng hide show animation
 .ng-hide-add
+
 .ng-hide-remove
   display: none !important

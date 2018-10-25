@@ -1,11 +1,11 @@
 main.home
   section(ng-repeat="item in ::page.data.assets track by item._id"
-    class="{{item.fields.layout.value || 'fullScreen'|normalize}}" ng-style="{backgroundColor: item.fields.color.value || 'white'}")
+    ng-class="(item.fields.layout.value || 'fullScreen') | normalize" )
 
     div(ng-switch="item.type")
 
       //- heading start
-      .heading(ng-switch-when="heading" ng-class="item.fields.layout.value"
+      .heading(ng-switch-when="heading" ng-class="item.fields.layout.value | normalize"
         ng-style="{backgroundColor: item.fields.color.value}")
         div(ng-switch="::item.fields.size.value")
           div(ng-switch-when="1")
@@ -17,16 +17,16 @@ main.home
 
 
       //- imageContent start
-      .imageContent(ng-switch-when="imageContent")
+      .imageContent(ng-class="{fullscreen:item.fullscreen}" ng-switch-when="imageContent")
+        button(ng-click="item.fullscreen = !item.fullscreen")
+          span(ng-show="!item.fullscreen") Enlarge
+          span(ng-show="item.fullscreen") Close
         p {{::item.fields.description.value}}
         .media(ng-if="::!item.assets.length")
           imago-video(data="::item" ng-if="::item.fields.formats"
             controls="{{::!!item.fields.controls.value}}" stop-event="click")
           imago-image(ng-if="::(!item.fields.formats && item.serving_url)" data="::item")
         .media(ng-if="::item.assets.length")
-          h4 Gallery:
-            br
-            | {{item.fields.title.value}}
           imago-slider(
             data="item.assets"
             animation="fade"
@@ -36,19 +36,19 @@ main.home
               ng-if="currentIndex === $index")
               imago-video(ng-if="asset.fields.formats" data="asset")
               imago-image(ng-if="!asset.fields.formats" data="asset")
-            //- .slider-index
-            //-   a(ng-repeat="asset in imagoslider.assets track by asset._id"
-            //-     ng-class="{ 'active': currentIndex === $index }"
-            //-     ng-click="imagoslider.setCurrent($index)"
-            //-     ng-if="currentIndex === $index") {{$index + 1}} / {{imagoslider.assets.length}}
+
+              h4 {{::item.fields.title.value}}
+                br
+                | {{::asset.fields.title.value}}
+
 
       //- blocklist start
       .blockList(ng-class="item.fields.layout.value" ng-switch-when="blockList")
         .block
-          h2 {{::item.fields.title.value}}
+          h2(ng-bind-html="::item.fields.title.value | newlineToBr")
         .block
         .block(ng-repeat="block in ::item.assets track by block._id")
-          h3 {{::block.fields.title.value}}
+          h3(ng-bind-html="::block.fields.title.value | newlineToBr")
         .block.learnmore(ng-show="::page.data.path ==='/home'")
           a(href="/services")
             h3 +
@@ -65,7 +65,7 @@ main.home
 
 
       //- image
-      .image(ng-class="::item.fields.size.value" ng-switch-when="image")
+      .image(class="_{{item.fields.width.value|normalize}}", ng-class="[item.fields.size.value, item.fields.width.value, item.fields.align.value]", ng-switch-when="image")
         imago-image(ng-if="::item.serving_url" data="::item")
 
       //- video
@@ -73,15 +73,16 @@ main.home
         imago-video(data="::item" ng-if="::item.fields.formats"
           controls="{{::!!item.fields.controls.value}}" stop-event="click")
 
-      .mapWidget.padding(ng-class="::item.fields.align.value" ng-switch-when="map")
+      .mapWidget(ng-class="::item.fields.align.value" ng-switch-when="map")
         h3(ng-bind-html="item.fields.title.value" ng-show="item.fields.title.value.length")
         ui-gmap-google-map(
           ng-if="item.fields.address.latlng"
           center="item.fields.address.latlng"
           zoom="item.fields.zoom.value || 4"
-          draggable="false"
-          options="{styles: gmapstyle}"
+          options="{styles: gmapstyle, disableDefaultUI: true, zoomControl: true, draggable: true, fullscreenControl: true}"
           )
+
+
           ui-gmap-marker(
             ng-repeat="marker in ::item.assets"
             idKey="::marker._id"
@@ -93,9 +94,6 @@ main.home
           )
 
       .galleryWidget(ng-class="::item.fields.size.value" ng-switch-when="gallery")
-        h4 Gallery:
-            br
-            | {{item.fields.title.value}}
         imago-slider(
           data="::item.assets"
           animation="fade"
@@ -105,11 +103,13 @@ main.home
             ng-if="currentIndex === $index")
             imago-video(ng-if="asset.fields.formats" data="asset")
             imago-image(ng-if="!asset.fields.formats" data="asset")
+            h4 {{::item.fields.title.value}}
+              br
+              | {{::asset.fields.title.value}}
 
 
 
   section.contentFooter
-    .background
     .row.padding
       p Headquaters
       p 185 Madison Avenue, Suite

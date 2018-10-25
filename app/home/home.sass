@@ -4,6 +4,7 @@ main.home
   // general styles
   .heading
     height: 70vw
+    max-height: 100vh
     position: relative
     overflow: hidden
     display: flex
@@ -17,14 +18,16 @@ main.home
       font-size: 10vw
       margin: 0 70px
       line-height: 1em
+      letter-spacing: -1px
 
     h2
       position: relative
       z-index: 2
-      font-size: 10vw
+      font-size: 11vw
       margin: 0 70px
       line-height: 1em
       font-weight: 300
+      letter-spacing: -1px
 
     h3
       position: relative
@@ -34,28 +37,28 @@ main.home
       line-height: 1em
       font-weight: 300
 
-    &.Padding.Left
-      margin-left: 65px
+    &.padding-left
+      transition: margin-left 0.25s ease
+
+      +min-screen($small)
+        margin-left: 65px
 
   .imageContent
-    height: 50vw
-    display: flex
-    justify-content: space-between
+    position: relative
 
-    // margin-bottom: $blockSpacing
-
-    p
-      align-self: flex-end
+    button
+      position: absolute
+      top: 0.2em
+      right: 0.5em
+      z-index: 3
+      background: none
+      border: none
+      font-size: 0.8em
       margin: 0
-      text-align: left
-      font-size: 1.5em
-      line-height: 1.2em
-      text-indent: 1em
-      position: relative
-      left: 100px
-      padding-left: 10vw
-      padding-bottom: 5vw
-      z-index: 2
+
+    &.fullscreen button
+      position: fixed
+      z-index: 201
 
     .media
       position: relative
@@ -75,37 +78,111 @@ main.home
         top: 0
         left: 0
         z-index: 10
+        text-align: left
+        font-size: 0.8em
 
-    p, .media
-      width: 50%
+    &.fullscreen .media
+      background: white
+      width: 100vw
+      height: 100vh
+      position: fixed
+      top: 0
+      right: 0
+      bottom: 0
+      left: 0
+      z-index: 200
+
+    +max-screen($small)
+      display: flex
+      flex-direction: column-reverse
+      justify-content: space-between
+
+      .media
+        height: 100vw
+        margin-bottom: 3em
+
+      p
+        text-align: left
+        font-size: 2em
+        line-height: 1.25em
+        text-indent: 1em
+        padding-left: 1.5em
+        padding-right: 1em
+        max-width: 1200px
+        margin: 0 auto
+        padding: 0 2em
+
+
+    +min-screen($small)
+      height: 50vw
+      display: flex
+      justify-content: space-between
+
+      p, .media
+        width: 50%
+
+      p
+        align-self: flex-end
+        margin: 0
+        text-align: left
+        font-size: 3.6vw
+        font-weight: 400
+        line-height: 1em
+        text-indent: 1em
+        position: relative
+        left: 20px
+        padding-left: 8vw
+        padding-bottom: 5vw
+        z-index: 2
+
+
+    +min-screen($medium)
+      p
+        font-size: 2.6vw
 
   .textContent
     text-align: left
-    font-size: 1.5em
-    line-height: 1.2em
+    line-height: 1em
     display: flex
     justify-content: space-between
-    font-weight: 300
 
-    &.large
+    +max-screen($small)
+      flex-direction: column
       font-size: 2em
+      line-height: 1.25em
 
-    .text,
-    .media
-      width: calc(50% - 35px)
 
-    &.right
-      flex-direction: row-reverse
+    +min-screen($small)
+      font-size: 3.6vw
 
-    &.indent
-      text-indent: 2em
+      &.large
+        font-size: 4.5vw
+        font-weight: 300
 
-    &.wide
+      .text,
       .media
-        display: none
+        width: calc(50% - 35px)
 
-      .text
-        width: 70%
+      &.right
+        flex-direction: row-reverse
+
+      &.indent
+        text-indent: 2em
+
+      &.wide
+        .media
+          display: none
+
+        .text
+          width: 70%
+
+        &.wide
+          .text
+            width: 90%
+
+
+    +min-screen($medium)
+      font-size: 2.6vw
 
   .blockList
     display: flex
@@ -113,15 +190,27 @@ main.home
     flex-wrap: wrap
     margin-top: $blockSpacing
 
+    &::after
+      content: ""
+      flex: auto
+
     // margin-bottom: $blockSpacing
+    // padding-left: 3em
+    // padding-right: 3em
 
     .block
       overflow: hidden
-      font-size: 0.75em
-      font-weight: 300
-      width: 44vw
+      width: 50%
       height: 44vw * 0.5
-      padding: 1em
+
+      // border: 1px solid red
+
+      h3
+        font-size: 1.1em
+
+      display: flex
+      justify-content: center
+      align-items: center
 
       &:first-child
         color: #E15543
@@ -129,37 +218,20 @@ main.home
       &:nth-child(2)
         display: none
 
-      +min-screen($xsmall)
-        width: 44vw
-        height: 44vw * 0.5
-        font-size: 1em
-
-
       +min-screen($small)
-        width: 30vw
-        height: 30vw * 0.75
-        font-size: 1em
-
-        &:nth-child(2)
-          display: block
+        h3
+          font-size: 2vw
 
 
       +min-screen($medium)
-        width: 22vw
+        width: 25%
         height: 22vw * 0.75
-        font-size: 1.05em
 
+        h3
+          font-size: 1.65vw
 
-      +min-screen($large)
-        width: 18vw
-        height: 18vw * 0.75
-        font-size: 1.1em
-
-
-      +min-screen($xlarge)
-        width: 12vw
-        height: 12vw * 0.75
-        font-size: 1.125em
+        &:nth-child(2)
+          display: block
 
     &.Header.Center
       .block:first-child
@@ -170,7 +242,17 @@ main.home
         display: none
 
   .image
-    // margin-bottom: $blockSpacing
+    &._60-percent
+      .imago-image-content
+        width: 60%
+
+    &.right
+      .imago-image-content
+        margin-left: auto
+
+    &.left
+      .imago-image-content
+        margin-right: auto
 
     &.small .imago-image-content
       height: 30vw
@@ -186,19 +268,10 @@ main.home
     padding-top: $blockSpacing
     margin: 0
     margin-right: 65px
+    margin-top: 4em
     position: relative
     overflow: hidden
     background: #F9F9F9
-
-    .background
-      display: none
-      background: #F9F9F9
-      position: absolute
-      top: 0
-      right: 65px
-      bottom: 0
-      left: 0
-      z-index: 0
 
     .row
       display: flex
@@ -207,34 +280,40 @@ main.home
       margin-bottom: $blockSpacing
       position: relative
       z-index: 1
+      font-size: 1.25em
 
       p
         width: 18em
-        font-size: 1.25em
         line-height: 1.25em
 
         &:first-child
           width: 10em
 
-      +max-screen($small)
+      +max-screen($medium)
         flex-direction: column
         display: flex
         padding: 0 10vw
+
+
+      +max-screen($xsmall)
+        font-size: 1em
+
+
+      input
+        max-width: 46em
+        width: 100%
+        margin: 0 auto
 
   .mapWidget
     text-align: center
 
     h3
-      max-width: 500px
+      max-width: 68vw
+      margin-bottom: 3em
 
     .angular-google-map
-      height: 600px
-
-      // max-width: 600px
-
-      +max-screen($small)
-        height: 300px
-
+      height: 53vw
+      margin: 0 7vw
 
       .angular-google-map-container
         width: inherit
@@ -246,7 +325,7 @@ main.home
         margin-left: auto
 
       .angular-google-map
-        max-width: 600px
+        max-width: 68vw
 
     &.Left
       h3,
@@ -254,10 +333,11 @@ main.home
         margin-right: auto
 
       .angular-google-map
-        max-width: 600px
+        max-width: 68vw
 
   .galleryWidget
     height: 100vh
+    max-height: 100vw
     position: relative
     overflow: hidden
 
@@ -267,14 +347,16 @@ main.home
       top: 0
       left: 0
       z-index: 10
+      text-align: left
+      font-size: 0.8em
 
-    &.small .imago-slider-content
+    &.small
       height: 30vw
 
-    &.medium .imago-slider-content
+    &.medium
       height: 50vw
 
-    &.large .imago-slider-content
+    &.large
       height: 80vw
 
 body.company

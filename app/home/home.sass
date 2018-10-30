@@ -244,9 +244,9 @@ main.home
         &:nth-child(2)
           display: block
 
-    &.Header.Center
+    &.header-center
       .block:first-child
-        width: 100%
+        flex-basis: 100%
         color: red
 
       .block:nth-child(2)
@@ -387,18 +387,46 @@ body.company
   section
     margin-bottom: $blockSpacing * 2
 
-body.sustainability-and-compliance main.home
-  .blockList
-    margin-top: calc(5em + 6vw)
-    .block:first-child
-      display: block
-      text-align: center
-      flex: 0 0 100%
-      // height: auto
-
 
 body.desktop main.home
   // desktop styles
 
 body.mobile main.home
   // mobile styles
+
+
+
+// animations
+body.desktop
+  main.home
+    .heading
+      h1,h2,h3
+        text-shadow: 1px 1px rgba(white,0.1)
+        transition: all .25s
+        &:hover
+          text-shadow: 5px 5px rgba(white,0.6)
+
+
+    .imageContent
+      .media
+        transition: all .25s
+        &:hover
+          transform: scale(1.05)
+
+    .blockList
+      padding-bottom: 30px
+
+      .block:nth-child(n+3)
+        transition: all .25s
+        cursor: pointer
+        perspective: 800px
+
+        transform-origin: 50% 50%
+        h2, h3
+          transition: all .25s
+
+        &:hover
+          box-shadow: 0 0 5px rgba(black, .1)
+          transform: rotateX(5deg)
+          h2, h3
+            transform: scale(1.1)

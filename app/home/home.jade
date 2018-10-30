@@ -43,7 +43,7 @@ main.home
 
 
       //- blocklist start
-      .blockList(ng-class="item.fields.layout.value" ng-switch-when="blockList")
+      .blockList(ng-class="item.fields.layout.value | normalize" ng-switch-when="blockList")
         .block
           h2(ng-bind-html="::item.fields.title.value | newlineToBr")
         .block

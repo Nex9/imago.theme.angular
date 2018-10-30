@@ -7,6 +7,11 @@ header
   left: 0
   right: 0
   transition: background 0.25s ease
+  backdrop-filter: blur(10px)
+  height: $header-height
+
+  &.headroom--pinned
+    background: rgba(white, 1)
 
   a.logo
     position: relative
@@ -15,17 +20,48 @@ header
     left: 0
     top: 0
     margin-left: 20px
-    margin-bottom: 5px
     overflow: hidden
-    background: url(i/logo.svg) no-repeat
-    background-size: contain
-    height: 0
-    padding-top: 32px
+    perspective: 1000
     width: 100px
+    height: 32px
+
+    .front, .back
+      display: block
+      width: 100px
+      height: 32px
+      position: absolute
+      top: 0
+      left: 0
+      transition: 0.5s
+      backface-visibility: hidden
+      transform-style: preserve-3d
+      transition-delay: 0s
+      background: white
+
+    .front
+      background: url(i/logo.svg) no-repeat
+      background-size: contain
+
+    .back
+      transform: rotateX(180deg)
+      line-height: 2.2em
+
+    &.active
+      .front
+        transform: rotateX(180deg)
+
+      .back
+        transform: rotateX(0deg)
 
   // narrow
   +max-screen($small)
     background: white
+
+    a.logotext
+      position: absolute
+      top: 0
+      left: 0
+      border: 1px solid red
 
     .menu
       background: none
@@ -56,6 +92,9 @@ header
         &:last-child
           margin-top: 1em
 
+        &.active
+          border-bottom: 1px solid black
+
       &.active
         transform: translateY(0px)
 
@@ -74,10 +113,11 @@ header
       justify-content: center
       align-items: center
       height: 32px
+      margin-top: 4px
 
       a
         margin: 0.25em
-        font-size: 0.8em
+        font-size: 1em
         margin: 0 1em
         transition: transform 0.25s ease-in-out
         padding: 2em 0

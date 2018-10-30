@@ -43,3 +43,40 @@
 // select:-webkit-autofill:hover,
 // select:-webkit-autofill:focus
 //   transition: background-color 5000s ease-in-out 0s
+
+.imago-slider-content
+  > .next,
+  > .prev
+    position: absolute
+    z-index: 5
+    top: 0px
+    bottom: 0px
+    width: 30%
+
+    &:hover
+      cursor: pointer
+
+  > .next
+    right: 0
+
+    &:after
+      position: absolute
+      bottom: 20px
+      right: 15px
+      width: 30px
+      height: 11px
+      content: "Next"
+
+  > .prev
+    left: 0
+
+    &:after
+      position: absolute
+      bottom: 20px
+      left: 15px
+      width: 32px
+      height: 11px
+      content: "Back"
+
+    &:hover
+      cursor: none

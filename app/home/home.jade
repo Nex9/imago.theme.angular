@@ -76,14 +76,14 @@ main.home
       .mapWidget(ng-class="::item.fields.align.value" ng-switch-when="map")
         h3(ng-bind-html="item.fields.title.value" ng-show="item.fields.title.value.length")
         ui-gmap-google-map(
+
           ng-if="item.fields.address.latlng"
           center="item.fields.address.latlng"
           zoom="item.fields.zoom.value || 4"
           options="{styles: gmapstyle, disableDefaultUI: true, zoomControl: true, draggable: true, fullscreenControl: true}"
           )
-
-
           ui-gmap-marker(
+            fit="true"
             ng-repeat="marker in ::item.assets"
             idKey="::marker._id"
             coords="{latitude: marker.fields.address.value.lat, longitude: marker.fields.address.value.lng}"
@@ -92,8 +92,7 @@ main.home
             options="{animation:4}"
             icon="{url:'https://jce.imago.io/jce/latest/i/mapicon.png'}"
           )
-
-      .galleryWidget(ng-class="::item.fields.size.value" ng-switch-when="gallery")
+      .galleryWidget(class="_{{item.fields.width.value|normalize}}",ng-class="[item.fields.size.value,item.fields.align.value]",ng-switch-when="gallery")
         imago-slider(
           data="::item.assets"
           animation="fade"
@@ -112,9 +111,9 @@ main.home
   section.contentFooter
     .row.padding
       p Headquaters
-      p 185 Madison Avenue, Suite
+      p 185 Madison Avenue, Suite 600
         br
-        | 600 New York, New York 10016
+        | New York, New York 10016
         br
         | USA
         br
@@ -157,7 +156,7 @@ main.home
         br
         | Pacific
         br
-        | APACCareers@JCEdwardCorp.com
+        a(href="mailto:APACCareers@JCEdwardCorp.com") APACCareers@JCEdwardCorp.com
       p &nbsp;
 
     .row.padding

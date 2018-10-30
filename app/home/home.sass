@@ -43,18 +43,27 @@ main.home
       +min-screen($small)
         margin-left: 65px
 
+    +max-screen(500px)
+      height: 400px
+
+      h1
+        font-size: 3em
+        margin: 5px
+
   .imageContent
     position: relative
 
     button
       position: absolute
-      top: 0.2em
-      right: 0.5em
-      z-index: 3
+      top: 0
+      right: 0
+      z-index: 11
       background: none
       border: none
-      font-size: 0.8em
+      font-size: 1em
       margin: 0
+      padding: 7px 10px
+      line-height: normal
 
     &.fullscreen button
       position: fixed
@@ -79,7 +88,7 @@ main.home
         left: 0
         z-index: 10
         text-align: left
-        font-size: 0.8em
+        font-size: 1em
 
     &.fullscreen .media
       background: white
@@ -111,6 +120,7 @@ main.home
         max-width: 1200px
         margin: 0 auto
         padding: 0 2em
+        font-size: 1.35em
 
 
     +min-screen($small)
@@ -118,10 +128,11 @@ main.home
       display: flex
       justify-content: space-between
 
-      p, .media
-        width: 50%
+      .media
+        width: 60%
 
       p
+        width: 50%
         align-self: flex-end
         margin: 0
         text-align: left
@@ -148,7 +159,7 @@ main.home
 
     +max-screen($small)
       flex-direction: column
-      font-size: 2em
+      font-size: 1.35em;
       line-height: 1.25em
 
 
@@ -189,24 +200,19 @@ main.home
     justify-content: center
     flex-wrap: wrap
     margin-top: $blockSpacing
+    padding: 0 10px
 
     &::after
       content: ""
       flex: auto
 
-    // margin-bottom: $blockSpacing
-    // padding-left: 3em
-    // padding-right: 3em
-
     .block
       overflow: hidden
-      width: 50%
+      flex: 0 0 50%
       height: 44vw * 0.5
 
-      // border: 1px solid red
-
-      h3
-        font-size: 1.1em
+      h2,h3
+        font-size: 1em
 
       display: flex
       justify-content: center
@@ -219,15 +225,15 @@ main.home
         display: none
 
       +min-screen($small)
-        h3
+        h2, h3
           font-size: 2vw
 
 
       +min-screen($medium)
-        width: 25%
+        flex: 1 1 25%
         height: 22vw * 0.75
 
-        h3
+        h2, h3
           font-size: 1.65vw
 
         &:nth-child(2)
@@ -245,6 +251,9 @@ main.home
     &._60-percent
       .imago-image-content
         width: 60%
+
+        +max-screen($small)
+          width: 100%
 
     &.right
       .imago-image-content
@@ -267,11 +276,14 @@ main.home
     text-align: left
     padding-top: $blockSpacing
     margin: 0
-    margin-right: 65px
     margin-top: 4em
     position: relative
     overflow: hidden
     background: #F9F9F9
+
+    +min-screen($small)
+      margin-right: 65px
+
 
     .row
       display: flex
@@ -348,7 +360,7 @@ main.home
       left: 0
       z-index: 10
       text-align: left
-      font-size: 0.8em
+      font-size: 1em
 
     &.small
       height: 30vw
@@ -358,6 +370,14 @@ main.home
 
     &.large
       height: 80vw
+
+    &.right
+      margin-left: auto
+
+    &._60-percent
+      width: 60%
+      +max-screen($small)
+          width: 100%
 
 body.company
   section

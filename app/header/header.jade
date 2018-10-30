@@ -1,8 +1,10 @@
 
 
-button.menu(ng-click="header.activate()") Menu
+button.menu(ng-click="header.activate()") {{header.activeMenu || 'Menu'}}
 
-a.logo(href="/") {{tenantSettings.settings.name}}
+a.logo(ng-class="{active: navActive}" ng-click="header.activeMenu = ''" href="/")
+  span.front
+  span.back {{tenantSettings.settings.name}}
 
 imago-fetch(query="/")
   nav(ng-class="{active: navActive}")
@@ -11,6 +13,8 @@ imago-fetch(query="/")
       ng-href="{{::item.path}}"
       ng-class="[{active: item.path === urlPath},item.name.toLowerCase()]"
       ng-repeat="item in ::imagofetch.result.assets"
-      ui-sref-active="active") {{::item.fields.title.value || item.name}}
+      ui-sref-active="active"
+      ng-click="header.activeMenu = item.fields.title.value || item.name") {{::item.fields.title.value || item.name}}
+
 
 

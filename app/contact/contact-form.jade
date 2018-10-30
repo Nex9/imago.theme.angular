@@ -1,5 +1,5 @@
 .imago-form-content
-  form(name="imagoContact" ng-if="!contact.status" ng-submit="contact.submitForm(imagoContact.$valid)" novalidate)
+  form(name="imagoContact" ng-submit="contact.submitForm(imagoContact.$valid)" novalidate)
 
     .imago-field
       input(
@@ -7,10 +7,10 @@
         name="name"
         id="name"
         ng-model="contact.data.name"
-        placeholder="Name"
+        placeholder="First & Last Name"
         required
         )
-      label(for="name") Name
+      label(for="name") First & Last Name
 
     .imago-field
       input(
@@ -40,10 +40,10 @@
         name="website"
         id="website"
         ng-model="contact.data.website"
-        placeholder="Website"
+        placeholder="Company Website"
         required
         )
-      label(for="website") Website
+      label(for="website") Company Website
 
     .imago-field
       input(
@@ -55,6 +55,23 @@
         required
         )
       label(for="averageShipmentsPerMonth") Average Shipments per Month
+      select(
+        name="averageShipmentsPerMonth"
+        id="averageShipmentsPerMonth"
+        ng-model="contact.data.averageShipmentsPerMonth"
+        placeholder="Average Shipments per Month"
+        required
+        )
+        option My company doesn’t ship products
+        option Pre-launch, not shipping yet
+        option 0-1,000
+        option 1,000-2,000
+        option 2,000-100,000
+        option 100,000-500,000
+        option 500,000+
+
+
+
 
 
     .imago-field
@@ -67,6 +84,10 @@
         msd-elastic="\n"
         )
       label(for="message") Message
+
+
+
+
 
     .legal
       p This form collects your name and email so that we can add you to our newsletter list for awesome project updates. Check out our privacy policy for the Tull story on how we protect and manage your submitted data!
@@ -81,13 +102,11 @@
           )
         label(for="subscribe" style="display: block") I consent to having {{tenantSettings.settings.name}} collect my name and email
 
+    .imago-actions(ng-class="{submitted: contact.status !== undefined}")
+      button.btn.primary.send(type="submit")
+        span &nbsp;
+        span.thanks(ng-show="contact.status === true") Thank you for Contacting Us. We’ll be in touch shortly.
+        span.thanks(ng-show="contact.status === false") Sorry there was an error, please try again later.
+        span.submitting
+        span.send Send
 
-    .imago-actions
-      button.btn.primary.send(type="submit") Send
-
-  .messages(ng-switch="contact.status")
-    .success(ng-switch-when="true")
-      span Thank You!
-
-    .error(ng-switch-when="false")
-      span Error: {{contact.error}}

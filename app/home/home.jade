@@ -76,21 +76,19 @@ main.home
       .mapWidget(ng-class="::item.fields.align.value" ng-switch-when="map")
         h3(ng-bind-html="item.fields.title.value" ng-show="item.fields.title.value.length")
         ui-gmap-google-map(
-
           ng-if="item.fields.address.latlng"
           center="item.fields.address.latlng"
-          zoom="item.fields.zoom.value || 4"
+          zoom="item.fields.zoom.value"
           options="{styles: gmapstyle, disableDefaultUI: true, zoomControl: true, draggable: true, fullscreenControl: true}"
           )
-          ui-gmap-marker(
-            fit="true"
-            ng-repeat="marker in ::item.assets"
-            idKey="::marker._id"
-            coords="{latitude: marker.fields.address.value.lat, longitude: marker.fields.address.value.lng}"
-            events="page.eventsMarker"
-            dragable="false"
-            options="{animation:4}"
-            icon="{url:'https://jce.imago.io/jce/latest/i/mapicon.png'}"
+          ui-gmap-markers(
+            models="item.markers"
+            coords="'self'"
+            icon="'icon'"
+            click="'onclicked'"
+						options="'options'"
+						idkey="'idKey'"
+            fit="!item.fields.zoom.value"
           )
       .galleryWidget(class="_{{item.fields.width.value|normalize}}",ng-class="[item.fields.size.value,item.fields.align.value]",ng-switch-when="gallery")
         imago-slider(
@@ -165,16 +163,9 @@ main.home
         data="page.form"
         name="subscribe"
         ng-submit="imagosubscribe.submit(subscribe)"
+        template-url="/app/footer/subscribe-form.html"
         )
 
-        .imago-field
-          input(
-            type="email"
-            name="email"
-            ng-model="page.form.email"
-            placeholder="Enter email address to sign-up"
-            required
-            )
 
 
 

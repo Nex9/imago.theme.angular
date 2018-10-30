@@ -156,6 +156,7 @@ main.home
     line-height: 1em
     display: flex
     justify-content: space-between
+    padding-top: 5vw
 
     +max-screen($small)
       flex-direction: column
@@ -223,6 +224,10 @@ main.home
 
       &:nth-child(2)
         display: none
+
+      +min-screen($xsmall)
+        h2, h3
+          font-size: 1.1em
 
       +min-screen($small)
         h2, h3
@@ -292,7 +297,6 @@ main.home
       margin-bottom: $blockSpacing
       position: relative
       z-index: 1
-      font-size: 1.25em
 
       p
         width: 18em
@@ -382,6 +386,16 @@ main.home
 body.company
   section
     margin-bottom: $blockSpacing * 2
+
+body.sustainability-and-compliance main.home
+  .blockList
+    margin-top: calc(5em + 6vw)
+    .block:first-child
+      display: block
+      text-align: center
+      flex: 0 0 100%
+      // height: auto
+
 
 body.desktop main.home
   // desktop styles

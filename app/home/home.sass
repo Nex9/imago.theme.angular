@@ -322,6 +322,7 @@ main.home
 
   .mapWidget
     text-align: center
+    margin: 0 7vw
 
     h3
       max-width: 68vw
@@ -329,7 +330,6 @@ main.home
 
     .angular-google-map
       height: 53vw
-      margin: 0 7vw
 
       .angular-google-map-container
         width: inherit
@@ -396,37 +396,40 @@ body.mobile main.home
 
 
 
-// animations
-body.desktop
-  main.home
-    .heading
-      h1,h2,h3
-        text-shadow: 1px 1px rgba(white,0.1)
-        transition: all .25s
-        &:hover
-          text-shadow: 5px 5px rgba(white,0.6)
+// // animations
+// body.desktop
+//   main.home
 
 
-    .imageContent
-      .media
-        transition: all .25s
-        &:hover
-          transform: scale(1.05)
+//     .heading
+//       // bacground fades in and text comes up later
+//       h1,h2,h3
+//         text-shadow: 1px 1px rgba(white,0.1)
+//         transition: all .25s
+//         &:hover
+//           text-shadow: 5px 5px rgba(white,0.6)
 
-    .blockList
-      padding-bottom: 30px
 
-      .block:nth-child(n+3)
-        transition: all .25s
-        cursor: pointer
-        perspective: 800px
+//     .imageContent
+//       .media
+//         transition: all .25s
+//         &:hover
+//           transform: scale(1.05)
 
-        transform-origin: 50% 50%
-        h2, h3
-          transition: all .25s
+//     .blockList
+//       padding-bottom: 30px
 
-        &:hover
-          box-shadow: 0 0 5px rgba(black, .1)
-          transform: rotateX(5deg)
-          h2, h3
-            transform: scale(1.1)
+//       .block:nth-child(n+3)
+//         transition: all .25s
+//         cursor: pointer
+//         perspective: 800px
+
+//         transform-origin: 50% 50%
+//         h2, h3
+//           transition: all .25s
+
+//         &:hover
+//           box-shadow: 0 0 5px rgba(black, .1)
+//           transform: rotateX(5deg)
+//           h2, h3
+//             transform: scale(1.1)

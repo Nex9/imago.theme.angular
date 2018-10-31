@@ -289,7 +289,7 @@ class Load extends Run
 
     $rootScope.js = true
     $rootScope.mobile = imagoUtils.isMobile()
-    $rootScope.mobileClass = if $rootScope.mobile then 'mobidle' else 'desktop'
+    $rootScope.mobileClass = if $rootScope.mobile then 'mobile' else 'desktop'
     FastClick.attach(document.body)
 
 

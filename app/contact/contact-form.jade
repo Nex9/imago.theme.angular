@@ -51,10 +51,10 @@
         name="averageShipmentsPerMonth"
         id="averageShipmentsPerMonth"
         ng-model="contact.data.averageShipmentsPerMonth"
-        placeholder="Average Shipments per Month"
+        placeholder="Average Shipments Per Month"
         required
         )
-      label(for="averageShipmentsPerMonth") Average Shipments per Month
+      label(for="averageShipmentsPerMonth") Average Shipments Per Month
       select(
         name="averageShipmentsPerMonth"
         id="averageShipmentsPerMonth"
@@ -79,7 +79,7 @@
         name="message"
         id="message"
         ng-model="contact.data.message"
-        placeholder="Your message."
+        placeholder="Your Message."
         required
         msd-elastic="\n"
         )
@@ -92,7 +92,7 @@
     .legal
       p This form collects your name and email so that we can add you to our newsletter list for awesome project updates.
         br
-        | Check out our privacy policy for the Tull story on how we protect and manage your submitted data!
+        | Check out our privacy policy for the full story on how we protect and manage your submitted data!
 
       .imago-field
         input(
@@ -110,5 +110,5 @@
         span.thanks(ng-show="contact.status === true") Thank you for Contacting Us. We’ll be in touch shortly.
         span.thanks(ng-show="contact.status === false") Sorry there was an error, please try again later.
         span.submitting
-        span.send Send
+        span.send Submit
 

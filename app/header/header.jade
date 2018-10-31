@@ -1,11 +1,14 @@
 
 
-button.menu(ng-click="header.activate()") {{header.activeMenu || 'Menu'}}
+button.menu(ng-click="header.activate()" ng-hide="navActive") {{header.activeMenu || 'Menu'}}
+button.menu(ng-click="header.activate()" ng-show="navActive") {{'Close'}}
+
 
 a.logo(ng-class="{active: navActive}" ng-click="header.activeMenu = ''" href="/")
   span.front
   span.back {{tenantSettings.settings.name}}
 
+.back(ng-click="navActive = false")
 imago-fetch(query="/")
   nav(ng-class="{active: navActive}")
     a(

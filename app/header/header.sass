@@ -6,12 +6,12 @@ header
   top: 0
   left: 0
   right: 0
-  transition: background 0.25s ease
-  backdrop-filter: blur(10px)
+  transition: all 0.25s ease
   height: $header-height
+  background: rgba(white, 1)
+  backdrop-filter: blur(0px)
 
-  &.headroom--pinned
-    background: rgba(white, 1)
+  // &.headroom--pinned
 
   a.logo
     position: relative
@@ -56,6 +56,14 @@ header
   // narrow
   +max-screen($small)
     background: white
+
+    &.active
+      height: 100vh
+      background: transparent
+      backdrop-filter: blur(10px)
+
+      .back
+        +pos
 
     a.logotext
       position: absolute
@@ -119,7 +127,7 @@ header
         margin: 0.25em
         font-size: 1em
         margin: 0 1em
-        transition: transform 0.25s ease-in-out
+        transition: transform 0.125s ease-in-out
         padding: 2em 0
 
         &:not(.home)

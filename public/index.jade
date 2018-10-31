@@ -22,7 +22,7 @@ html(ng-app="app"
     ng-class="[mobileClass, state, controller, path, {'navActive': navActive}]"
     responsive-events imago-save-scroll)
 
-    header(headroom)
+    header(ng-class="{active: navActive}")
     imago-main(ui-view)
     footer
 

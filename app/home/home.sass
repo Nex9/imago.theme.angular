@@ -2,84 +2,641 @@ $blockSpacing: 3em
 
 main.home
   // general styles
-  .heading
-    height: 70vw
-    max-height: 100vh
-    position: relative
-    overflow: hidden
-    display: flex
-    flex-direction: column
-    justify-content: center
 
-    h1
+  a.link,
+  .text a
+    transition: opacity 0.25s
+
+  a.link:hover,
+  .text a:hover
+    opacity: 0.3
+
+  section
+    .heading
+      height: 70vw
+      max-height: 100vh
       position: relative
-      z-index: 2
-      font-family: "AustinWeb"
-      font-size: 10vw
-      margin: 0 70px
-      line-height: 1em
-      letter-spacing: -1px
+      overflow: hidden
+      display: flex
+      flex-direction: column
+      justify-content: center
 
-    h2
-      position: relative
-      z-index: 2
-      font-size: 11vw
-      margin: 0 70px
-      line-height: 1em
-      font-weight: 300
-      letter-spacing: -1px
-
-    h3
-      position: relative
-      z-index: 2
-      font-size: 5vw
-      margin: 0 70px
-      line-height: 1em
-      font-weight: 300
-
-    &.padding-left
-      transition: margin-left 0.25s ease
-
-      +min-screen($small)
-        margin-left: 65px
-
-    +max-screen(500px)
-      height: 400px
+      &.size2
+        height: 50vw
 
       h1
-        font-size: 3em
-        margin: 5px
+        position: relative
+        z-index: 2
+        font-family: "AustinWeb"
+        font-size: 10vw
+        margin: 0 70px
+        line-height: 1em
+        letter-spacing: -1px
 
-  .imageContent
-    position: relative
+      h2
+        position: relative
+        z-index: 2
+        font-size: 11vw
+        margin: 0 70px
+        line-height: 1em
+        font-weight: 300
+        letter-spacing: -1px
 
-    button
-      position: absolute
-      top: 0
-      right: 0
-      z-index: 11
-      background: none
-      border: none
-      font-size: 1em
-      margin: 0
-      padding: 7px 10px
-      line-height: normal
+      h3
+        position: relative
+        z-index: 2
+        font-size: 5vw
+        margin: 0 20px
+        line-height: 1em
+        font-weight: 300
 
-    &.fullscreen button
-      position: fixed
-      z-index: 201
+        +max-screen($small)
+          font-size: 10vw
 
-    .media
+      &.padding-left
+        +min-screen($small)
+          margin-left: 65px
+
+      +max-screen(500px)
+        height: 400px
+
+        h1
+          font-size: 3em
+          margin: 5px
+
+    // animation
+    .heading
+      transition: all 0.25s ease
+      opacity: 0
+
+      h1, h2, h3
+        transition: all 0.5s ease
+        transition-delay: 0.5s
+        top: 20px
+        opacity: 0
+
+    &.inview .heading
+      opacity: 1
+
+      h1, h2, h3
+        top: 0
+        opacity: 1
+
+  section
+    .imageContent
       position: relative
 
-      .imago-image-content,
-      .imago-video-content,
-      .iamgo-slider-content
+      button
         position: absolute
+        top: 0
+        right: 0
+        z-index: 11
+        background: none
+        border: none
+        font-size: 1em
+        margin: 0
+        padding: 7px 10px
+        line-height: normal
+
+        +max-screen(600px)
+          display: none
+
+      &.fullscreen button
+        position: fixed
+        z-index: 201
+
+      .media
+        position: relative
+
+        .imago-image-content,
+        .imago-video-content,
+        .iamgo-slider-content
+          position: absolute
+          top: 0
+          right: 0
+          bottom: 0
+          left: 0
+
+        h4
+          position: absolute
+          margin: 0.5em 0.75em
+          top: 0
+          left: 0
+          z-index: 10
+          text-align: left
+          font-size: 1em
+
+      &.fullscreen .media
+        background: white
+        width: 100vw
+        height: 100vh
+        position: fixed
         top: 0
         right: 0
         bottom: 0
         left: 0
+        z-index: 200
+
+      +max-screen($small)
+        display: flex
+        flex-direction: column-reverse
+        justify-content: space-between
+
+        .media
+          height: 100vw
+          margin-bottom: 3em
+
+        p
+          text-align: left
+          font-size: 2em
+          line-height: 1.25em
+          text-indent: 1em
+          padding-left: 1.5em
+          padding-right: 1em
+          max-width: 1200px
+          margin: 0 auto
+          padding: 0 2em
+          font-size: 1.35em
+
+
+      &.right
+        +min-screen($small)
+          flex-direction: row-reverse
+
+      +min-screen($small)
+        height: 50vw
+        display: flex
+        justify-content: space-between
+
+        .media
+          width: 60%
+
+        p
+          width: 50%
+          align-self: flex-end
+          margin: 0
+          text-align: left
+          font-size: 3.6vw
+          font-weight: 400
+          line-height: 1em
+          text-indent: 1em
+          position: relative
+          left: 20px
+          padding-left: 8vw
+          padding-bottom: 5vw
+          z-index: 2
+
+
+      +min-screen($medium)
+        p
+          font-size: 2.6vw
+
+    // animation
+    .imageContent
+      .media
+        opacity: 0
+        transform: scale(0.9)
+        transition: all 0.25s ease-out
+
+      p
+        opacity: 0
+        top: 50px
+        transition: all 0.25s ease-out
+        transition-delay: 0.5s
+
+    &.inview .imageContent
+      .media
+        opacity: 1
+        transform: scale(1)
+
+      p
+        opacity: 1
+        top: 0
+
+  section
+    .textContent
+      text-align: left
+      line-height: 1em
+      display: flex
+      justify-content: space-between
+      padding-top: 5vw
+      padding-bottom: 5vw
+
+      .text p:first-child
+        margin-top: 0
+
+      .text p:last-child
+        margin-bottom: 0
+
+      +max-screen($small)
+        flex-direction: column
+        font-size: 1.35em
+        line-height: 1.25em
+
+
+      +min-screen($small)
+        font-size: 3.6vw
+
+        &.large
+          font-size: 4.5vw
+          font-weight: 300
+
+        .text,
+        .media
+          width: calc(50% - 35px)
+
+        &.right
+          flex-direction: row-reverse
+
+        &.indent
+          text-indent: 2em
+
+        &.wide
+          .media
+            display: none
+
+          .text
+            width: 70%
+
+          &.wide
+            .text
+              width: 90%
+
+
+      +min-screen($medium)
+        font-size: 2.6vw
+
+    // animation
+
+    .textContent
+      .text
+        position: relative
+        opacity: 0
+        top: 50px
+        transition: all 0.25s ease-out
+        transition-delay: 0s
+
+    &.inview .textContent
+      .text
+        opacity: 1
+        top: 0px
+
+  section
+    .blockList
+      display: flex
+      justify-content: flex-start
+      flex-wrap: wrap
+      margin-top: $blockSpacing
+      padding: 0 10px
+
+      &::after
+        content: ""
+        flex: auto
+
+      .block
+        overflow: hidden
+        position: relative
+        flex: 0 0 50%
+        height: 44vw * 0.5
+        transition: background 0.25s ease
+
+        .block-heading
+          h2, h3
+            font-size: 1em
+
+        .block-text
+          opacity: 0
+          transform: translateY(50px)
+
+          p
+            padding: 1em
+
+        .block-heading, .block-text
+          transition: all 0.25s ease
+
+          +pos
+
+          display: flex
+          justify-content: center
+          align-items: center
+
+        &:not(:hover)
+          background-color: white !important
+
+        &:hover
+          .block-heading
+            opacity: 0
+            transform: translateY(-50px)
+
+          .block-text
+            opacity: 1
+            transform: translateY(0px)
+
+        &:first-child
+          color: #E15543
+
+        &:nth-child(2)
+          display: none
+
+        +min-screen($xsmall)
+          .block-heading
+            h2, h3
+              font-size: 1.1em
+
+          .block-text
+            p
+              font-size: 1.1em
+
+
+        +min-screen($small)
+          .block-heading
+            h2, h3
+              font-size: 2vw
+
+          .block-text
+            p
+              font-size: 1.3em
+
+
+        +min-screen($medium)
+          flex: 0 0 25%
+          height: 22vw * 0.75
+
+          .block-heading
+            h2, h3
+              font-size: 1.65vw
+
+          .block-text
+            p
+              font-size: 1.4em
+
+          &:nth-child(2)
+            display: block
+
+      &.header-center
+        .block:first-child
+          flex-basis: 100%
+          color: red
+
+        .block:nth-child(2)
+          display: none
+
+        // animation
+
+    // for animation make container full height
+    .blocklist
+      min-height: 100vh
+
+    &.inview .blockList
+      background: white
+      min-height: initial
+
+    // stagger animation
+    .block
+      &.ng-enter
+        transition: all linear 0.125s
+        opacity: 0
+
+      &.ng-enter.ng-enter-active
+        opacity: 1
+
+      &.ng-enter-stagger
+        transition-delay: 0
+        transition-duration: 0
+
+      &.ng-enter-stagger,
+      &.ng-leave-stagger,
+      &.ng-move-stagger
+        // 200ms will be applied between each sucessive enter operation
+        transition-delay: 0.125s
+
+      &.ng-enter,
+      &.ng-leave,
+      &.ng-move
+        transition: 0.25s linear all
+
+      &.ng-leave.ng-leave-active,
+      &.ng-enter,
+      &.ng-move
+        transition: 0.25s linear all
+        opacity: 0
+        line-height: 0
+
+      &.ng-leave,
+      &.ng-move.ng-move-active,
+      &.ng-enter.ng-enter-active
+        opacity: 1
+
+  section
+    .image
+      &._60-percent
+        .imago-image-content
+          width: 60%
+
+          +max-screen($small)
+            width: 100%
+
+      &.right
+        .imago-image-content
+          margin-left: auto
+
+      &.left
+        .imago-image-content
+          margin-right: auto
+
+      &.small .imago-image-content
+        height: 30vw
+
+      &.medium .imago-image-content
+        height: 50vw
+
+      &.large .imago-image-content
+        height: 80vw
+
+        // animation
+
+    .image
+      transition: all 0.25s ease-out
+      opacity: 0
+      position: relative
+      top: 50px
+
+    &.inview .image
+      opacity: 1
+      top: 0px
+
+  section
+    .contentFooter
+      text-align: left
+      padding-top: $blockSpacing
+      margin: 0
+      margin-top: 4em
+      position: relative
+      overflow: hidden
+      background: #F9F9F9
+
+      // +min-screen($small)
+      //   margin-right: 65px
+
+      .row
+        display: flex
+        justify-content: center
+        align-content: center
+        margin-bottom: $blockSpacing
+        position: relative
+        z-index: 1
+
+        p
+          width: 18em
+          line-height: 1.25em
+
+          &:first-child
+            width: 10em
+
+        +max-screen($medium)
+          flex-direction: column
+          display: flex
+          padding: 0 10vw
+
+
+        +max-screen($xsmall)
+          font-size: 1em
+
+      .footerform
+        height: 100px
+        background: blue
+        transition: background 0.25s ease
+
+        .form,
+        .action
+          width: 100%
+          position: absolute
+          height: 100px
+          display: flex
+          flex-direction: column
+          justify-content: center
+          align-items: center
+          transition: transform 0.25s ease
+
+        .action
+          h2
+            margin: 0.5em 0
+            font-size: 2em
+
+        .form
+          transform: translateX(-100%)
+          transition: transform 0.25s ease
+
+        form
+          position: relative
+
+        .imago-subscribe-content
+          input
+            border: none !important
+            width: 100%
+            margin: 0 auto
+            line-height: normal
+            text-align: left
+
+          // animation
+
+          .imago-actions
+            position: absolute
+            top: 0
+            right: 0
+            z-index: 100
+
+            button
+              border: none
+              padding: 0.625em 0.5em
+
+            color: lighten($text-color-muted, 15%)
+
+        &.subscribe
+          background: yellow
+
+          .form
+            transform: translateX(0%)
+
+          .action
+            transform: translateX(100%)
+
+    .contentFooter
+      transition: all 0.25s ease-out
+      opacity: 0
+      position: relative
+      top: 50px
+
+    &.inview .contentFooter
+      opacity: 1
+      top: 0px
+
+  section
+    .mapWidget
+      text-align: center
+      margin: 0 7vw
+
+      +max-screen($xsmall)
+        text-align: left
+
+
+      h3
+        max-width: 68vw
+        margin-bottom: 3em
+
+        +max-screen($xsmall)
+          max-width: none
+          width: 100%
+
+      .angular-google-map
+        height: 53vw
+
+        .angular-google-map-container
+          width: inherit
+          height: inherit
+
+      &.Right
+        h3,
+        .angular-google-map
+          margin-left: auto
+
+        .angular-google-map
+          max-width: 68vw
+
+          +max-screen($xsmall)
+            max-width: none
+            width: 100%
+
+      &.Left
+        h3,
+        .angular-google-map
+          margin-right: auto
+
+        .angular-google-map
+          max-width: 68vw
+
+          +max-screen($xsmall)
+            max-width: none
+            width: 100%
+
+        // animation
+
+    .mapWidget
+      transition: all 0.25s ease-out
+      opacity: 0
+      top: 50px
+      position: relative
+
+    &.inview .mapWidget
+      opacity: 1
+      top: 0
+
+  section
+    .galleryWidget
+      height: calc(100vh - 20px)
+      max-height: 100vw
+      position: relative
+      overflow: hidden
 
       h4
         position: absolute
@@ -90,346 +647,40 @@ main.home
         text-align: left
         font-size: 1em
 
-    &.fullscreen .media
-      background: white
-      width: 100vw
-      height: 100vh
-      position: fixed
-      top: 0
-      right: 0
-      bottom: 0
-      left: 0
-      z-index: 200
+      &.small
+        height: 30vw
 
-    +max-screen($small)
-      display: flex
-      flex-direction: column-reverse
-      justify-content: space-between
-
-      .media
-        height: 100vw
-        margin-bottom: 3em
-
-      p
-        text-align: left
-        font-size: 2em
-        line-height: 1.25em
-        text-indent: 1em
-        padding-left: 1.5em
-        padding-right: 1em
-        max-width: 1200px
-        margin: 0 auto
-        padding: 0 2em
-        font-size: 1.35em
-
-
-    +min-screen($small)
-      height: 50vw
-      display: flex
-      justify-content: space-between
-
-      .media
-        width: 60%
-
-      p
-        width: 50%
-        align-self: flex-end
-        margin: 0
-        text-align: left
-        font-size: 3.6vw
-        font-weight: 400
-        line-height: 1em
-        text-indent: 1em
-        position: relative
-        left: 20px
-        padding-left: 8vw
-        padding-bottom: 5vw
-        z-index: 2
-
-
-    +min-screen($medium)
-      p
-        font-size: 2.6vw
-
-  .textContent
-    text-align: left
-    line-height: 1em
-    display: flex
-    justify-content: space-between
-    padding-top: 5vw
-
-    +max-screen($small)
-      flex-direction: column
-      font-size: 1.35em;
-      line-height: 1.25em
-
-
-    +min-screen($small)
-      font-size: 3.6vw
+      &.medium
+        height: 50vw
 
       &.large
-        font-size: 4.5vw
-        font-weight: 300
-
-      .text,
-      .media
-        width: calc(50% - 35px)
+        height: 80vw
 
       &.right
-        flex-direction: row-reverse
+        margin-left: auto
 
-      &.indent
-        text-indent: 2em
-
-      &.wide
-        .media
-          display: none
-
-        .text
-          width: 70%
-
-        &.wide
-          .text
-            width: 90%
-
-
-    +min-screen($medium)
-      font-size: 2.6vw
-
-  .blockList
-    display: flex
-    justify-content: center
-    flex-wrap: wrap
-    margin-top: $blockSpacing
-    padding: 0 10px
-
-    &::after
-      content: ""
-      flex: auto
-
-    .block
-      overflow: hidden
-      flex: 0 0 50%
-      height: 44vw * 0.5
-
-      h2,h3
-        font-size: 1em
-
-      display: flex
-      justify-content: center
-      align-items: center
-
-      &:first-child
-        color: #E15543
-
-      &:nth-child(2)
-        display: none
-
-      +min-screen($xsmall)
-        h2, h3
-          font-size: 1.1em
-
-      +min-screen($small)
-        h2, h3
-          font-size: 2vw
-
-
-      +min-screen($medium)
-        flex: 1 1 25%
-        height: 22vw * 0.75
-
-        h2, h3
-          font-size: 1.65vw
-
-        &:nth-child(2)
-          display: block
-
-    &.header-center
-      .block:first-child
-        flex-basis: 100%
-        color: red
-
-      .block:nth-child(2)
-        display: none
-
-  .image
-    &._60-percent
-      .imago-image-content
+      &._60-percent
         width: 60%
 
         +max-screen($small)
           width: 100%
 
-    &.right
-      .imago-image-content
-        margin-left: auto
-
-    &.left
-      .imago-image-content
-        margin-right: auto
-
-    &.small .imago-image-content
-      height: 30vw
-
-    &.medium .imago-image-content
-      height: 50vw
-
-    &.large .imago-image-content
-      height: 80vw
-
-  .contentFooter
-    text-align: left
-    padding-top: $blockSpacing
-    margin: 0
-    margin-top: 4em
-    position: relative
-    overflow: hidden
-    background: #F9F9F9
-
-    +min-screen($small)
-      margin-right: 65px
-
-
-    .row
-      display: flex
-      justify-content: center
-      align-content: center
-      margin-bottom: $blockSpacing
+    .galleryWidget
+      transition: all 0.25s ease-out
+      opacity: 0
       position: relative
-      z-index: 1
+      top: 50px
 
-      p
-        width: 18em
-        line-height: 1.25em
-
-        &:first-child
-          width: 10em
-
-      +max-screen($medium)
-        flex-direction: column
-        display: flex
-        padding: 0 10vw
-
-
-      +max-screen($xsmall)
-        font-size: 1em
-
-
-      input
-        max-width: 46em
-        width: 100%
-        margin: 0 auto
-
-  .mapWidget
-    text-align: center
-    margin: 0 7vw
-
-    h3
-      max-width: 68vw
-      margin-bottom: 3em
-
-    .angular-google-map
-      height: 53vw
-
-      .angular-google-map-container
-        width: inherit
-        height: inherit
-
-    &.Right
-      h3,
-      .angular-google-map
-        margin-left: auto
-
-      .angular-google-map
-        max-width: 68vw
-
-    &.Left
-      h3,
-      .angular-google-map
-        margin-right: auto
-
-      .angular-google-map
-        max-width: 68vw
-
-  .galleryWidget
-    height: 100vh
-    max-height: 100vw
-    position: relative
-    overflow: hidden
-
-    h4
-      position: absolute
-      margin: 0.5em 0.75em
+    &.inview .galleryWidget
+      opacity: 1
       top: 0
-      left: 0
-      z-index: 10
-      text-align: left
-      font-size: 1em
-
-    &.small
-      height: 30vw
-
-    &.medium
-      height: 50vw
-
-    &.large
-      height: 80vw
-
-    &.right
-      margin-left: auto
-
-    &._60-percent
-      width: 60%
-      +max-screen($small)
-          width: 100%
 
 body.company
   section
     margin-bottom: $blockSpacing * 2
-
 
 body.desktop main.home
   // desktop styles
 
 body.mobile main.home
   // mobile styles
-
-
-
-// // animations
-// body.desktop
-//   main.home
-
-
-//     .heading
-//       // bacground fades in and text comes up later
-//       h1,h2,h3
-//         text-shadow: 1px 1px rgba(white,0.1)
-//         transition: all .25s
-//         &:hover
-//           text-shadow: 5px 5px rgba(white,0.6)
-
-
-//     .imageContent
-//       .media
-//         transition: all .25s
-//         &:hover
-//           transform: scale(1.05)
-
-//     .blockList
-//       padding-bottom: 30px
-
-//       .block:nth-child(n+3)
-//         transition: all .25s
-//         cursor: pointer
-//         perspective: 800px
-
-//         transform-origin: 50% 50%
-//         h2, h3
-//           transition: all .25s
-
-//         &:hover
-//           box-shadow: 0 0 5px rgba(black, .1)
-//           transform: rotateX(5deg)
-//           h2, h3
-//             transform: scale(1.1)

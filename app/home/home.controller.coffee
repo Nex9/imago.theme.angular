@@ -1,12 +1,13 @@
 class Home extends Controller
 
-  constructor: (promiseData) ->
+  constructor: (promiseData, @$timeout) ->
     return unless promiseData
     if promiseData.length == 1
       for asset in promiseData
         @data = asset
     else
       @data = promiseData
+
 
     # calc lat lng cause needs to be assignable on map drag    for asset in @data.asset
     for asset in @data.assets
@@ -19,6 +20,8 @@ class Home extends Controller
         # markers
         asset.markers = []
         for marker in asset.assets
+          iconurl = if marker.fields.color?.value is 'green' then 'https://jce.imago.io/jce/latest/i/mapicon-green.png' else 'https://jce.imago.io/jce/latest/i/mapicon-red.png'
+          # console.log 'iconurl', iconurl
           asset.markers.push
             latitude:  marker.fields.address.value.lat
             longitude: marker.fields.address.value.lng
@@ -31,10 +34,14 @@ class Home extends Controller
             options:
               animation:4
             icon:
-              url:'https://jce.imago.io/jce/latest/i/mapicon.png'
-        console.log 'asset.markers', asset.markers
+              url: iconurl
 
 
+
+  sectionInview: (inview, section) ->
+    # console.log 'inview, section', inview, section.name
+    return if !inview or section.inview
+    section.inview = true
 
 
   eventsMarker:

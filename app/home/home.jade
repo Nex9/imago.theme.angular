@@ -1,11 +1,14 @@
 main.home
   section(ng-repeat="item in ::page.data.assets track by item._id"
-    ng-class="(item.fields.layout.value || 'fullScreen') | normalize" )
+    ng-class="[((item.fields.layout.value || 'fullScreen') | normalize), {inview: item.inview}]"
+    in-view="item.inview = true"
+    in-view-options="{throttle: 300, offset:['-30%', '50%']}"
+    )
 
     div(ng-switch="item.type")
 
       //- heading start
-      .heading(ng-switch-when="heading" ng-class="item.fields.layout.value | normalize"
+      .heading(ng-switch-when="heading" ng-class="[(item.fields.layout.value | normalize), 'size'+item.fields.size.value]"
         ng-style="{backgroundColor: item.fields.color.value}")
         div(ng-switch="::item.fields.size.value")
           div(ng-switch-when="1")
@@ -17,9 +20,9 @@ main.home
 
 
       //- imageContent start
-      .imageContent(ng-class="{fullscreen:item.fullscreen}" ng-switch-when="imageContent")
+      .imageContent(ng-class="[{fullscreen:item.fullscreen}, item.fields.layout.value]" ng-switch-when="imageContent")
         button(ng-click="item.fullscreen = !item.fullscreen")
-          span(ng-show="!item.fullscreen") Enlarge
+          span.enlarge(ng-show="!item.fullscreen") Enlarge
           span(ng-show="item.fullscreen") Close
         p {{::item.fields.description.value}}
         .media(ng-if="::!item.assets.length")
@@ -45,15 +48,20 @@ main.home
       //- blocklist start
       .blockList(ng-class="item.fields.layout.value | normalize" ng-switch-when="blockList")
         .block
-          h2(ng-bind-html="::item.fields.title.value | newlineToBr")
+          .block-heading
+            h2(ng-bind-html="::item.fields.title.value | newlineToBr")
         .block
-        .block(ng-repeat="block in ::item.assets track by block._id")
-          h3(ng-bind-html="::block.fields.title.value | newlineToBr")
+        .block(ng-if="item.inview" ng-repeat="block in ::item.assets track by block._id" ng-style="{backgroundColor: block.fields.color.value}")
+          .block-heading
+            h3(ng-bind-html="::block.fields.title.value | newlineToBr")
+          .block-text
+            p {{::block.fields.description.value | newlineToBr}}
         .block.learnmore(ng-show="::page.data.path ==='/home'")
-          a(href="/services")
-            h3 +
-              br
-              | Learn More
+          a.link(href="/services")
+            .block-heading
+              h3 +
+                br
+                | Learn More
 
       //- text
       .textContent.padding(ng-class="[{indent:item.fields.indent.value},item.fields.align.value, item.fields.size.value]" ng-style="{backgroundColor: item.fields.color.value}" ng-switch-when="text")
@@ -90,6 +98,14 @@ main.home
 						idkey="'idKey'"
             fit="!item.fields.zoom.value"
           )
+          //- ui-gmap-window(
+          //-   show="item.window.show"
+          //-   coords="item.window.model"
+          //-   options="item.window.options"
+          //-   closeClick="item.window.closeClick()"
+          //-   templateUrl="'<h1>hello</h1>'"
+          //-   templateParameter="item.window")
+
       .galleryWidget(class="_{{item.fields.width.value|normalize}}",ng-class="[item.fields.size.value,item.fields.align.value]",ng-switch-when="gallery")
         imago-slider(
           data="::item.assets"
@@ -106,76 +122,57 @@ main.home
 
 
 
-  section.contentFooter
-    .row.padding
-      p Headquaters
-      p 185 Madison Avenue, Suite 600
-        br
-        | New York, New York 10016
-        br
-        | USA
-        br
-        br
-        | Telephone&nbsp;
-        a(href="tel:+12122689009") (212) 268-9009
-        br
-        | Fax&nbsp;
-        a(href="tel:+12122685698") (212) 268-5698
-        br
-        br
-        a(href="mailto:info@JCEdwardCorp.com") info@JCEdwardCorp.com
-      p 3F, A3 Building
-        br
-        | Animation City, Xi Ping 3rd Road
-        br
-        | Nancheng District, Dongguan City,
-        br
-        | Guangdong Province, China
-        br
-        | 523079
-        br
-        br
-        | 电话: +86 (769) 2280-4009
-        br
-        | 电话: +86 (769) 2202-0780
-        br
-        | 传真: +86 (769) 2280-4001
-        br
-        br
-        a(href="mailto:info@JCEdwardChina.com") info@JCEdwardChina.com
-
-    .row.padding
-      p Careers
-      p USA
-        br
-        a(href="mailto:USCareers@JCEdwardCorp.com") USCareers@JCEdwardCorp.com
-        | Asia
-        br
-        br
-        | Pacific
-        br
-        a(href="mailto:APACCareers@JCEdwardCorp.com") APACCareers@JCEdwardCorp.com
-      p &nbsp;
-
-    .row.padding
-      form.subscribe.imago-form(
-        imago-subscribe="subscribe"
-        data="page.form"
-        name="subscribe"
-        ng-submit="imagosubscribe.submit(subscribe)"
-        template-url="/app/footer/subscribe-form.html"
-        )
+  section(ng-class="[((item.fields.layout.value || 'fullScreen') | normalize), {inview: item.inview}]"
+    in-view="item.inview = $inview"
+    in-view-options="{throttle: 300}")
+    .contentFooter
+      .row.footerform(ng-class="{subscribe: page.subscribe}")
+        .action(ng-click="page.subscribe = true")
+          h2 Work with Us →
+        .form(ng-click="page.subscribe = false")
+          form.subscribe.imago-form(
+            stop-event="click"
+            imago-subscribe="subscribe"
+            data="page.form"
+            name="subscribe"
+            ng-submit="imagosubscribe.submit(subscribe)"
+            template-url="/app/footer/subscribe-form.html"
+            )
+      .row.padding
+        p Headquarters
+        p 185 Madison Avenue, Suite 600
+          br
+          | New York, New York 10016
+          br
+          | USA
+          br
+          br
+          | Telephone&nbsp;
+          a(href="tel:+12122689009") (212) 268-9009
+          br
+          | Fax&nbsp;
+          a(href="tel:+12122685698") (212) 268-5698
+          br
+          br
+          a(href="mailto:info@JCEdwardCorp.com") info@JCEdwardCorp.com
+        p 3F, A3 Building
+          br
+          | Animation City, Xi Ping 3rd Road
+          br
+          | Nancheng District, Dongguan City,
+          br
+          | Guangdong Province, China
+          br
+          | 523079
+          br
+          br
+          | 电话: +86 (769) 2280-4009
+          br
+          | 电话: +86 (769) 2202-0780
+          br
+          | 传真: +86 (769) 2280-4001
+          br
+          br
+          a(href="mailto:info@JCEdwardChina.com") info@JCEdwardChina.com
 
 
-
-
-
-
-
-    //- imago-video(data="::item" ng-if="::item.fields.formats"
-    //-   controls="{{::!!item.fields.controls.value}}" stop-event="click")
-    //- imago-image(ng-if="::!item.fields.formats && ::item.serving_url" data="::item")
-
-    //- .caption(ng-class="[{text: item.type === 'text'},{center: !item.fields.text.value}]" ng-style="{color: item.fields.textColor.value || 'black'}")
-    //-   h2 {{::item.fields.title.value}}
-    //-   .text(ng-bind-html="::item.fields.text.value" ng-show="item.fields.text.value")

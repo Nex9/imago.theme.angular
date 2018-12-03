@@ -17,8 +17,7 @@ body
   imago-main
     min-height: 100vh
     padding-top: $header-height
-
-    // padding-bottom: $footer-height
+    padding-bottom: $footer-height
     main
       +max-screen($medium)
         padding-top: $mobile-header-height
@@ -29,3 +28,5 @@ body
   // max-width: 1200px
   margin: 0 auto
   padding: 0 2em
+  +max-screen($xsmall)
+    padding: 0 7vw

@@ -102,7 +102,7 @@
           ng-model="contact.data.subscribe"
           required
           )
-        label(for="subscribe" style="display: block") I consent to having {{tenantSettings.settings.name}} collect my name and email
+        label(for="subscribe" style="display: block") I consent to having my name and email collected.
 
     .imago-actions(ng-class="{submitted: contact.status !== undefined}")
       button.btn.primary.send(type="submit")

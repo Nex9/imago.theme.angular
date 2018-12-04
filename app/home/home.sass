@@ -323,7 +323,7 @@ main.home
         &:not(:hover)
           background-color: white !important
 
-        &:hover
+        &:nth-child(n+3):hover
           .block-heading
             opacity: 0
             transform: translateY(-50px)
@@ -504,7 +504,7 @@ main.home
 
       .footerform
         height: 100px
-        background: blue
+        background: #042BC1
         transition: background 0.25s ease
 
         .form,
@@ -553,7 +553,7 @@ main.home
             color: lighten($text-color-muted, 15%)
 
         &.subscribe
-          background: yellow
+          background: #FFDB00
 
           .form
             transform: translateX(0%)

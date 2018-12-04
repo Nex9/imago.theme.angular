@@ -93,18 +93,18 @@ main.home
             models="item.markers"
             coords="'self'"
             icon="'icon'"
-            click="'onclicked'"
 						options="'options'"
 						idkey="'idKey'"
             fit="!item.fields.zoom.value"
+            events="item.markerEvents"
           )
           //- ui-gmap-window(
-          //-   show="item.window.show"
-          //-   coords="item.window.model"
-          //-   options="item.window.options"
-          //-   closeClick="item.window.closeClick()"
-          //-   templateUrl="'<h1>hello</h1>'"
-          //-   templateParameter="item.window")
+          //-   show="item.activeMarker"
+          //-   coords="item.activeMarker.coords"
+          //-   closeClick="item.activeMarker.markerEvents.closeClick()")
+          //-     h2 hello xxx {{item.activeMarker|json}}
+        //- pre x{{item.activeMarker}}
+
 
       .galleryWidget(class="_{{item.fields.width.value|normalize}}",ng-class="[item.fields.size.value,item.fields.align.value]",ng-switch-when="gallery")
         imago-slider(

@@ -18,18 +18,27 @@ class Home extends Controller
             latitude:  asset.fields.address.value.lat
             longitude: asset.fields.address.value.lng
         # markers
+        asset.markerEvents =
+          closeClick: ->
+            # console.log 'close click'
+            asset.activeMarker = null
+          click: (marker, eventName, model, args) ->
+            # console.log 'marker, eventName, model, args', marker, eventName, model, args
+            # console.log 'asset', asset
+            asset.activeMarker = marker
+
         asset.markers = []
         for marker in asset.assets
           iconurl = if marker.fields.color?.value is 'green' then 'https://jce.imago.io/jce/latest/i/mapicon-green.png' else 'https://jce.imago.io/jce/latest/i/mapicon-red.png'
           # console.log 'iconurl', iconurl
           asset.markers.push
+            asset: marker
             latitude:  marker.fields.address.value.lat
             longitude: marker.fields.address.value.lng
             idKey: marker._id
             coords:
               lat: marker.fields.address.value.lat
               lng: marker.fields.address.value.lng
-            events:"page.eventsMarker"
             dragable: false
             options:
               animation:4
@@ -42,9 +51,3 @@ class Home extends Controller
     # console.log 'inview, section', inview, section.name
     return if !inview or section.inview
     section.inview = true
-
-
-  eventsMarker:
-    click: (evt) ->
-      alert('open')
-      # window.open 'https://goo.gl/maps/fEr9AcE3GQp', '_blank'

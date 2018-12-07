@@ -8,8 +8,7 @@ main.home
     div(ng-switch="item.type")
 
       //- heading start
-      .heading(ng-switch-when="heading" ng-class="[(item.fields.layout.value | normalize), 'size'+item.fields.size.value]"
-        ng-style="{backgroundColor: item.fields.color.value}")
+      .heading(ng-class="[(item.fields.layout.value | normalize), 'size'+item.fields.size.value, item.fields.color.value]", ng-switch-when="heading")
         div(ng-switch="::item.fields.size.value")
           div(ng-switch-when="1")
             h1(ng-bind-html="::item.fields.title.value | newlineToBr")
@@ -51,17 +50,12 @@ main.home
           .block-heading
             h2(ng-bind-html="::item.fields.title.value | newlineToBr")
         .block
-        .block(ng-if="item.inview" ng-repeat="block in ::item.assets track by block._id" ng-style="{backgroundColor: block.fields.color.value}")
+        .block(ng-class="::block.fields.color.value" ng-if="item.inview" ng-repeat="block in ::item.assets track by block._id")
           .block-heading
             h3(ng-bind-html="::block.fields.title.value | newlineToBr")
           .block-text
             p {{::block.fields.description.value | newlineToBr}}
-        .block.learnmore(ng-show="::page.data.path ==='/home'")
-          a.link(href="/services")
-            .block-heading
-              h3 +
-                br
-                | Learn More
+
 
       //- text
       .textContent.padding(ng-class="[{indent:item.fields.indent.value},item.fields.align.value, item.fields.size.value]" ng-style="{backgroundColor: item.fields.color.value}" ng-switch-when="text")

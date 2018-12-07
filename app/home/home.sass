@@ -13,6 +13,8 @@ main.home
 
   section
     .heading
+      @extend backgroundColors
+
       height: 70vw
       max-height: 100vh
       position: relative
@@ -294,6 +296,8 @@ main.home
         flex: auto
 
       .block
+        @extend backgroundColors
+
         overflow: hidden
         position: relative
         flex: 0 0 50%
@@ -306,7 +310,9 @@ main.home
 
         .block-text
           opacity: 0
-          transform: translateY(50px)
+
+          // transform: translateY(50px)
+          text-align: left
 
           p
             padding: 1em
@@ -326,9 +332,11 @@ main.home
         &:nth-child(n+3):hover
           .block-heading
             opacity: 0
-            transform: translateY(-50px)
+
+            // transform: translateY(-50px)
 
           .block-text
+            // transition-delay: 0.125s
             opacity: 1
             transform: translateY(0px)
 
@@ -468,7 +476,7 @@ main.home
   section
     .contentFooter
       text-align: left
-      padding-top: $blockSpacing
+      padding-top: 0
       margin: 0
       margin-top: 4em
       position: relative
@@ -504,7 +512,7 @@ main.home
 
       .footerform
         height: 100px
-        background: #042BC1
+        background: $blue
         transition: background 0.25s ease
 
         .form,
@@ -522,6 +530,7 @@ main.home
           h2
             margin: 0.5em 0
             font-size: 2em
+            color: white
 
         .form
           transform: translateX(-100%)
@@ -532,6 +541,7 @@ main.home
 
         .imago-subscribe-content
           input
+            background: $yellow
             border: none !important
             width: 100%
             margin: 0 auto
@@ -553,7 +563,7 @@ main.home
             color: lighten($text-color-muted, 15%)
 
         &.subscribe
-          background: #FFDB00
+          background: $yellow
 
           .form
             transform: translateX(0%)

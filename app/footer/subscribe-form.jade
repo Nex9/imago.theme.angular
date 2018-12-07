@@ -1,15 +1,15 @@
 .imago-subscribe-content(ng-class="{submitted: imagosubscribe.submitted}")
   .imago-field
-    .thanks Thank You!
+    .thanks We will be in touch shortly.
     .progress
     input(
       type="email"
       name="email"
       ng-model="page.form.email"
-      placeholder="Enter email address to sign-up"
+      placeholder="Enter Email"
       required
       )
 
   .imago-actions(ng-hide="mobile")
-    button.btn.primary.send(type="submit") Subscribe
+    button.btn.primary.send(type="submit") Submit
 

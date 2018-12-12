@@ -112,7 +112,7 @@ main.home
             ng-if="currentIndex === $index")
             imago-video(ng-if="asset.fields.formats" data="asset")
             imago-image(ng-if="!asset.fields.formats" data="asset")
-            h4 {{::asset.fields.title.value}}
+            h4(ng-style="{color: asset.fields.titleColor.value }") {{::asset.fields.title.value}}
 
 
 

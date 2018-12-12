@@ -22,10 +22,10 @@ class HeaderController extends Controller
     else
       @$rootScope.navActive = !@$rootScope.navActive
 
-    # prevent scrolling on mobile
-    if @$rootScope.navActive
-      document.ontouchmove = (e) ->
-        e.preventDefault()
-    else
-      document.ontouchmove = (e) ->
-        return true
+    # # prevent scrolling on mobile
+    # if @$rootScope.navActive
+    #   document.ontouchmove = (e) ->
+    #     e.preventDefault()
+    # else
+    #   document.ontouchmove = (e) ->
+    #     return true

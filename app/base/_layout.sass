@@ -18,9 +18,13 @@ body
     min-height: 100vh
     padding-top: $header-height
     padding-bottom: $footer-height
+
+    +max-screen($medium)
+      padding-top: $mobile-header-height
+      padding-bottom: $mobile-footer-height
+
+
     main
-      +max-screen($medium)
-        padding-top: $mobile-header-height
 
 .padding
   // border: 1px solid red
@@ -28,5 +32,6 @@ body
   // max-width: 1200px
   margin: 0 auto
   padding: 0 2em
+
   +max-screen($xsmall)
     padding: 0 7vw

@@ -26,6 +26,9 @@ main.home
       &.size2
         height: 50vw
 
+        +max-screen($xsmall)
+          height: 60vw
+
       h1
         position: relative
         z-index: 2
@@ -217,6 +220,8 @@ main.home
 
   section
     .textContent
+      @extend backgroundColors
+
       text-align: left
       line-height: 1em
       display: flex
@@ -231,9 +236,12 @@ main.home
         margin-bottom: 0
 
       +max-screen($small)
-        flex-direction: column
+        flex-direction: column-reverse
         font-size: 1.35em
         line-height: 1.25em
+
+        .media
+          margin-bottom: 1em
 
 
       +min-screen($small)
@@ -300,29 +308,46 @@ main.home
 
         overflow: hidden
         position: relative
-        flex: 0 0 50%
-        height: 44vw * 0.5
-        transition: background 0.25s ease
+        flex: 0 0 100%
+        height: 44vw * 0.7
 
         .block-heading
           h2, h3
-            font-size: 1em
+            font-size: 1.5em
+            margin: 0
+
+          display: flex
+          flex-direction: column
+
+          h2
+            @extend textColors
 
         .block-text
           opacity: 0
-
-          // transform: translateY(50px)
+          display: flex
+          flex-direction: column
           text-align: left
 
+          img
+            max-width: 32px
+            max-height: 32px
+
           p
-            padding: 1em
+            padding: 0 1em
+            font-size: 0.9em
+
+        &.blue, &.black
+          .block-text p
+            color: white
 
         .block-heading, .block-text
-          transition: all 0.25s ease
-
           +pos
 
           display: flex
+          justify-content: center
+          align-items: center
+
+        .block-text
           justify-content: center
           align-items: center
 
@@ -336,7 +361,8 @@ main.home
             // transform: translateY(-50px)
 
           .block-text
-            // transition-delay: 0.125s
+            transition: all 0.25s ease
+            transition-delay: 0.05s
             opacity: 1
             transform: translateY(0px)
 
@@ -346,37 +372,46 @@ main.home
         &:nth-child(2)
           display: none
 
-        +min-screen($xsmall)
-          .block-heading
-            h2, h3
-              font-size: 1.1em
+        +min-screen($xxsmall)
+          flex: 0 0 50%
 
           .block-text
             p
-              font-size: 1.1em
+              font-size: 1em
+
+
+        +min-screen($xsmall)
+          // .block-heading
+          //   h2, h3
+          //     font-size: 1.1em
+
+          // .block-text
+          //   p
+          //     background: red
+          //     font-size: 1.25em
 
 
         +min-screen($small)
+          // .block-heading
+          //   h2, h3
+          //     font-size: 2vw
+
+          .block-text
+            p
+              font-size: 1.75vw
+
+
+        +min-screen($medium)
+          flex: 0 0 33.33%
+          height: 22vw * 0.85
+
           .block-heading
             h2, h3
               font-size: 2vw
 
           .block-text
             p
-              font-size: 1.3em
-
-
-        +min-screen($medium)
-          flex: 0 0 25%
-          height: 22vw * 0.75
-
-          .block-heading
-            h2, h3
-              font-size: 1.65vw
-
-          .block-text
-            p
-              font-size: 1.4em
+              font-size: 1.5vw
 
           &:nth-child(2)
             display: block
@@ -504,7 +539,8 @@ main.home
         +max-screen($medium)
           flex-direction: column
           display: flex
-          padding: 0 10vw
+
+          // padding: 0 10vw
 
 
         +max-screen($xsmall)
@@ -518,6 +554,8 @@ main.home
         .form,
         .action
           width: 100%
+
+          // border: 1px solid red
           position: absolute
           height: 100px
           display: flex
@@ -651,17 +689,25 @@ main.home
       h4
         position: absolute
         margin: 0.5em 0.75em
-        top: 0
+        bottom: 5px
         left: 0
+        right: 0
+        line-height: 1em
         z-index: 10
-        text-align: left
-        font-size: 1em
+        text-align: center
+        font-size: 0.8em
+
+        +max-screen($xsmall)
+          bottom: 0
 
       &.small
         height: 30vw
 
       &.medium
         height: 50vw
+
+        +max-screen($xsmall)
+          height: 80vw
 
       &.large
         height: 80vw

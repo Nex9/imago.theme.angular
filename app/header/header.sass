@@ -35,7 +35,7 @@ header
       transition: 0.5s
       backface-visibility: hidden
       transform-style: preserve-3d
-      transition-delay: 0s
+      transition-delay: 0.125s
       background: white
 
     .front
@@ -83,6 +83,7 @@ header
       position: absolute
       right: 0px
       padding: 20px
+      padding-top: 100px
       margin-left: auto
       display: flex
       flex-direction: column
@@ -90,13 +91,16 @@ header
       align-items: flex-end
       background: white
       width: 50%
-      height: 300px
+      height: 340px
       min-width: 400px
       max-width: 700px
       transition: all 0.25s ease-in-out
-      transform: translateY(-300px)
+      transform: translateY(-400px)
 
       a
+        line-height: 1.25em
+        margin: 0.4em 0
+
         &:last-child
           margin-top: 1em
 
@@ -104,7 +108,7 @@ header
           border-bottom: 1px solid black
 
       &.active
-        transform: translateY(0px)
+        transform: translateY(-50px)
 
 
   // wide

@@ -48,17 +48,19 @@ main.home
       .blockList(ng-class="item.fields.layout.value | normalize" ng-switch-when="blockList")
         .block
           .block-heading
-            h2(ng-bind-html="::item.fields.title.value | newlineToBr")
+            h2(ng-bind-html="::item.fields.title.value | newlineToBr" ng-class="::item.fields.color.value")
         .block
         .block(ng-class="::block.fields.color.value" ng-if="item.inview" ng-repeat="block in ::item.assets track by block._id")
           .block-heading
+
             h3(ng-bind-html="::block.fields.title.value | newlineToBr")
           .block-text
+            img(ng-show="::block.serving_url" ng-src="{{::block.serving_url}}=s64")
             p {{::block.fields.description.value | newlineToBr}}
 
 
       //- text
-      .textContent.padding(ng-class="[{indent:item.fields.indent.value},item.fields.align.value, item.fields.size.value]" ng-style="{backgroundColor: item.fields.color.value}" ng-switch-when="text")
+      .textContent.padding(ng-class="[{indent:item.fields.indent.value},item.fields.align.value, item.fields.size.value,item.fields.color.value]" ng-switch-when="text")
         .text(ng-bind-html="item.fields.text.value" ng-show="item.fields.text.value")
         .media
           imago-video(data="::item" ng-if="::item.fields.formats"
@@ -110,9 +112,7 @@ main.home
             ng-if="currentIndex === $index")
             imago-video(ng-if="asset.fields.formats" data="asset")
             imago-image(ng-if="!asset.fields.formats" data="asset")
-            h4 {{::item.fields.title.value}}
-              br
-              | {{::asset.fields.title.value}}
+            h4 {{::asset.fields.title.value}}
 
 
 

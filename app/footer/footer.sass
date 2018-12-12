@@ -13,9 +13,12 @@ footer
     font-size: 1em
 
 .imago-subscribe-content
+  max-width: 90vw
+  position: relative
+  margin: 0 auto
+
   .imago-field
     position: relative
-    max-width: 46em
     margin: 0 auto
 
     .thanks, .progress
@@ -34,12 +37,13 @@ footer
       border-radius: $btn-roundness
       color: $btn-default-text-color
       cursor: pointer
-      line-height: 1
+      line-height: 1em
       font-family: inherit
       font-size: inherit
       text-decoration: none
       display: inline-block
-      padding: 0.5em 1.5em
+
+      // padding: 0.5em 1.5em
       user-select: none
       line-height: 1em
 
@@ -49,6 +53,11 @@ footer
       background: $yellow
       width: 100%
       z-index: 1
+      font-size: 2em
+
+      +max-screen($xsmall)
+        font-size: 1.3em
+        line-height: 1.6em
 
     input
       background: white

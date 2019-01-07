@@ -52,22 +52,6 @@ class Setup extends Config
         url: '/page-not-found'
         templateUrl: '/app/page-not-found/page-not-found.html'
 
-      # custom routes
-
-      # .state 'blog',
-      #   url: '/blog'
-      #   templateUrl: '/app/blog/blog.html'
-      #   reload: true
-      #   data:
-      #     pageSize: 50
-      #     query: '/blog'
-      # .state 'blog.paged',
-      #   url: '/page/:page'
-      # .state 'blog.filtered',
-      #   url: '/tags/:tag'
-      # .state 'blog.filtered.paged',
-      #   url: '/page/:page'
-
       .state 'contact',
         url: '/contact'
         templateUrl: '/app/contact/contact.html'
@@ -86,31 +70,13 @@ class Setup extends Config
               path: '/subscribe'
 
 
-      # .state 'shop',
-      #   url: '/shop'
-      #   templateUrl: '/app/shop/shop.html'
-      #   controller: 'shop as page'
-      #   resolve:
-      #     promiseData: (imagoModel) ->
-      #       imagoModel.getData({path: '/shop', recursive: true})
-
-      # .state 'blog',
-      #   url: '/blog'
-      #   templateUrl: '/app/blog/blog.html'
-      #   controller: 'blog as page'
-      # .state 'blog.tags',
-      #   url: '/tag/:tag'
-      # .state 'blog.paged',
-      #   url: '/page/:page'
-
-      .state 'share',
-        url: '/public/*parameter'
-        templateUrl: '/app/share/share.html'
-        controller: 'share as page'
+      .state 'policy',
+        url: '/policy'
+        templateUrl: '/app/page/page.html'
+        controller: 'page as page'
         resolve:
-          promiseData: (imagoModel, $stateParams) ->
-            imagoModel.getData({path: '/public/' + $stateParams.parameter})
-
+          promiseData: (imagoModel) ->
+            imagoModel.getData '/policy'
 
       .state 'home',
         url: '/:url'
@@ -121,6 +87,7 @@ class Setup extends Config
             imagoModel.getData
               path: if $stateParams.url then "/#{$stateParams.url}" else '/home'
               recursive: true
+
 
 class Load extends Run
 

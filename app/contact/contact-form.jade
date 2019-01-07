@@ -90,9 +90,10 @@
 
 
     .legal
-      p This form collects your name and email so that we can add you to our newsletter list for awesome project updates.
-        br
-        | Check out our privacy policy for the full story on how we protect and manage your submitted data!
+      p This form collects your name and email. We will never share your information with outside parties. We just want to be friends and help your brand make the most sustainable, highest quality packaging in the world.
+        //- br
+        //- | Check out our privacy policy for the full story on how we protect and manage your submitted data!
+
 
       .imago-field
         input(
@@ -102,7 +103,7 @@
           ng-model="contact.data.subscribe"
           required
           )
-        label(for="subscribe" style="display: block") I consent to having my name and email collected.
+        label(for="subscribe" style="display: block") I agree to the terms and conditions
 
     .imago-actions(ng-class="{submitted: contact.status !== undefined}")
       button.btn.primary.send(type="submit")

@@ -1,5 +1,28 @@
 main.page
-  // general styles
+  padding: 0 1em
+  transition: font-size 0.25s ease
+
+  +max-screen($medium)
+    font-size: 0.9em
+
+
+  +max-screen($small)
+    font-size: 0.8em
+
+
+  h1
+    font-size: 4em
+    margin-bottom: 1.5em
+
+  h2
+    font-size: 3em
+    margin-bottom: 0.5em
+
+  p
+    max-width: $xsmall
+    font-size: 1.5em
+    margin: 0 auto
+    text-align: left
 
 body.desktop main.page
   // desktop styles
